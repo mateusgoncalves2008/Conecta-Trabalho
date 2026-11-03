@@ -75,3 +75,27 @@ body.page-entry .dashboard-header{animation:none!important}
     min-height:78px;
   }
 }
+
+
+/* Vidro mais evidente no menu dos painéis */
+.dashboard-header.site-header{
+  background:rgba(238,245,252,.48);
+  border-color:rgba(255,255,255,.88);
+  -webkit-backdrop-filter:blur(32px) saturate(220%);
+  backdrop-filter:blur(32px) saturate(220%);
+  box-shadow:
+    0 5px 24px rgba(20,43,73,.075),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(255,255,255,.38);
+}
+.dashboard-header.site-header.is-scrolled{
+  background:rgba(235,243,252,.32);
+  border-color:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:blur(36px) saturate(235%);
+  backdrop-filter:blur(36px) saturate(235%);
+  box-shadow:
+    0 16px 42px rgba(20,43,73,.16),
+    0 4px 12px rgba(20,43,73,.07),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(255,255,255,.42);
+}
