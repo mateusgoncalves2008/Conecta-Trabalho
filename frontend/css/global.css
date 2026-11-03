@@ -195,3 +195,17 @@
     transition: none;
   }
 }
+
+
+/* Botões sem movimento ou aumento no hover */
+.button-primary:hover:not(:disabled),
+.button-outline:hover:not(:disabled),
+.button-light:hover:not(:disabled),
+.button:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+
+.button {
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
