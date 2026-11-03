@@ -561,3 +561,20 @@ body.page-entry .job-card:nth-child(3) { animation-delay: 380ms; }
     animation: none !important;
   }
 }
+
+/* Rodapé institucional e links do desenvolvedor */
+.site-footer{display:block;padding:38px max(5vw,24px) 18px;background:#10243d;border:0;color:rgba(255,255,255,.68)}
+.footer-main{width:min(1180px,100%);margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:48px;padding-bottom:30px}
+.site-footer .brand-footer{color:#fff;font-size:19px}
+.site-footer .brand-footer .brand-mark{background:#fff;color:var(--navy)}
+.site-footer .brand-footer .brand-light{color:#f09a70}
+.footer-brand-block>p{max-width:350px;margin:14px 0 0;color:rgba(255,255,255,.62);font-size:13px;line-height:1.7}
+.footer-links{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.footer-heading{color:#f09a70;font-size:10px;font-weight:750;letter-spacing:1.3px;text-transform:uppercase}
+.footer-links>strong{color:#fff;font-size:14px;font-weight:650}
+.footer-socials{display:flex;gap:10px;margin-top:7px}
+.footer-socials a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(255,255,255,.17);border-radius:7px;color:rgba(255,255,255,.82);font-size:12px;transition:background .18s,border-color .18s,color .18s}
+.footer-socials a:hover{background:rgba(255,255,255,.1);border-color:rgba(240,154,112,.65);color:#fff}
+.footer-socials svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.footer-bottom{width:min(1180px,100%);margin:0 auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.13);display:flex;justify-content:space-between;gap:14px;color:rgba(255,255,255,.48);font-size:11px}
+@media(max-width:650px){.site-footer{padding:30px 22px 17px}.footer-main{flex-direction:column;gap:26px;padding-bottom:24px}.footer-bottom{flex-direction:column;gap:6px}.footer-socials{flex-wrap:wrap}}
