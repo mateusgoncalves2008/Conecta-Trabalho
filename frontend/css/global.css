@@ -43,3 +43,87 @@
     transition: none;
   }
 }
+
+
+/* Menu de vidro que ganha aparência flutuante durante a rolagem */
+.site-header {
+  position: sticky;
+  top: 10px;
+  z-index: 50;
+  width: calc(100% - 32px);
+  margin: 10px auto;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .78);
+  -webkit-backdrop-filter: blur(14px) saturate(155%);
+  backdrop-filter: blur(14px) saturate(155%);
+  box-shadow: 0 5px 22px rgba(20, 43, 73, .045);
+  transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease, border-radius .25s ease;
+}
+
+.site-header.is-scrolled {
+  background: rgba(255, 255, 255, .88);
+  border-color: rgba(214, 107, 61, .16);
+  box-shadow: 0 12px 34px rgba(20, 43, 73, .13);
+}
+
+.site-header .main-nav a {
+  position: relative;
+  padding: 8px 0;
+}
+
+.site-header .main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .22s ease;
+}
+
+.site-header .main-nav a:hover::after,
+.site-header .main-nav a.active::after {
+  transform: scaleX(1);
+}
+
+.site-header .main-nav a:hover,
+.site-header .main-nav a.active {
+  color: var(--orange-dark);
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    width: calc(100% - 20px);
+    margin: 10px auto;
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .site-header.is-scrolled {
+    top: 7px;
+  }
+
+  .site-header .main-nav {
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .94);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 28px rgba(20, 43, 73, .12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header .main-nav a::after {
+    transition: none;
+  }
+}
