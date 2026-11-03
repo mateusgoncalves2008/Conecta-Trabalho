@@ -17,12 +17,12 @@
   <a class="brand" href="/" aria-label="ConectaTrabalho - início"><span class="brand-mark">CT</span><span>Conecta<span class="brand-light">Trabalho</span></span></a>
   <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <nav class="main-nav" id="main-nav">
-    <a class="active" href="/">Início</a><a href="pages/vagas.html">Vagas</a><a href="#como-funciona">Como funciona</a>
+    <a class="active" href="#inicio" data-section-link="inicio" aria-current="location">Início</a><a href="pages/vagas.html">Vagas</a><a href="#como-funciona" data-section-link="como-funciona">Como funciona</a>
   </nav>
   <div class="header-actions"><a class="button button-outline button-small" href="pages/login.html">Entrar</a><a class="button button-primary button-small" href="pages/cadastro.html">Cadastrar</a></div>
 </header>
 <main>
-  <section class="hero">
+  <section class="hero" id="inicio">
     <div class="hero-content">
       <span class="eyebrow">OPORTUNIDADES EM CAPELINHA E REGIÃO</span>
       <h1>Seu próximo emprego pode estar <span>aqui.</span></h1>
@@ -33,7 +33,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.2 4.2"></path></svg>
             Cargo ou área de interesse
           </span>
-          <input name="busca" type="text" placeholder="Ex.: vendedor, auxiliar administrativo..." maxlength="100" autocomplete="off">
+          <input name="busca" type="text" placeholder="Digite um cargo ou profissão" maxlength="100" autocomplete="off">
           <small>Digite o tipo de trabalho que você procura.</small>
         </label>
         <label class="search-field">
@@ -41,7 +41,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10.2c0 5-7 11-7 11s-7-6-7-11a7 7 0 1 1 14 0Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
             Cidade
           </span>
-          <input name="cidade" type="text" placeholder="Digite a cidade" maxlength="100" value="Capelinha" autocomplete="address-level2">
+          <input name="cidade" type="text" placeholder="Digite a cidade desejada" maxlength="100" value="Capelinha" autocomplete="address-level2">
           <small>Informe onde deseja encontrar vagas.</small>
         </label>
         <button class="button button-primary search-submit" type="submit">
