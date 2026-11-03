@@ -209,3 +209,72 @@
 .button {
   transition: background-color .2s ease, border-color .2s ease, color .2s ease;
 }
+
+
+/* Transição entre páginas: cortina discreta e entrada suave */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: var(--navy);
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+body.page-leaving::after {
+  transform: scaleY(1);
+  transform-origin: bottom;
+  animation: page-curtain-in 280ms cubic-bezier(.72, 0, .25, 1) forwards;
+}
+
+body.page-enter::after {
+  transform: scaleY(1);
+  transform-origin: top;
+  animation: page-curtain-out 520ms cubic-bezier(.7, 0, .2, 1) forwards;
+}
+
+body.page-enter main,
+body.page-enter .auth-layout,
+body.page-enter .dashboard-main,
+body.page-enter .listing-main {
+  animation: page-content-enter 520ms cubic-bezier(.2, .7, .25, 1) both;
+}
+
+body.page-leaving main,
+body.page-leaving .auth-layout,
+body.page-leaving .dashboard-main,
+body.page-leaving .listing-main {
+  opacity: .72;
+  transform: translateY(-8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+@keyframes page-curtain-in {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes page-curtain-out {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0); }
+}
+
+@keyframes page-content-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    display: none;
+  }
+
+  body.page-enter main,
+  body.page-enter .auth-layout,
+  body.page-enter .dashboard-main,
+  body.page-enter .listing-main {
+    animation: none;
+  }
+}
