@@ -6,9 +6,30 @@
   const card = vaga => `<article class="job-card">
     <div class="job-card-top"><span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span><span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span></div>
     <h3>${escapeHTML(vaga.titulo)}</h3>
+    <p class="job-description">${escapeHTML(vaga.descricao.length > 150 ? vaga.descricao.slice(0, 150) + '...' : vaga.descricao)}</p>
     <div class="job-meta"><span>${escapeHTML(vaga.cidade)}</span><span>${escapeHTML(vaga.modalidade)}</span><span>${dateLabel(vaga.criado_em)}</span></div>
-    <div class="job-card-bottom"><span class="job-salary">${escapeHTML(vaga.salario || 'Salário a combinar')}</span><a class="text-link" href="/pages/login.html" data-apply="${Number(vaga.id)}">Ver oportunidade →</a></div>
+    <div class="job-card-bottom"><span class="job-salary">${escapeHTML(vaga.salario || 'Salário a combinar')}</span><button class="button button-primary button-small" type="button" data-apply="${Number(vaga.id)}">Candidatar-se</button></div>
   </article>`;
+
+  async function applyToJob(id, button) {
+    try {
+      const session = await Conecta.api('/api/me');
+      if (!session.usuario) return window.location.href = '/pages/login.html';
+      if (session.usuario.tipo === 'empresa') return Conecta.toast('Contas de empresa não podem se candidatar a vagas.');
+      button.disabled = true;
+      button.textContent = 'Enviando...';
+      await Conecta.api('/api/vagas/' + id + '/candidatar', {
+        method: 'POST',
+        body: JSON.stringify({ mensagem: '' })
+      });
+      button.textContent = 'Candidatura enviada';
+      Conecta.toast('Sua candidatura foi enviada com sucesso.');
+    } catch (error) {
+      Conecta.toast(error.message);
+      button.disabled = false;
+      button.textContent = 'Candidatar-se';
+    }
+  }
 
   async function loadJobs({ busca = '', cidade = '' } = {}) {
     const homeContainer = document.getElementById('featured-jobs');
@@ -27,15 +48,8 @@
       }
       const shown = listContainer ? vagas : vagas.slice(0, 3);
       container.innerHTML = shown.length ? shown.map(card).join('') : '<div class="empty-state">Nenhuma vaga encontrada com esses filtros.</div>';
-      container.querySelectorAll('[data-apply]').forEach(link => {
-        link.addEventListener('click', async event => {
-          event.preventDefault();
-          try {
-            const session = await Conecta.api('/api/me');
-            if (!session.usuario) return window.location.href = '/pages/login.html';
-            window.location.href = session.usuario.tipo === 'empresa' ? '/pages/empresa.html' : '/pages/vagas.html';
-          } catch (_error) { window.location.href = '/pages/login.html'; }
-        });
+      container.querySelectorAll('[data-apply]').forEach(button => {
+        button.addEventListener('click', () => applyToJob(button.dataset.apply, button));
       });
     } catch (error) {
       container.innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
