@@ -175,8 +175,10 @@ app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
 
 app.get('/api/painel/candidato', role('candidato'), asyncRoute(async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id,c.status,c.criada_em,c.mensagem,v.id vaga_id,v.titulo,v.cidade,v.nome_empresa
-     FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id
+    `SELECT c.id,c.status,c.criada_em,c.mensagem,v.id vaga_id,v.titulo,v.cidade,empresa.nome_empresa
+     FROM candidaturas c
+     JOIN vagas v ON v.id=c.vaga_id
+     JOIN usuarios empresa ON empresa.id=v.empresa_id
      WHERE c.candidato_id=$1 ORDER BY c.criada_em DESC`, [req.session.user.id]
   );
   res.json({ candidaturas: result.rows });
