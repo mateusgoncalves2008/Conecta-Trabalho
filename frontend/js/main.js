@@ -44,15 +44,9 @@
         </div>`;
       document.body.appendChild(transitionOverlay);
       window.setTimeout(() => {
-        transitionOverlay?.classList.remove('is-entering');
-        transitionOverlay?.classList.add('is-hidden');
-      }, 850);
-      transitionOverlay.addEventListener('animationend', () => {
-        if (transitionOverlay?.classList.contains('is-hidden')) {
-          transitionOverlay.remove();
-          transitionOverlay = null;
-        }
-      }, { once: false });
+        transitionOverlay?.remove();
+        transitionOverlay = null;
+      }, 900);
     }
 
     document.addEventListener('click', event => {
