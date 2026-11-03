@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     button.disabled = true;
     button.textContent = 'Entrando...';
     const values = Object.fromEntries(new FormData(form));
+    values.email = values.email.trim().toLowerCase();
+    if (!values.email.includes('@')) values.email += '@gmail.com';
     try {
       const result = await Conecta.api('/api/login', { method: 'POST', body: JSON.stringify(values) });
       feedback.textContent = 'Login realizado. Redirecionando...';
