@@ -399,3 +399,65 @@ body.page-leaving .listing-main {
     display: none !important;
   }
 }
+
+
+/* Ritmo mais lento e confortável para a transição de páginas */
+.page-transition-overlay {
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(54, 83, 116, .72) 0%, rgba(20, 43, 73, .96) 58%, #10233d 100%);
+}
+
+.page-transition-content {
+  animation-duration: 1050ms;
+}
+
+.page-transition-brand {
+  font-size: 24px;
+  letter-spacing: -.8px;
+}
+
+.page-transition-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+}
+
+.page-transition-message {
+  margin: 24px 0 22px;
+  font-size: 14px;
+}
+
+.page-transition-progress {
+  width: 220px;
+  height: 4px;
+}
+
+.page-transition-progress span {
+  animation-duration: 2.1s;
+}
+
+.page-transition-overlay.is-entering {
+  animation: transition-overlay-enter 1550ms cubic-bezier(.55, 0, .25, 1) forwards;
+}
+
+.page-transition-overlay.is-leaving {
+  animation: transition-overlay-leave 1350ms cubic-bezier(.55, 0, .25, 1) forwards;
+}
+
+@keyframes transition-overlay-enter {
+  0% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes transition-overlay-leave {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-overlay {
+    display: none !important;
+  }
+}
