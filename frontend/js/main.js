@@ -57,6 +57,34 @@
 
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
+
+    // Tema claro/escuro compartilhado entre todas as páginas
+    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user');
+    const savedTheme = localStorage.getItem('conecta-theme');
+    const applyTheme = theme => {
+      document.documentElement.dataset.theme = theme;
+      if (!themeButton) return;
+      const dark = theme === 'dark';
+      themeButton.setAttribute('aria-label', dark ? 'Ativar tema claro' : 'Ativar tema escuro');
+      themeButton.setAttribute('aria-pressed', String(dark));
+      themeButton.innerHTML = dark
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path></svg>';
+    };
+    let themeButton = null;
+    if (themeButtonHost) {
+      themeButton = document.createElement('button');
+      themeButton.type = 'button';
+      themeButton.className = 'theme-toggle';
+      themeButtonHost.insertBefore(themeButton, themeButtonHost.firstElementChild);
+      themeButton.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('conecta-theme', nextTheme);
+        applyTheme(nextTheme);
+      });
+    }
+    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+
     const header = document.querySelector('.site-header');
     if (header) {
       const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
