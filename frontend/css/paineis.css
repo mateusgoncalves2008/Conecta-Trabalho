@@ -57,3 +57,21 @@ body.page-entry .dashboard-header{animation:none!important}
 @media(prefers-reduced-motion:reduce){
   .dashboard-header.site-header{transition:none}
 }
+
+
+/* Altura do menu dos painéis alinhada ao cabeçalho da página inicial */
+.dashboard-header.site-header{
+  height:88px;
+  min-height:88px;
+}
+.dashboard-header.site-header.is-scrolled{
+  height:88px;
+  min-height:88px;
+}
+@media(max-width:650px){
+  .dashboard-header.site-header,
+  .dashboard-header.site-header.is-scrolled{
+    height:78px;
+    min-height:78px;
+  }
+}
