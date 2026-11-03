@@ -461,3 +461,103 @@ body.page-leaving .listing-main {
     display: none !important;
   }
 }
+
+
+/* Remove completamente a antiga tela de transição */
+.page-transition-overlay,
+body::after {
+  display: none !important;
+}
+
+/* Entrada delicada dos componentes ao abrir uma página */
+@keyframes page-component-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+body.page-entry main > *,
+body.page-entry .auth-intro,
+body.page-entry .auth-card,
+body.page-entry .dashboard-header,
+body.page-entry .dashboard-welcome,
+body.page-entry .dashboard-section,
+body.page-entry .listing-main > * {
+  animation: page-component-rise 1.15s cubic-bezier(.2, .65, .25, 1) both;
+}
+
+body.page-entry main > :nth-child(1),
+body.page-entry .listing-main > :nth-child(1) {
+  animation-delay: 90ms;
+}
+
+body.page-entry main > :nth-child(2),
+body.page-entry .listing-main > :nth-child(2) {
+  animation-delay: 190ms;
+}
+
+body.page-entry main > :nth-child(3),
+body.page-entry .listing-main > :nth-child(3) {
+  animation-delay: 290ms;
+}
+
+body.page-entry .auth-intro {
+  animation-delay: 80ms;
+}
+
+body.page-entry .auth-card {
+  animation-delay: 180ms;
+}
+
+body.page-entry .dashboard-header {
+  animation-delay: 50ms;
+}
+
+body.page-entry .dashboard-welcome {
+  animation-delay: 130ms;
+}
+
+body.page-entry .dashboard-section:nth-of-type(1) {
+  animation-delay: 230ms;
+}
+
+body.page-entry .dashboard-section:nth-of-type(2) {
+  animation-delay: 330ms;
+}
+
+body.page-entry .dashboard-section:nth-of-type(3) {
+  animation-delay: 430ms;
+}
+
+body.page-entry .step-card,
+body.page-entry .job-card {
+  animation: page-component-rise 1.05s cubic-bezier(.2, .65, .25, 1) both;
+}
+
+body.page-entry .step-card:nth-child(1),
+body.page-entry .job-card:nth-child(1) { animation-delay: 180ms; }
+
+body.page-entry .step-card:nth-child(2),
+body.page-entry .job-card:nth-child(2) { animation-delay: 280ms; }
+
+body.page-entry .step-card:nth-child(3),
+body.page-entry .job-card:nth-child(3) { animation-delay: 380ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  body.page-entry main > *,
+  body.page-entry .auth-intro,
+  body.page-entry .auth-card,
+  body.page-entry .dashboard-header,
+  body.page-entry .dashboard-welcome,
+  body.page-entry .dashboard-section,
+  body.page-entry .listing-main > *,
+  body.page-entry .step-card,
+  body.page-entry .job-card {
+    animation: none !important;
+  }
+}
