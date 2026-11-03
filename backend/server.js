@@ -49,6 +49,10 @@ const limitLogin = rateLimit({
 });
 const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
+const normalizeEmail = value => {
+  const email = clean(value, 160).toLowerCase();
+  return email && !email.includes('@') ? email + '@gmail.com' : email;
+};
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const publicUser = user => ({
   id: user.id, nome: user.nome, email: user.email, tipo: user.tipo,
@@ -68,7 +72,7 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
 
 app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
   const nome = clean(req.body.nome, 120);
-  const email = clean(req.body.email, 160).toLowerCase();
+  const email = normalizeEmail(req.body.email);
   const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
   const tipo = clean(req.body.tipo, 20);
   const telefone = clean(req.body.telefone, 30);
