@@ -27,10 +27,27 @@
       <span class="eyebrow">OPORTUNIDADES EM CAPELINHA E REGIÃO</span>
       <h1>Seu próximo emprego pode estar <span>aqui.</span></h1>
       <p>Encontre oportunidades e conecte-se a empresas da sua região.</p>
-      <form class="search-box" id="home-search">
-        <label><span>O que você procura?</span><input name="busca" type="search" placeholder="Cargo, função ou palavra-chave" maxlength="100"></label>
-        <label><span>Onde?</span><input name="cidade" type="search" placeholder="Cidade" maxlength="100" value="Capelinha"></label>
-        <button class="button button-primary" type="submit">Buscar vagas</button>
+      <form class="search-box" id="home-search" role="search">
+        <label class="search-field">
+          <span class="search-field-label">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.2 4.2"></path></svg>
+            Cargo ou área de interesse
+          </span>
+          <input name="busca" type="text" placeholder="Ex.: vendedor, auxiliar administrativo..." maxlength="100" autocomplete="off">
+          <small>Digite o tipo de trabalho que você procura.</small>
+        </label>
+        <label class="search-field">
+          <span class="search-field-label">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10.2c0 5-7 11-7 11s-7-6-7-11a7 7 0 1 1 14 0Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
+            Cidade
+          </span>
+          <input name="cidade" type="text" placeholder="Digite a cidade" maxlength="100" value="Capelinha" autocomplete="address-level2">
+          <small>Informe onde deseja encontrar vagas.</small>
+        </label>
+        <button class="button button-primary search-submit" type="submit">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.2 4.2"></path></svg>
+          Buscar vagas
+        </button>
       </form>
       <p class="hero-note">Simples, gratuito para quem procura uma oportunidade.</p>
     </div>
