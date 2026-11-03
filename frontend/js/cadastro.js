@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     feedback.classList.remove('success');
     if (!form.reportValidity()) return;
     const values = Object.fromEntries(new FormData(form));
+    values.email = values.email.trim().toLowerCase();
+    if (!values.email.includes('@')) values.email += '@gmail.com';
     if (values.senha !== values.confirmarSenha) {
       feedback.textContent = 'As senhas não são iguais.';
       form.elements.confirmarSenha.focus();
