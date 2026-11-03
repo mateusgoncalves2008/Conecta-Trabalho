@@ -40,6 +40,7 @@ app.use(session({
   cookie: { httpOnly: true, secure: production, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
+app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'index.html')));
 
 const limitLogin = rateLimit({
   windowMs: 15 * 60 * 1000, limit: 10,
