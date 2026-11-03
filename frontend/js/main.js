@@ -27,13 +27,11 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let transitionOverlay = null;
-
-    if (!reduceMotion) {
-      transitionOverlay = document.createElement('div');
-      transitionOverlay.className = 'page-transition-overlay is-entering';
-      transitionOverlay.setAttribute('aria-hidden', 'true');
-      transitionOverlay.innerHTML = `
+    const createTransitionOverlay = className => {
+      const overlay = document.createElement('div');
+      overlay.className = `page-transition-overlay ${className}`;
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.innerHTML = `
         <div class="page-transition-content">
           <div class="page-transition-brand">
             <span class="page-transition-mark">CT</span>
@@ -42,11 +40,13 @@
           <p class="page-transition-message">Preparando seu próximo passo</p>
           <div class="page-transition-progress"><span></span></div>
         </div>`;
-      document.body.appendChild(transitionOverlay);
-      window.setTimeout(() => {
-        transitionOverlay?.remove();
-        transitionOverlay = null;
-      }, 900);
+      document.body.appendChild(overlay);
+      return overlay;
+    };
+
+    if (!reduceMotion) {
+      const entranceOverlay = createTransitionOverlay('is-entering');
+      window.setTimeout(() => entranceOverlay.remove(), 1700);
     }
 
     document.addEventListener('click', event => {
@@ -64,13 +64,10 @@
       if (destination.href === window.location.href) return;
 
       event.preventDefault();
-      if (transitionOverlay) {
-        transitionOverlay.classList.remove('is-entering', 'is-hidden');
-        transitionOverlay.classList.add('is-leaving');
-      }
+      createTransitionOverlay('is-leaving');
       window.setTimeout(() => {
         window.location.href = destination.href;
-      }, 720);
+      }, 1450);
     });
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
