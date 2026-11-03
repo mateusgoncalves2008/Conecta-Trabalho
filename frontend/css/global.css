@@ -581,3 +581,141 @@ body.page-entry .job-card:nth-child(3) { animation-delay: 380ms; }
 
 .brand-mark-image{display:block;width:38px;height:38px;flex:0 0 38px;object-fit:contain;border-radius:0}
 .site-footer .brand-footer .brand-mark-image{width:48px;height:48px;flex-basis:48px}
+
+
+/* Alternância global entre tema claro e escuro */
+.theme-toggle{
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid rgba(20,43,73,.13);
+  border-radius:8px;
+  background:rgba(255,255,255,.48);
+  color:var(--navy);
+  cursor:pointer;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+}
+.theme-toggle:hover{background:rgba(214,107,61,.1);border-color:rgba(214,107,61,.42);color:var(--orange-dark)}
+.theme-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dashboard-user .theme-toggle{margin-right:2px}
+@media(max-width:760px){.theme-toggle{width:34px;height:34px;flex-basis:34px}.header-actions{gap:6px}}
+
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --navy:#e5edf7;
+  --navy-2:#b9cbe0;
+  --ink:#e7edf5;
+  --muted:#a5b1c1;
+  --line:#354255;
+  --surface:#151d2a;
+  --page:#111925;
+  --soft:#202c3c;
+  --shadow:0 12px 34px rgba(0,0,0,.25);
+}
+html[data-theme="dark"] body{background:#111925;color:#e7edf5}
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .dashboard-header.site-header{
+  background:rgba(24,34,49,.78);
+  border-color:rgba(255,255,255,.12);
+  box-shadow:0 5px 24px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.1);
+}
+html[data-theme="dark"] .site-header.is-scrolled,
+html[data-theme="dark"] .dashboard-header.site-header.is-scrolled{
+  background:rgba(18,28,42,.68);
+  border-color:rgba(255,255,255,.2);
+  box-shadow:0 16px 42px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.13);
+}
+html[data-theme="dark"] .brand,
+html[data-theme="dark"] .site-header .main-nav a,
+html[data-theme="dark"] .dashboard-user{color:#e7edf5}
+html[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#f5c56b}
+html[data-theme="dark"] .main-nav,
+html[data-theme="dark"] .site-header .main-nav{
+  background:rgba(24,34,49,.97);
+}
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] .how-section,
+html[data-theme="dark"] .listing-main,
+html[data-theme="dark"] .auth-page,
+html[data-theme="dark"] .dashboard-page{background:#111925}
+html[data-theme="dark"] .jobs-section{background:#151e2b}
+html[data-theme="dark"] .hero h1,
+html[data-theme="dark"] .section-heading h1,
+html[data-theme="dark"] .section-heading h2,
+html[data-theme="dark"] .hero-card strong,
+html[data-theme="dark"] .step-card h3,
+html[data-theme="dark"] .job-card h3,
+html[data-theme="dark"] .auth-intro h1,
+html[data-theme="dark"] .auth-card h2,
+html[data-theme="dark"] .dashboard-welcome h1,
+html[data-theme="dark"] .dashboard-item h3{color:#e7edf5}
+html[data-theme="dark"] .hero-content>p,
+html[data-theme="dark"] .hero-note,
+html[data-theme="dark"] .section-heading p,
+html[data-theme="dark"] .step-card p,
+html[data-theme="dark"] .auth-intro p,
+html[data-theme="dark"] .form-subtitle,
+html[data-theme="dark"] .auth-switch,
+html[data-theme="dark"] .dashboard-welcome p,
+html[data-theme="dark"] .dashboard-item p{color:#a5b1c1}
+html[data-theme="dark"] .search-box,
+html[data-theme="dark"] .hero-card,
+html[data-theme="dark"] .job-card,
+html[data-theme="dark"] .step-card,
+html[data-theme="dark"] .auth-card,
+html[data-theme="dark"] .dashboard-welcome,
+html[data-theme="dark"] .job-form,
+html[data-theme="dark"] .dashboard-item,
+html[data-theme="dark"] .dashboard-empty,
+html[data-theme="dark"] .empty-state{
+  background:#1c2838;
+  border-color:#354255;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+}
+html[data-theme="dark"] .search-box .search-field:focus-within{background:#243348;border-color:#52647b}
+html[data-theme="dark"] .search-box .search-field input,
+html[data-theme="dark"] .search-box input,
+html[data-theme="dark"] .field input,
+html[data-theme="dark"] .field select,
+html[data-theme="dark"] .field textarea,
+html[data-theme="dark"] .job-form .field input,
+html[data-theme="dark"] .job-form .field select,
+html[data-theme="dark"] .job-form .field textarea,
+html[data-theme="dark"] .dashboard-item select{
+  color:#e7edf5;
+  background:#121c2a;
+  border-color:#46566b;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:#8291a4}
+html[data-theme="dark"] .field,
+html[data-theme="dark"] .job-form .field,
+html[data-theme="dark"] .search-field-label{color:#d4deea}
+html[data-theme="dark"] .search-box .search-field small,
+html[data-theme="dark"] .field-hint,
+html[data-theme="dark"] .field-optional{color:#9baabd}
+html[data-theme="dark"] .welcome-detail,
+html[data-theme="dark"] .job-form-footer{border-color:#354255;color:#a5b1c1}
+html[data-theme="dark"] .hero-card-icon,
+html[data-theme="dark"] .hero-card-line,
+html[data-theme="dark"] .job-tag,
+html[data-theme="dark"] .status-label,
+html[data-theme="dark"] .candidate-message{background:#29384c;color:#d8e2ef}
+html[data-theme="dark"] .hero-card-bottom{border-color:#354255;color:#a5b1c1}
+html[data-theme="dark"] .back-link,
+html[data-theme="dark"] .text-link{color:#dce6f2}
+html[data-theme="dark"] .button-outline{background:#263448;border-color:#526176;color:#edf3fa}
+html[data-theme="dark"] .button-outline:hover{background:#34465d;color:#fff}
+html[data-theme="dark"] .site-footer{background:#0b1320;border-color:#263448}
+html[data-theme="dark"] .cta-section{background:#0d1b2d}
+html[data-theme="dark"] .password-toggle{color:#aab8c9}
+html[data-theme="dark"] .password-toggle:hover{background:#29384c;color:#fff}
+html[data-theme="dark"] img:not(.brand-mark-image){filter:brightness(.82) contrast(1.06) saturate(.88)}
+html[data-theme="dark"] .brand-mark-image{filter:none}
+html[data-theme="dark"] .toast{background:#263448;color:#f3f6fa}
+html[data-theme="dark"] .form-feedback.success{color:#72d6a1}
+html[data-theme="dark"] .form-feedback{color:#ff938a}
+@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
