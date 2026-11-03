@@ -26,6 +26,33 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+      document.body.classList.add('page-enter');
+      window.setTimeout(() => document.body.classList.remove('page-enter'), 700);
+    }
+
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href]');
+      if (!link || reduceMotion || event.defaultPrevented) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (link.target && link.target !== '_self') return;
+      if (link.hasAttribute('download') || link.hasAttribute('data-no-transition')) return;
+
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      if (destination.pathname === window.location.pathname &&
+          destination.search === window.location.search &&
+          destination.hash) return;
+      if (destination.href === window.location.href) return;
+
+      event.preventDefault();
+      document.body.classList.remove('page-enter');
+      document.body.classList.add('page-leaving');
+      window.setTimeout(() => {
+        window.location.href = destination.href;
+      }, 280);
+    });
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
     const header = document.querySelector('.site-header');
