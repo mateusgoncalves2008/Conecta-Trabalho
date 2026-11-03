@@ -27,48 +27,10 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const createTransitionOverlay = className => {
-      const overlay = document.createElement('div');
-      overlay.className = `page-transition-overlay ${className}`;
-      overlay.setAttribute('aria-hidden', 'true');
-      overlay.innerHTML = `
-        <div class="page-transition-content">
-          <div class="page-transition-brand">
-            <span class="page-transition-mark">CT</span>
-            <span>Conecta<span>Trabalho</span></span>
-          </div>
-          <p class="page-transition-message">Preparando seu próximo passo</p>
-          <div class="page-transition-progress"><span></span></div>
-        </div>`;
-      document.body.appendChild(overlay);
-      return overlay;
-    };
-
     if (!reduceMotion) {
-      const entranceOverlay = createTransitionOverlay('is-entering');
-      window.setTimeout(() => entranceOverlay.remove(), 1700);
+      document.body.classList.add('page-entry');
     }
 
-    document.addEventListener('click', event => {
-      const link = event.target.closest('a[href]');
-      if (!link || reduceMotion || event.defaultPrevented) return;
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      if (link.target && link.target !== '_self') return;
-      if (link.hasAttribute('download') || link.hasAttribute('data-no-transition')) return;
-
-      const destination = new URL(link.href, window.location.href);
-      if (destination.origin !== window.location.origin) return;
-      if (destination.pathname === window.location.pathname &&
-          destination.search === window.location.search &&
-          destination.hash) return;
-      if (destination.href === window.location.href) return;
-
-      event.preventDefault();
-      createTransitionOverlay('is-leaving');
-      window.setTimeout(() => {
-        window.location.href = destination.href;
-      }, 1450);
-    });
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
     const header = document.querySelector('.site-header');
