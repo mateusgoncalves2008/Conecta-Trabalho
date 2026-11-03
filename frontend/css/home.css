@@ -185,3 +185,45 @@
     justify-self: stretch;
   }
 }
+
+
+/* Campos de busca mais evidentes e títulos com maior hierarquia */
+.search-field-label {
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--navy);
+}
+
+.search-box .search-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid #d7e0e9;
+  border-radius: 7px;
+  background: #fbfcfe;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color .18s ease, background-color .18s ease;
+}
+
+.search-box .search-field input:focus {
+  border-color: var(--orange);
+  background: #fff;
+  outline: 2px solid rgba(214, 107, 61, .12);
+  outline-offset: 1px;
+}
+
+.search-box .search-field input::placeholder {
+  color: #8996a5;
+  opacity: 1;
+  font-weight: 400;
+}
+
+.search-box .search-field small {
+  font-size: 11px;
+}
+
+#inicio,
+#como-funciona {
+  scroll-margin-top: 100px;
+}
