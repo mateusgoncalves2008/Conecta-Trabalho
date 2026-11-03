@@ -27,9 +27,32 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let transitionOverlay = null;
+
     if (!reduceMotion) {
-      document.body.classList.add('page-enter');
-      window.setTimeout(() => document.body.classList.remove('page-enter'), 700);
+      transitionOverlay = document.createElement('div');
+      transitionOverlay.className = 'page-transition-overlay is-entering';
+      transitionOverlay.setAttribute('aria-hidden', 'true');
+      transitionOverlay.innerHTML = `
+        <div class="page-transition-content">
+          <div class="page-transition-brand">
+            <span class="page-transition-mark">CT</span>
+            <span>Conecta<span>Trabalho</span></span>
+          </div>
+          <p class="page-transition-message">Preparando seu próximo passo</p>
+          <div class="page-transition-progress"><span></span></div>
+        </div>`;
+      document.body.appendChild(transitionOverlay);
+      window.setTimeout(() => {
+        transitionOverlay?.classList.remove('is-entering');
+        transitionOverlay?.classList.add('is-hidden');
+      }, 850);
+      transitionOverlay.addEventListener('animationend', () => {
+        if (transitionOverlay?.classList.contains('is-hidden')) {
+          transitionOverlay.remove();
+          transitionOverlay = null;
+        }
+      }, { once: false });
     }
 
     document.addEventListener('click', event => {
@@ -47,11 +70,13 @@
       if (destination.href === window.location.href) return;
 
       event.preventDefault();
-      document.body.classList.remove('page-enter');
-      document.body.classList.add('page-leaving');
+      if (transitionOverlay) {
+        transitionOverlay.classList.remove('is-entering', 'is-hidden');
+        transitionOverlay.classList.add('is-leaving');
+      }
       window.setTimeout(() => {
         window.location.href = destination.href;
-      }, 280);
+      }, 720);
     });
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
