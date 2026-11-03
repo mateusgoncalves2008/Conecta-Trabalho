@@ -1,5 +1,9 @@
 {
-  "rewrites": [\n    { "source": "/img/:path*", "destination": "/frontend/img/:path*" },
+  "rewrites": [
+    {
+      "source": "/img/:path*",
+      "destination": "/frontend/img/:path*"
+    },
     {
       "source": "/css/:path*",
       "destination": "/frontend/css/:path*"
