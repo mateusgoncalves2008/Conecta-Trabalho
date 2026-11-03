@@ -28,6 +28,12 @@
   document.addEventListener('DOMContentLoaded', () => {
     const year = document.getElementById('current-year');
     if (year) year.textContent = new Date().getFullYear();
+    const header = document.querySelector('.site-header');
+    if (header) {
+      const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
+      updateHeader();
+      window.addEventListener('scroll', updateHeader, { passive: true });
+    }
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
     if (toggle && nav) {
