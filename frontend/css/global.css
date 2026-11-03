@@ -127,3 +127,71 @@
     transition: none;
   }
 }
+
+
+/* Estado inicial: menu encostado no topo e nas laterais */
+.site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, .58);
+  border-left: 0;
+  border-right: 0;
+  background: rgba(255, 255, 255, .68);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  backdrop-filter: blur(20px) saturate(175%);
+  box-shadow: 0 2px 16px rgba(20, 43, 73, .055), inset 0 1px 0 rgba(255, 255, 255, .72);
+  transform: translateY(0);
+  transition:
+    width .32s cubic-bezier(.2,.7,.25,1),
+    transform .32s cubic-bezier(.2,.7,.25,1),
+    border-radius .32s ease,
+    background-color .32s ease,
+    border-color .32s ease,
+    box-shadow .32s ease,
+    -webkit-backdrop-filter .32s ease,
+    backdrop-filter .32s ease;
+}
+
+/* Ao rolar: o menu se afasta das bordas e ganha volume de vidro */
+.site-header.is-scrolled {
+  width: calc(100% - 36px);
+  transform: translateY(12px);
+  border: 1px solid rgba(255, 255, 255, .82);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, .56);
+  -webkit-backdrop-filter: blur(26px) saturate(195%);
+  backdrop-filter: blur(26px) saturate(195%);
+  box-shadow:
+    0 14px 38px rgba(20, 43, 73, .14),
+    0 3px 10px rgba(20, 43, 73, .06),
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    inset 0 -1px 0 rgba(255, 255, 255, .3);
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    border-radius: 0;
+  }
+
+  .site-header.is-scrolled {
+    width: calc(100% - 20px);
+    transform: translateY(8px);
+    border-radius: 14px;
+  }
+
+  .site-header .main-nav {
+    top: calc(100% + 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header {
+    transition: none;
+  }
+}
