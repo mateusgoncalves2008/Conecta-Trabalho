@@ -36,6 +36,44 @@
     }
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
+
+    const sectionLinks = [...document.querySelectorAll('[data-section-link]')];
+    const observedSections = sectionLinks
+      .map(link => document.getElementById(link.dataset.sectionLink))
+      .filter(Boolean);
+
+    const setActiveSection = id => {
+      sectionLinks.forEach(link => {
+        const active = link.dataset.sectionLink === id;
+        link.classList.toggle('active', active);
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    };
+
+    if (sectionLinks.length && observedSections.length) {
+      const sectionObserver = new IntersectionObserver(entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveSection(visible.target.id);
+      }, {
+        rootMargin: '-25% 0px -55% 0px',
+        threshold: [0, .15, .35, .6]
+      });
+
+      observedSections.forEach(section => sectionObserver.observe(section));
+
+      sectionLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          setActiveSection(link.dataset.sectionLink);
+          if (nav && toggle) {
+            nav.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+    }
     if (toggle && nav) {
       toggle.addEventListener('click', () => {
         const opened = nav.classList.toggle('open');
