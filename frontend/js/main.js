@@ -164,37 +164,6 @@
       });
     }
 
-    // Define uma cor de preenchimento que contraste com a cor original de cada botão.
-    const effectButtons = document.querySelectorAll('button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button, input[type="submit"], input[type="button"], input[type="reset"]');
-    const setButtonHoverColors = button => {
-      const background = getComputedStyle(button).backgroundColor;
-      const match = background.match(/[\\d.]+/g);
-      if (!match || match.length < 3) return;
-
-      const [r, g, b] = match.slice(0, 3).map(Number);
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      const delta = max - min;
-      let hue = 0;
-      if (delta) {
-        if (max === r) hue = 60 * (((g - b) / delta) % 6);
-        else if (max === g) hue = 60 * ((b - r) / delta + 2);
-        else hue = 60 * ((r - g) / delta + 4);
-        if (hue < 0) hue += 360;
-      }
-
-      const isBlue = hue >= 185 && hue <= 265;
-      const isWarm = (hue >= 5 && hue <= 75) || hue >= 345;
-      const useOrange = isBlue || (!isWarm && max < 145);
-      button.style.setProperty('--button-hover-fill', useOrange ? '#f0a078' : '#142b49');
-      button.style.setProperty('--button-hover-text', useOrange ? '#171717' : '#ffffff');
-    };
-    effectButtons.forEach(button => {
-      setButtonHoverColors(button);
-      button.addEventListener('pointerenter', () => setButtonHoverColors(button));
-      button.addEventListener('focus', () => setButtonHoverColors(button));
-    });
-
     const header = document.querySelector('.site-header');
     if (header) {
       const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
