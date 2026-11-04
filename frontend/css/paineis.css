@@ -213,3 +213,106 @@ body.a11y-motion *,body.a11y-motion *::before,body.a11y-motion *::after{animatio
 body.a11y-focus :focus-visible{outline:3px solid #e06d36!important;outline-offset:4px!important;box-shadow:0 0 0 5px rgba(224,109,54,.2)!important}
 @media(max-width:600px){.accessibility-launcher{right:15px;bottom:32px;width:54px;height:54px}.accessibility-dialog{padding:20px 17px}.accessibility-option{align-items:flex-start;flex-direction:column}.accessibility-option input[type=checkbox]{align-self:flex-end;margin-top:-25px}.accessibility-font-controls{width:100%}.accessibility-font-controls button{flex:1}.accessibility-dialog-footer{align-items:stretch;flex-direction:column-reverse}.accessibility-dialog-footer button{width:100%}}
 @media(prefers-reduced-motion:reduce){.accessibility-launcher,.accessibility-backdrop{transition:none}}
+
+
+/* Melhorias de legibilidade e acessibilidade */
+.accessibility-dialog{font-size:15px}
+.accessibility-dialog-header h2{font-size:28px}
+.accessibility-dialog-header p{font-size:15px;line-height:1.65}
+.accessibility-option{gap:16px;padding:19px 0}
+.accessibility-option strong{font-size:16px;line-height:1.4}
+.accessibility-option span{font-size:14px;line-height:1.6}
+.accessibility-font-controls button{font-size:14px;padding:10px 13px}
+.accessibility-option input[type=checkbox]{width:23px;height:23px;flex-basis:23px}
+.accessibility-close{font-size:27px}
+.accessibility-reset{font-size:14px;padding:12px 14px}
+
+/* Aumentos fortes, com quebra de linha para preservar os cartões e formulários */
+body[data-a11y-font=large] .dashboard-main :is(p,span,a,label,button,input,select,textarea,li,small,strong,.status-label,.candidate-message,.welcome-detail){
+  font-size:max(1em,1.15rem)!important;
+  line-height:1.65!important;
+}
+body[data-a11y-font=larger] .dashboard-main :is(p,span,a,label,button,input,select,textarea,li,small,strong,.status-label,.candidate-message,.welcome-detail){
+  font-size:max(1em,1.35rem)!important;
+  line-height:1.7!important;
+}
+body[data-a11y-font=large] .dashboard-main :is(h1,h2,h3){line-height:1.35!important}
+body[data-a11y-font=larger] .dashboard-main :is(h1,h2,h3){font-size:clamp(1.65rem,2.5vw,2.5rem)!important;line-height:1.3!important}
+body[data-a11y-font=large] .dashboard-main :is(*,.dashboard-item,.dashboard-item-actions,.job-form-grid){min-width:0}
+body[data-a11y-font=larger] .dashboard-main :is(*,.dashboard-item,.dashboard-item-actions,.job-form-grid){min-width:0}
+body[data-a11y-font=large] .dashboard-main :is(p,span,a,label,button,li,strong){overflow-wrap:anywhere}
+body[data-a11y-font=larger] .dashboard-main :is(p,span,a,label,button,li,strong){overflow-wrap:anywhere}
+body[data-a11y-font=larger] .dashboard-main .dashboard-welcome,
+body[data-a11y-font=larger] .dashboard-main .dashboard-item,
+body[data-a11y-font=larger] .dashboard-main .job-form{gap:18px}
+
+/* Espaçamento ampliado sem estourar os limites dos componentes */
+body.a11y-spacing .dashboard-main{line-height:2.15!important;letter-spacing:.075em!important;word-spacing:.16em!important}
+body.a11y-spacing .dashboard-main :is(p,span,a,label,li,strong,button,input,select,textarea){
+  line-height:2.05!important;
+  letter-spacing:.075em!important;
+  word-spacing:.16em!important;
+  overflow-wrap:anywhere;
+}
+body.a11y-spacing .dashboard-main :is(.dashboard-item,.dashboard-welcome,.job-form,.dashboard-empty){min-width:0}
+body.a11y-spacing .dashboard-main :is(.dashboard-item-actions,.job-form-footer){flex-wrap:wrap}
+
+/* Contraste real por cores, sem aplicar filtro na página inteira */
+html[data-theme=light] body.a11y-contrast.dashboard-page{
+  background:#fff!important;
+  color:#111!important;
+}
+html[data-theme=light] body.a11y-contrast .dashboard-header,
+html[data-theme=light] body.a11y-contrast .dashboard-welcome,
+html[data-theme=light] body.a11y-contrast .dashboard-item,
+html[data-theme=light] body.a11y-contrast .dashboard-empty,
+html[data-theme=light] body.a11y-contrast .job-form,
+html[data-theme=light] body.a11y-contrast .candidate-stat,
+html[data-theme=light] body.a11y-contrast .candidate-info-card,
+html[data-theme=light] body.a11y-contrast .candidate-action-card,
+html[data-theme=light] body.a11y-contrast .candidate-tips-grid article{
+  background:#fff!important;
+  color:#111!important;
+  border-color:#333!important;
+}
+html[data-theme=light] body.a11y-contrast.dashboard-page :is(h1,h2,h3,h4,p,span,label,strong,small,a,.dashboard-user,.welcome-detail,.dashboard-item p){
+  color:#111!important;
+}
+html[data-theme=light] body.a11y-contrast.dashboard-page :is(input,select,textarea){
+  background:#fff!important;color:#111!important;border:2px solid #222!important;
+}
+html[data-theme=light] body.a11y-contrast.dashboard-page :is(.button,.welcome-action,.button-primary){
+  background:#111!important;color:#fff!important;border:2px solid #111!important;
+}
+html[data-theme=dark] body.a11y-contrast.dashboard-page{
+  background:#000!important;color:#fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .dashboard-header,
+html[data-theme=dark] body.a11y-contrast .dashboard-welcome,
+html[data-theme=dark] body.a11y-contrast .dashboard-item,
+html[data-theme=dark] body.a11y-contrast .dashboard-empty,
+html[data-theme=dark] body.a11y-contrast .job-form,
+html[data-theme=dark] body.a11y-contrast .candidate-stat,
+html[data-theme=dark] body.a11y-contrast .candidate-info-card,
+html[data-theme=dark] body.a11y-contrast .candidate-action-card,
+html[data-theme=dark] body.a11y-contrast .candidate-tips-grid article{
+  background:#080808!important;color:#fff!important;border-color:#fff!important;
+}
+html[data-theme=dark] body.a11y-contrast.dashboard-page :is(h1,h2,h3,h4,p,span,label,strong,small,a,.dashboard-user,.welcome-detail,.dashboard-item p){
+  color:#fff!important;
+}
+html[data-theme=dark] body.a11y-contrast.dashboard-page :is(input,select,textarea){
+  background:#000!important;color:#fff!important;border:2px solid #fff!important;
+}
+html[data-theme=dark] body.a11y-contrast.dashboard-page :is(.button,.welcome-action,.button-primary){
+  background:#fff!important;color:#000!important;border:2px solid #fff!important;
+}
+body.a11y-contrast.dashboard-page :is(a,button,input,select,textarea):focus-visible{
+  outline:4px solid #ff8a00!important;outline-offset:4px!important;
+}
+@media(max-width:600px){
+  .accessibility-option{align-items:flex-start}
+  .accessibility-option>div:first-child,.accessibility-option>span:first-child{max-width:100%}
+  body[data-a11y-font=larger] .dashboard-main .dashboard-welcome{grid-template-columns:minmax(0,1fr)}
+  body[data-a11y-font=larger] .dashboard-main .dashboard-welcome .welcome-action{grid-column:1;grid-row:auto}
+}
