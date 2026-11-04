@@ -719,3 +719,9 @@ html[data-theme="dark"] .toast{background:#263448;color:#f3f6fa}
 html[data-theme="dark"] .form-feedback.success{color:#72d6a1}
 html[data-theme="dark"] .form-feedback{color:#ff938a}
 @media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+
+
+/* Ilustrações SVG: preserva as cores próprias de cada versão de tema */
+.page-illustration{display:block;max-width:100%;height:auto}
+html[data-theme="dark"] .page-illustration{filter:none!important}
+.auth-intro .theme-toggle{vertical-align:middle}
