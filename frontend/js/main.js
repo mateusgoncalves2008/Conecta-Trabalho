@@ -151,7 +151,7 @@
 
     function guardarCorOriginal(button) {
       const background = window.getComputedStyle(button).backgroundColor;
-      const rgb = background.match(/[\\d.]+/g);
+      const rgb = background.match(/[\d.]+/g);
       if (!rgb || rgb.length < 3 || Number(rgb[3] ?? 1) === 0) return;
       originalButtonBackgrounds.set(button, background);
     }
@@ -164,7 +164,7 @@
     function aplicarCorOposta(button) {
       const background = originalButtonBackgrounds.get(button);
       if (!background) return;
-      const rgb = background.match(/[\\d.]+/g);
+      const rgb = background.match(/[\d.]+/g);
       if (!rgb || rgb.length < 3) return;
 
       const [r, g, b] = rgb.slice(0, 3).map(Number);
