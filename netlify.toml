@@ -1,0 +1,31 @@
+[build]
+  command = "mkdir -p dist && cp index.html dist/ && cp -R frontend dist/frontend"
+  publish = "dist"
+
+# Mantém a API no mesmo domínio do site, preservando o fluxo de sessão.
+[[redirects]]
+  from = "/api/*"
+  to = "https://conecta-trabalho.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# Mantém os caminhos públicos já usados pelo frontend.
+[[redirects]]
+  from = "/img/*"
+  to = "/frontend/img/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/css/*"
+  to = "/frontend/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/js/*"
+  to = "/frontend/js/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/pages/*"
+  to = "/frontend/pages/:splat"
+  status = 200
