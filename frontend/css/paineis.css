@@ -112,3 +112,61 @@ body.page-entry .dashboard-header{animation:none!important}
 .listing-main .section-heading{align-items:center}
 .listing-main .section-heading>.page-illustration{display:block;width:min(34%,310px);max-height:220px;object-fit:contain;flex:0 0 auto}
 @media(max-width:760px){.listing-main .section-heading>.page-illustration{width:min(75%,260px);align-self:center;margin:0 auto}}
+
+
+/* Recursos adicionais do painel do candidato */
+.candidate-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:26px}
+.candidate-stat{padding:20px 22px;background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;gap:4px}
+.candidate-stat-label{color:var(--muted);font-size:12px;font-weight:650}
+.candidate-stat strong{color:var(--navy);font-size:30px;line-height:1.2}
+.candidate-stat>span:last-child{color:var(--muted);font-size:11px}
+.candidate-action-grid,.candidate-tips-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.candidate-action-card{min-height:150px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .18s,background-color .18s}
+.candidate-action-card:hover{border-color:var(--orange);background:var(--page)}
+.candidate-action-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:rgba(214,107,61,.12);color:var(--orange-dark);font-size:21px}
+.candidate-action-card strong{color:var(--navy);font-size:14px}
+.candidate-action-card>span:last-child{color:var(--muted);font-size:12px;line-height:1.5}
+.candidate-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.candidate-lower-grid .dashboard-section{min-width:0}
+.candidate-info-list{padding:5px 18px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.candidate-info-list>div{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);font-size:12px}
+.candidate-info-list>div:last-child{border-bottom:0}
+.candidate-info-list span{color:var(--muted)}
+.candidate-info-list strong{color:var(--ink);font-weight:650;text-align:right;overflow-wrap:anywhere}
+.font-controls{display:flex;flex-wrap:wrap;gap:8px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.font-controls button{padding:9px 11px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:11px}
+.font-controls button[aria-pressed="true"]{border-color:var(--orange);background:rgba(214,107,61,.1);color:var(--orange-dark)}
+.accessibility-note{color:var(--muted);font-size:11px;line-height:1.6}
+.candidate-tips-grid article{padding:20px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.candidate-tips-grid article>span{color:var(--orange);font-size:11px;font-weight:750;letter-spacing:1px}
+.candidate-tips-grid h3{margin:9px 0 6px;color:var(--navy);font-size:14px}
+.candidate-tips-grid p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+body[data-font-size="large"] .dashboard-main{font-size:1.08rem}
+body[data-font-size="large"] .dashboard-main p,body[data-font-size="large"] .dashboard-main span,body[data-font-size="large"] .dashboard-main a{font-size:1.08em}
+body[data-font-size="larger"] .dashboard-main{font-size:1.16rem}
+body[data-font-size="larger"] .dashboard-main p,body[data-font-size="larger"] .dashboard-main span,body[data-font-size="larger"] .dashboard-main a{font-size:1.16em}
+html[data-theme="dark"] .candidate-stat,html[data-theme="dark"] .candidate-action-card,html[data-theme="dark"] .candidate-info-list,html[data-theme="dark"] .font-controls,html[data-theme="dark"] .candidate-tips-grid article{background:#1c2838;border-color:#354255}
+html[data-theme="dark"] .candidate-action-card:hover{background:#243348;border-color:var(--orange)}
+html[data-theme="dark"] .candidate-action-card strong,html[data-theme="dark"] .candidate-tips-grid h3{color:#e7edf5}
+html[data-theme="dark"] .candidate-info-list strong{color:#e7edf5}
+html[data-theme="dark"] .font-controls button{background:#121c2a;border-color:#46566b;color:#e7edf5}
+html[data-theme="dark"] .font-controls button[aria-pressed="true"]{background:rgba(214,107,61,.16);border-color:var(--orange);color:#ffb18b}
+/* Rodapé dos painéis acompanha o tema selecionado */
+.dashboard-page .site-footer{background:#eaf0f6;color:#586575;border-top:1px solid #dce4ed}
+.dashboard-page .site-footer .brand-footer{color:#142b49}
+.dashboard-page .site-footer .brand-footer .brand-light{color:#bd572d}
+.dashboard-page .footer-brand-block>p{color:#647386}
+.dashboard-page .footer-heading{color:#bd572d}
+.dashboard-page .footer-links>strong{color:#142b49}
+.dashboard-page .footer-socials a{border-color:#cbd5e1;color:#40536a}
+.dashboard-page .footer-socials a:hover{background:#dce6f0;border-color:#d66b3d;color:#142b49}
+.dashboard-page .footer-bottom{border-color:#d1dbe6;color:#718096}
+html[data-theme="dark"] .dashboard-page .site-footer{background:#0b1320;border-color:#263448;color:#a5b1c1}
+html[data-theme="dark"] .dashboard-page .site-footer .brand-footer,html[data-theme="dark"] .dashboard-page .footer-links>strong{color:#fff}
+html[data-theme="dark"] .dashboard-page .site-footer .brand-footer .brand-light,html[data-theme="dark"] .dashboard-page .footer-heading{color:#f09a70}
+html[data-theme="dark"] .dashboard-page .footer-brand-block>p{color:rgba(255,255,255,.62)}
+html[data-theme="dark"] .dashboard-page .footer-socials a{border-color:rgba(255,255,255,.17);color:rgba(255,255,255,.82)}
+html[data-theme="dark"] .dashboard-page .footer-socials a:hover{background:rgba(255,255,255,.1);border-color:rgba(240,154,112,.65);color:#fff}
+html[data-theme="dark"] .dashboard-page .footer-bottom{border-color:rgba(255,255,255,.13);color:rgba(255,255,255,.48)}
+@media(max-width:760px){.candidate-overview{grid-template-columns:1fr 1fr}.candidate-action-grid,.candidate-tips-grid{grid-template-columns:1fr 1fr}.candidate-lower-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.candidate-overview,.candidate-action-grid,.candidate-tips-grid{grid-template-columns:1fr}.candidate-stat{padding:16px}.candidate-info-list>div{align-items:flex-start;flex-direction:column;gap:4px}.candidate-info-list strong{text-align:left}}
