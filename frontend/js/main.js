@@ -165,7 +165,7 @@
     }
 
     // Define uma cor de preenchimento que contraste com a cor original de cada botão.
-    const effectButtons = document.querySelectorAll('button:not(.menu-toggle):not(.accessibility-launcher), .button, input[type="submit"], input[type="button"], input[type="reset"]');
+    const effectButtons = document.querySelectorAll('button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button, input[type="submit"], input[type="button"], input[type="reset"]');
     const setButtonHoverColors = button => {
       const background = getComputedStyle(button).backgroundColor;
       const match = background.match(/[\\d.]+/g);
