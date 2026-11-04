@@ -725,3 +725,11 @@ html[data-theme="dark"] .form-feedback{color:#ff938a}
 .page-illustration{display:block;max-width:100%;height:auto}
 html[data-theme="dark"] .page-illustration{filter:none!important}
 .auth-intro .theme-toggle{vertical-align:middle}
+
+
+/* No tema escuro, os links do menu desktop não recebem fundo próprio */
+@media (min-width: 761px) {
+  html[data-theme="dark"] .site-header .main-nav {
+    background: transparent;
+  }
+}
