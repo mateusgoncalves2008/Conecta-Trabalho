@@ -112,11 +112,13 @@
       const closeAccessibility = () => {
         accessibilityModal.classList.remove('is-open');
         accessibilityModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('accessibility-modal-open');
         accessibilityOpen.focus();
       };
       const openAccessibility = () => {
         accessibilityModal.classList.add('is-open');
         accessibilityModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('accessibility-modal-open');
         document.getElementById('accessibility-close').focus();
       };
       accessibilityOpen.addEventListener('click', openAccessibility);
