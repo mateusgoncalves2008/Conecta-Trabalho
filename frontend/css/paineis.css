@@ -99,3 +99,16 @@ body.page-entry .dashboard-header{animation:none!important}
     inset 0 1px 0 rgba(255,255,255,.98),
     inset 0 -1px 0 rgba(255,255,255,.42);
 }
+
+
+/* Ilustrações dos painéis */
+.dashboard-welcome{padding-right:285px;min-height:220px}
+.dashboard-welcome>.page-illustration{position:absolute;z-index:0;right:18px;top:50%;width:245px;max-height:205px;object-fit:contain;transform:translateY(-50%)}
+.dashboard-welcome>.welcome-copy,.dashboard-welcome>.welcome-action,.dashboard-welcome>.welcome-detail{position:relative;z-index:1}
+.dashboard-welcome>.welcome-detail{grid-column:1/-1}
+@media(max-width:760px){.dashboard-welcome{padding-right:24px;padding-bottom:205px}.dashboard-welcome>.page-illustration{top:auto;bottom:10px;right:50%;width:220px;max-height:190px;transform:translateX(50%)}}
+@media(max-width:650px){.dashboard-welcome{padding-bottom:190px}}
+/* Ilustração da busca de vagas */
+.listing-main .section-heading{align-items:center}
+.listing-main .section-heading>.page-illustration{display:block;width:min(34%,310px);max-height:220px;object-fit:contain;flex:0 0 auto}
+@media(max-width:760px){.listing-main .section-heading>.page-illustration{width:min(75%,260px);align-self:center;margin:0 auto}}
