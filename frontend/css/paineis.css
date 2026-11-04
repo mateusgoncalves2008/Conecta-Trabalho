@@ -374,3 +374,34 @@ html[data-theme=dark] .accessibility-launcher:hover{
 html[data-theme=dark] .accessibility-launcher:hover svg{
   stroke:#ff9b67!important;
 }
+
+
+/* Hover invertido: o botão troca para a cor oposta do tema */
+.accessibility-launcher{
+  transition:background-color .22s ease,border-color .22s ease,box-shadow .22s ease!important;
+}
+.accessibility-launcher:hover,
+.accessibility-launcher:focus-visible{
+  background:#142b49!important;
+  border-color:#142b49!important;
+  color:#fff!important;
+  box-shadow:0 6px 22px rgba(20,43,73,.28)!important;
+}
+.accessibility-launcher:hover svg,
+.accessibility-launcher:focus-visible svg{
+  stroke:#fff!important;
+}
+html[data-theme=dark] .accessibility-launcher:hover,
+html[data-theme=dark] .accessibility-launcher:focus-visible{
+  background:#f0a078!important;
+  border-color:#f0a078!important;
+  color:#171717!important;
+  box-shadow:0 6px 24px rgba(240,160,120,.25)!important;
+}
+html[data-theme=dark] .accessibility-launcher:hover svg,
+html[data-theme=dark] .accessibility-launcher:focus-visible svg{
+  stroke:#171717!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessibility-launcher{transition:none!important}
+}
