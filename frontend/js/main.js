@@ -144,6 +144,40 @@
     }
 
 
+    // Troca a cor do hover conforme a cor original de cada botão.
+    const buttonSelector = 'button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button, input[type="submit"], input[type="button"], input[type="reset"]';
+
+    function aplicarCorOposta(button) {
+      const background = window.getComputedStyle(button).backgroundColor;
+      const rgb = background.match(/[\\d.]+/g);
+      if (!rgb || rgb.length < 3 || Number(rgb[3] || 1) === 0) return;
+
+      const [r, g, b] = rgb.slice(0, 3).map(Number);
+      const isOrange = r > g * 1.2 && r > b * 1.35;
+      const isBlue = b > r * 1.15 && b > g * 1.02;
+
+      if (isOrange) {
+        button.style.setProperty('--button-hover-fill', '#142b49');
+        button.style.setProperty('--button-hover-text', '#ffffff');
+      } else if (isBlue) {
+        button.style.setProperty('--button-hover-fill', '#f0a078');
+        button.style.setProperty('--button-hover-text', '#171717');
+      }
+    }
+
+    document.addEventListener('pointerover', event => {
+      const button = event.target.closest(buttonSelector);
+      if (!button || button.contains(event.relatedTarget)) return;
+      aplicarCorOposta(button);
+    });
+
+    document.addEventListener('pointerout', event => {
+      const button = event.target.closest(buttonSelector);
+      if (!button || button.contains(event.relatedTarget)) return;
+      button.style.removeProperty('--button-hover-fill');
+      button.style.removeProperty('--button-hover-text');
+    });
+
     // Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
     const magneticLinks = document.querySelectorAll('.site-header .main-nav a');
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
