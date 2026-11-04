@@ -88,6 +88,7 @@
         const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
         localStorage.setItem('conecta-theme', nextTheme);
         applyTheme(nextTheme);
+        guardarCoresOriginais();
       });
     }
     applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
@@ -144,13 +145,27 @@
     }
 
 
-    // Troca a cor do hover conforme a cor original de cada botão.
-    const buttonSelector = 'button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button, input[type="submit"], input[type="button"], input[type="reset"]';
+    // Troca as cores de hover usando a cor original guardada antes da interação.
+    const buttonSelector = 'button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), input[type="submit"], input[type="button"], input[type="reset"]';
+    const originalButtonBackgrounds = new WeakMap();
+
+    function guardarCorOriginal(button) {
+      const background = window.getComputedStyle(button).backgroundColor;
+      const rgb = background.match(/[\\d.]+/g);
+      if (!rgb || rgb.length < 3 || Number(rgb[3] ?? 1) === 0) return;
+      originalButtonBackgrounds.set(button, background);
+    }
+
+    function guardarCoresOriginais(root = document) {
+      if (root.matches?.(buttonSelector)) guardarCorOriginal(root);
+      root.querySelectorAll?.(buttonSelector).forEach(guardarCorOriginal);
+    }
 
     function aplicarCorOposta(button) {
-      const background = window.getComputedStyle(button).backgroundColor;
-      const rgb = background.match(/[\d.]+/g);
-      if (!rgb || rgb.length < 3 || Number(rgb[3] || 1) === 0) return;
+      const background = originalButtonBackgrounds.get(button);
+      if (!background) return;
+      const rgb = background.match(/[\\d.]+/g);
+      if (!rgb || rgb.length < 3) return;
 
       const [r, g, b] = rgb.slice(0, 3).map(Number);
       const isOrange = r > g * 1.2 && r > b * 1.35;
@@ -162,23 +177,35 @@
       } else if (isBlue) {
         button.style.setProperty('--button-hover-fill', '#f0a078');
         button.style.setProperty('--button-hover-text', '#171717');
+      } else {
+        button.style.setProperty('--button-hover-fill', '#142b49');
+        button.style.setProperty('--button-hover-text', '#ffffff');
       }
     }
 
+    // Captura os botões existentes e também os inseridos dinamicamente.
+    guardarCoresOriginais();
+    const buttonObserver = new MutationObserver(records => {
+      records.forEach(record => record.addedNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) guardarCoresOriginais(node);
+      }));
+    });
+    buttonObserver.observe(document.body, { childList: true, subtree: true });
+
     document.addEventListener('pointerover', event => {
-      const button = event.target.closest(buttonSelector);
+      const button = event.target.closest?.(buttonSelector);
       if (!button || button.contains(event.relatedTarget)) return;
       aplicarCorOposta(button);
     });
 
     document.addEventListener('pointerout', event => {
-      const button = event.target.closest(buttonSelector);
+      const button = event.target.closest?.(buttonSelector);
       if (!button || button.contains(event.relatedTarget)) return;
       button.style.removeProperty('--button-hover-fill');
       button.style.removeProperty('--button-hover-text');
     });
 
-    // Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
+    Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
     const magneticLinks = document.querySelectorAll('.site-header .main-nav a');
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       magneticLinks.forEach(link => {
