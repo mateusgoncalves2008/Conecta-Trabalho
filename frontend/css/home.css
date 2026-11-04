@@ -227,3 +227,10 @@
 #como-funciona {
   scroll-margin-top: 100px;
 }
+
+
+/* Ilustração vetorial principal */
+.hero-aside{align-items:center;min-width:0}
+.hero-aside .page-illustration{display:block;width:min(100%,500px);height:auto;object-fit:contain}
+@media(max-width:900px){.hero-aside{display:flex;max-width:430px;margin:0 auto}.hero-aside .page-illustration{max-height:330px}}
+@media(max-width:620px){.hero-aside{max-width:340px}.hero-aside .page-illustration{max-height:270px}}
