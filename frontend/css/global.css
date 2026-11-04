@@ -759,7 +759,7 @@ input[type="reset"]::before{
   left:var(--hover-x,50%);
   top:var(--hover-y,50%);
   border-radius:50%;
-  background:var(--button-hover-fill,#f0a078);
+  background:var(--button-hover-fill,#142b49);
   transform:translate(-50%,-50%);
   transition:width .48s cubic-bezier(.2,.75,.25,1);
   pointer-events:none;
@@ -780,7 +780,7 @@ input[type="button"]:hover,
 input[type="reset"]:hover,
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible,
 .button:focus-visible{
-  color:#fff!important;
+  color:var(--button-hover-text,#fff)!important;
   border-color:var(--button-hover-fill,#142b49)!important;
 }
 .site-header .main-nav a{
@@ -799,5 +799,13 @@ button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focu
 @media(prefers-reduced-motion:reduce){
   button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
   .button::before,
-  .site-header .main-nav a{transition:none!important}
+ html[data-theme="dark"] button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle),
+html[data-theme="dark"] .button,
+html[data-theme="dark"] input[type="submit"],
+html[data-theme="dark"] input[type="button"],
+html[data-theme="dark"] input[type="reset"]{
+  --button-hover-fill:#f0a078;
+  --button-hover-text:#171717;
+}
+ .site-header .main-nav a{transition:none!important}
 }
