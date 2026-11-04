@@ -59,10 +59,13 @@
     if (year) year.textContent = new Date().getFullYear();
 
     // Tema claro/escuro compartilhado entre todas as páginas
-    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user');
+    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user, .auth-intro');
     const savedTheme = localStorage.getItem('conecta-theme');
     const applyTheme = theme => {
       document.documentElement.dataset.theme = theme;
+      document.querySelectorAll('img[data-theme-light][data-theme-dark]').forEach(image => {
+        image.src = theme === 'dark' ? image.dataset.themeDark : image.dataset.themeLight;
+      });
       if (!themeButton) return;
       const dark = theme === 'dark';
       themeButton.setAttribute('aria-label', dark ? 'Ativar tema claro' : 'Ativar tema escuro');
@@ -76,7 +79,11 @@
       themeButton = document.createElement('button');
       themeButton.type = 'button';
       themeButton.className = 'theme-toggle';
-      themeButtonHost.insertBefore(themeButton, themeButtonHost.firstElementChild);
+      if (themeButtonHost.classList.contains('auth-intro')) {
+        themeButtonHost.insertBefore(themeButton, themeButtonHost.children[1] || null);
+      } else {
+        themeButtonHost.insertBefore(themeButton, themeButtonHost.firstElementChild);
+      }
       themeButton.addEventListener('click', () => {
         const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
         localStorage.setItem('conecta-theme', nextTheme);
