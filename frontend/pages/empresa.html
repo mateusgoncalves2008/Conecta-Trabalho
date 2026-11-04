@@ -53,6 +53,28 @@
       <div id="company-applications" class="dashboard-list"><div class="empty-state">As candidaturas recebidas aparecerão aqui.</div></div>
     </section>
   </main>
+
+    <button class="accessibility-launcher" type="button" id="accessibility-open" aria-label="Abrir opções de acessibilidade" aria-haspopup="dialog" aria-controls="accessibility-modal">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 9h8M12 9v9M9 18l3-4 3 4"></path></svg>
+    </button>
+    <div class="accessibility-backdrop" id="accessibility-modal" aria-hidden="true">
+      <section class="accessibility-dialog" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" aria-describedby="accessibility-description">
+        <div class="accessibility-dialog-header">
+          <div><span class="eyebrow">PERSONALIZE SUA EXPERIÊNCIA</span><h2 id="accessibility-title">Acessibilidade</h2><p id="accessibility-description">Ajuste a página para facilitar a leitura e a navegação.</p></div>
+          <button type="button" class="accessibility-close" id="accessibility-close" aria-label="Fechar acessibilidade">×</button>
+        </div>
+        <div class="accessibility-options">
+          <div class="accessibility-option"><div><strong>Tamanho do texto</strong><span>Aumente ou diminua os textos da página.</span></div><div class="accessibility-font-controls" role="group" aria-label="Tamanho do texto"><button type="button" data-a11y-font="normal" aria-pressed="true">Padrão</button><button type="button" data-a11y-font="large" aria-pressed="false">Maior</button><button type="button" data-a11y-font="larger" aria-pressed="false">Muito maior</button></div></div>
+          <label class="accessibility-option"><span><strong>Alto contraste</strong><span>Reforce a diferença entre textos e fundos.</span></span><input type="checkbox" data-a11y-toggle="contrast"></label>
+          <label class="accessibility-option"><span><strong>Destacar links</strong><span>Adicione sublinhado aos links para identificá-los melhor.</span></span><input type="checkbox" data-a11y-toggle="links"></label>
+          <label class="accessibility-option"><span><strong>Fonte de leitura</strong><span>Use uma fonte simples e mais legível.</span></span><input type="checkbox" data-a11y-toggle="font"></label>
+          <label class="accessibility-option"><span><strong>Espaçamento do texto</strong><span>Aumente o espaço entre linhas e letras.</span></span><input type="checkbox" data-a11y-toggle="spacing"></label>
+          <label class="accessibility-option"><span><strong>Reduzir animações</strong><span>Desative movimentos e transições da interface.</span></span><input type="checkbox" data-a11y-toggle="motion"></label>
+          <label class="accessibility-option"><span><strong>Realçar foco do teclado</strong><span>Deixe mais visível o elemento selecionado ao navegar com Tab.</span></span><input type="checkbox" data-a11y-toggle="focus"></label>
+        </div>
+        <div class="accessibility-dialog-footer"><button type="button" class="accessibility-reset" id="accessibility-reset">Restaurar configurações</button><button type="button" class="button button-primary" id="accessibility-done">Concluir</button></div>
+      </section>
+    </div>
   <footer class="site-footer">
   <div class="footer-main">
     <div class="footer-brand-block">
