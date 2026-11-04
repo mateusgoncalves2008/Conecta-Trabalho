@@ -92,6 +92,55 @@
     }
     applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
+
+    // Central de acessibilidade compartilhada entre os painéis
+    const accessibilityDefaults = { font: 'normal', contrast: false, links: false, readable: false, spacing: false, motion: false, focus: false };
+    let accessibilitySettings = { ...accessibilityDefaults };
+    try { accessibilitySettings = { ...accessibilityDefaults, ...JSON.parse(localStorage.getItem('conecta-accessibility') || '{}') }; } catch {}
+    const accessibilityModal = document.getElementById('accessibility-modal');
+    const accessibilityOpen = document.getElementById('accessibility-open');
+    if (accessibilityModal && accessibilityOpen) {
+      const applyAccessibility = () => {
+        const root = document.documentElement;
+        const body = document.body;
+        body.dataset.a11yFont = accessibilitySettings.font;
+        ['contrast','links','readable','spacing','motion','focus'].forEach(key => body.classList.toggle('a11y-' + key, !!accessibilitySettings[key]));
+        accessibilityModal.querySelectorAll('[data-a11y-font]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.a11yFont === accessibilitySettings.font)));
+        accessibilityModal.querySelectorAll('[data-a11y-toggle]').forEach(input => input.checked = !!accessibilitySettings[input.dataset.a11yToggle]);
+        localStorage.setItem('conecta-accessibility', JSON.stringify(accessibilitySettings));
+      };
+      const closeAccessibility = () => {
+        accessibilityModal.classList.remove('is-open');
+        accessibilityModal.setAttribute('aria-hidden', 'true');
+        accessibilityOpen.focus();
+      };
+      const openAccessibility = () => {
+        accessibilityModal.classList.add('is-open');
+        accessibilityModal.setAttribute('aria-hidden', 'false');
+        document.getElementById('accessibility-close').focus();
+      };
+      accessibilityOpen.addEventListener('click', openAccessibility);
+      document.getElementById('accessibility-close').addEventListener('click', closeAccessibility);
+      document.getElementById('accessibility-done').addEventListener('click', closeAccessibility);
+      accessibilityModal.addEventListener('click', event => { if (event.target === accessibilityModal) closeAccessibility(); });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && accessibilityModal.classList.contains('is-open')) closeAccessibility();
+      });
+      accessibilityModal.querySelectorAll('[data-a11y-font]').forEach(button => button.addEventListener('click', () => {
+        accessibilitySettings.font = button.dataset.a11yFont;
+        applyAccessibility();
+      }));
+      accessibilityModal.querySelectorAll('[data-a11y-toggle]').forEach(input => input.addEventListener('change', () => {
+        accessibilitySettings[input.dataset.a11yToggle] = input.checked;
+        applyAccessibility();
+      }));
+      document.getElementById('accessibility-reset').addEventListener('click', () => {
+        accessibilitySettings = { ...accessibilityDefaults };
+        applyAccessibility();
+      });
+      applyAccessibility();
+    }
+
     const header = document.querySelector('.site-header');
     if (header) {
       const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
