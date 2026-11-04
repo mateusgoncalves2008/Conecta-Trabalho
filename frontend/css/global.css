@@ -735,15 +735,10 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 }
 
 
-/* Efeito de preenchimento circular nos botões */
+/* Efeito de preenchimento circular com cor oposta à cor original do botão */
 :root {
   --button-hover-fill: #142b49;
   --button-hover-text: #fff;
-}
-
-html[data-theme="dark"] {
-  --button-hover-fill: #f0a078;
-  --button-hover-text: #171717;
 }
 
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle),
