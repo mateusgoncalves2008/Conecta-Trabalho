@@ -316,3 +316,19 @@ body.a11y-contrast.dashboard-page :is(a,button,input,select,textarea):focus-visi
   body[data-a11y-font=larger] .dashboard-main .dashboard-welcome{grid-template-columns:minmax(0,1fr)}
   body[data-a11y-font=larger] .dashboard-main .dashboard-welcome .welcome-action{grid-column:1;grid-row:auto}
 }
+
+
+/* Enquanto a central estiver aberta, somente o conteúdo do modal pode rolar */
+body.accessibility-modal-open{
+  overflow:hidden!important;
+  overscroll-behavior:none;
+}
+.accessibility-backdrop{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  overscroll-behavior:contain;
+}
+.accessibility-dialog{
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
