@@ -28,12 +28,26 @@
 
   async function loadCandidate() {
     const container = document.getElementById('candidate-applications');
-    const data = await Conecta.api('/api/painel/candidato');
-    if (!data.candidaturas.length) {
-      container.innerHTML = '<div class="dashboard-empty">Você ainda não se candidatou a nenhuma vaga.</div>';
+    const [data, session] = await Promise.all([
+      Conecta.api('/api/painel/candidato'),
+      Conecta.api('/api/me')
+    ]);
+    const applications = data.candidaturas || [];
+    const active = applications.filter(item => ['recebida', 'em_analise'].includes(item.status)).length;
+    const interviews = applications.filter(item => item.status === 'entrevista').length;
+    document.getElementById('candidate-total').textContent = applications.length;
+    document.getElementById('candidate-active').textContent = active;
+    document.getElementById('candidate-interviews').textContent = interviews;
+    const user = session.usuario || {};
+    document.getElementById('candidate-profile-name').textContent = user.nome || '—';
+    document.getElementById('candidate-profile-email').textContent = user.email || '—';
+    document.getElementById('candidate-profile-phone').textContent = user.telefone || 'Não informado';
+    document.getElementById('candidate-profile-city').textContent = user.cidade || '—';
+    if (!applications.length) {
+      container.innerHTML = '<div class="dashboard-empty">Você ainda não se candidatou a nenhuma vaga. <a class="text-link" href="vagas.html">Explore as oportunidades disponíveis.</a></div>';
       return;
     }
-    container.innerHTML = data.candidaturas.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.titulo)}</h3><p>${escapeHTML(item.nome_empresa || 'Empresa')} · ${escapeHTML(item.cidade)}</p><p>Candidatura enviada em ${dateLabel(item.criada_em)}</p></div><div class="dashboard-item-actions"><span class="status-label">${statusText(item.status)}</span></div></article>`).join('');
+    container.innerHTML = applications.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.titulo)}</h3><p>${escapeHTML(item.nome_empresa || 'Empresa')} · ${escapeHTML(item.cidade)}</p><p>Candidatura enviada em ${dateLabel(item.criada_em)}</p></div><div class="dashboard-item-actions"><span class="status-label">${statusText(item.status)}</span></div></article>`).join('');
   }
 
   async function loadCompany() {
@@ -81,6 +95,17 @@
         button.textContent = 'Publicar vaga';
       }
     });
+    const fontButtons = [...document.querySelectorAll('[data-font-size]')];
+    const savedFontSize = localStorage.getItem('conecta-font-size') || 'normal';
+    const applyFontSize = size => {
+      document.body.dataset.fontSize = size;
+      fontButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.fontSize === size)));
+      localStorage.setItem('conecta-font-size', size);
+    };
+    if (fontButtons.length) {
+      applyFontSize(['normal', 'large', 'larger'].includes(savedFontSize) ? savedFontSize : 'normal');
+      fontButtons.forEach(button => button.addEventListener('click', () => applyFontSize(button.dataset.fontSize)));
+    }
     initPanel();
   });
 })();
