@@ -735,77 +735,86 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 }
 
 
-/* Efeito de preenchimento circular nos botões, inspirado na referência enviada */
+/* Efeito de preenchimento circular nos botões */
+:root {
+  --button-hover-fill: #142b49;
+  --button-hover-text: #fff;
+}
+
+html[data-theme="dark"] {
+  --button-hover-fill: #f0a078;
+  --button-hover-text: #171717;
+}
+
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle),
-.button,
-input[type="submit"],
-input[type="button"],
-input[type="reset"]{
-  position:relative;
-  isolation:isolate;
-  overflow:hidden;
-  transition:color .28s ease,background-color .28s ease,border-color .28s ease,box-shadow .28s ease;
+.button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color .28s ease, background-color .28s ease, border-color .28s ease, box-shadow .28s ease;
 }
+
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
-.button::before,
-input[type="submit"]::before,
-input[type="button"]::before,
-input[type="reset"]::before{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  width:0;
-  aspect-ratio:1;
-  left:var(--hover-x,50%);
-  top:var(--hover-y,50%);
-  border-radius:50%;
-  background:var(--button-hover-fill,#142b49);
-  transform:translate(-50%,-50%);
-  transition:width .48s cubic-bezier(.2,.75,.25,1);
-  pointer-events:none;
+.button::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 0;
+  aspect-ratio: 1;
+  left: var(--hover-x, 50%);
+  top: var(--hover-y, 50%);
+  border-radius: 50%;
+  background: var(--button-hover-fill);
+  transform: translate(-50%, -50%);
+  transition: width .48s cubic-bezier(.2,.75,.25,1);
+  pointer-events: none;
 }
+
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):hover::before,
 .button:hover::before,
-input[type="submit"]:hover::before,
-input[type="button"]:hover::before,
-input[type="reset"]:hover::before,
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible::before,
-.button:focus-visible::before{
-  width:230%;
+.button:focus-visible::before {
+  width: 230%;
 }
+
 button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):hover,
 .button:hover,
+button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible,
+.button:focus-visible {
+  background-color: transparent !important;
+  color: var(--button-hover-text) !important;
+  border-color: var(--button-hover-fill) !important;
+}
+
 input[type="submit"]:hover,
 input[type="button"]:hover,
-input[type="reset"]:hover,
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible,
-.button:focus-visible{
-  color:var(--button-hover-text,#fff)!important;
-  border-color:var(--button-hover-fill,#142b49)!important;
+input[type="reset"]:hover {
+  background-color: var(--button-hover-fill);
+  color: var(--button-hover-text);
+  border-color: var(--button-hover-fill);
 }
-.site-header .main-nav a{
-  display:inline-block;
-  transition:transform .18s ease,color .18s ease;
-  transform:translate(var(--magnetic-x,0),var(--magnetic-y,0));
+
+.site-header .main-nav a {
+  display: inline-block;
+  transition: transform .18s ease, color .18s ease;
+  transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
 }
-.site-header .main-nav a.is-magnetic{will-change:transform}
-@media(hover:hover) and (pointer:fine){
+
+.site-header .main-nav a.is-magnetic {
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
   button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):hover,
-  .button:hover,
-  input[type="submit"]:hover,
-  input[type="button"]:hover,
-  input[type="reset"]:hover{box-shadow:0 5px 18px rgba(20,43,73,.16)}
+  .button:hover {
+    box-shadow: 0 5px 18px rgba(20, 43, 73, .16);
+  }
 }
-@media(prefers-reduced-motion:reduce){
+
+@media (prefers-reduced-motion: reduce) {
   button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
   .button::before,
- html[data-theme="dark"] button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle),
-html[data-theme="dark"] .button,
-html[data-theme="dark"] input[type="submit"],
-html[data-theme="dark"] input[type="button"],
-html[data-theme="dark"] input[type="reset"]{
-  --button-hover-fill:#f0a078;
-  --button-hover-text:#171717;
-}
- .site-header .main-nav a{transition:none!important}
+  .site-header .main-nav a {
+    transition: none !important;
+  }
 }
