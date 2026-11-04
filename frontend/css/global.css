@@ -733,3 +733,85 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
     background: transparent;
   }
 }
+
+
+/* Efeito de preenchimento circular nos botões, inspirado na referência enviada */
+button:not(.menu-toggle):not(.accessibility-launcher),
+.button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"]{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  transition:color .28s ease,background-color .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+button:not(.menu-toggle):not(.accessibility-launcher)::before,
+.button::before,
+input[type="submit"]::before,
+input[type="button"]::before,
+input[type="reset"]::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:0;
+  aspect-ratio:1;
+  left:var(--hover-x,50%);
+  top:var(--hover-y,50%);
+  border-radius:50%;
+  background:var(--button-hover-fill,#142b49);
+  transform:translate(-50%,-50%);
+  transition:width .48s cubic-bezier(.2,.75,.25,1);
+  pointer-events:none;
+}
+button:not(.menu-toggle):not(.accessibility-launcher):hover::before,
+.button:hover::before,
+input[type="submit"]:hover::before,
+input[type="button"]:hover::before,
+input[type="reset"]:hover::before,
+button:not(.menu-toggle):not(.accessibility-launcher):focus-visible::before,
+.button:focus-visible::before{
+  width:230%;
+}
+button:not(.menu-toggle):not(.accessibility-launcher):hover,
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+button:not(.menu-toggle):not(.accessibility-launcher):focus-visible,
+.button:focus-visible{
+  color:#fff!important;
+  border-color:var(--button-hover-fill,#142b49)!important;
+}
+html[data-theme="dark"] button:not(.menu-toggle):not(.accessibility-launcher),
+html[data-theme="dark"] .button,
+html[data-theme="dark"] input[type="submit"],
+html[data-theme="dark"] input[type="button"],
+html[data-theme="dark"] input[type="reset"]{
+  --button-hover-fill:#f0a078;
+}
+html[data-theme="dark"] button:not(.menu-toggle):not(.accessibility-launcher):hover,
+html[data-theme="dark"] .button:hover,
+html[data-theme="dark"] input[type="submit"]:hover,
+html[data-theme="dark"] input[type="button"]:hover,
+html[data-theme="dark"] input[type="reset"]:hover{
+  color:#171717!important;
+}
+.site-header .main-nav a{
+  display:inline-block;
+  transition:transform .18s ease,color .18s ease;
+  transform:translate(var(--magnetic-x,0),var(--magnetic-y,0));
+}
+.site-header .main-nav a.is-magnetic{will-change:transform}
+@media(hover:hover) and (pointer:fine){
+  button:not(.menu-toggle):not(.accessibility-launcher):hover,
+  .button:hover,
+  input[type="submit"]:hover,
+  input[type="button"]:hover,
+  input[type="reset"]:hover{box-shadow:0 5px 18px rgba(20,43,73,.16)}
+}
+@media(prefers-reduced-motion:reduce){
+  button:not(.menu-toggle):not(.accessibility-launcher)::before,
+  .button::before,
+  .site-header .main-nav a{transition:none!important}
+}
