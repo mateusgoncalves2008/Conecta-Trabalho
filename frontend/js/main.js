@@ -205,7 +205,7 @@
       button.style.removeProperty('--button-hover-text');
     });
 
-    Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
+    // Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
     const magneticLinks = document.querySelectorAll('.site-header .main-nav a');
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       magneticLinks.forEach(link => {
