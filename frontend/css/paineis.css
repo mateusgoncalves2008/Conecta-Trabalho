@@ -332,3 +332,45 @@ body.accessibility-modal-open{
   overscroll-behavior:contain;
   touch-action:pan-y;
 }
+
+
+/* O modal não deve acionar nem intensificar o efeito de vidro do cabeçalho */
+body.accessibility-modal-open .site-header,
+body.accessibility-modal-open .site-header.is-scrolled{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+
+/* Com reduzir animações ativo, o cabeçalho permanece fixo no topo */
+body.a11y-motion .dashboard-header.site-header,
+body.a11y-motion .dashboard-header.site-header.is-scrolled{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  right:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  transform:none!important;
+  border-radius:0!important;
+  transition:none!important;
+  animation:none!important;
+}
+
+/* O hover altera somente o desenho do cadeirante */
+.accessibility-launcher:hover{
+  border-color:var(--line)!important;
+  background:var(--surface)!important;
+  color:var(--navy)!important;
+}
+.accessibility-launcher:hover svg{
+  stroke:var(--orange)!important;
+}
+html[data-theme=dark] .accessibility-launcher:hover{
+  background:#1c2838!important;
+  border-color:#46566b!important;
+  color:#f0a078!important;
+}
+html[data-theme=dark] .accessibility-launcher:hover svg{
+  stroke:#ff9b67!important;
+}
