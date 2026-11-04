@@ -271,3 +271,54 @@
     max-height: 300px;
   }
 }
+
+/* Chamada final com identidade própria e borda superior ondulada */
+.cta-section {
+  position: relative;
+  isolation: isolate;
+  margin-top: 62px;
+  padding-top: 38px;
+  background: #d66b3d;
+}
+
+.cta-section::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: -62px;
+  height: 63px;
+  background-color: #d66b3d;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0 42 C180 2 360 78 540 42 S900 2 1080 42 S1260 78 1440 42 L1440 80 L0 80 Z' fill='black'/%3E%3C/svg%3E") center bottom / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0 42 C180 2 360 78 540 42 S900 2 1080 42 S1260 78 1440 42 L1440 80 L0 80 Z' fill='black'/%3E%3C/svg%3E") center bottom / 100% 100% no-repeat;
+}
+
+.cta-section .eyebrow {
+  color: #fff1e9;
+}
+
+.cta-section p {
+  color: rgba(255, 255, 255, .88);
+}
+
+html[data-theme="dark"] .cta-section {
+  background: #a94f2d;
+}
+
+html[data-theme="dark"] .cta-section::before {
+  background-color: #a94f2d;
+}
+
+@media (max-width: 620px) {
+  .cta-section {
+    margin-top: 48px;
+    padding-top: 32px;
+  }
+
+  .cta-section::before {
+    top: -48px;
+    height: 49px;
+  }
+}
+
