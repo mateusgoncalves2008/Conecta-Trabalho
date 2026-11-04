@@ -229,8 +229,45 @@
 }
 
 
-/* Ilustração vetorial principal */
-.hero-aside{align-items:center;min-width:0}
-.hero-aside .page-illustration{display:block;width:min(100%,500px);height:auto;object-fit:contain}
-@media(max-width:900px){.hero-aside{display:flex;max-width:430px;margin:0 auto}.hero-aside .page-illustration{max-height:330px}}
-@media(max-width:620px){.hero-aside{max-width:340px}.hero-aside .page-illustration{max-height:270px}}
+
+/* Ilustração principal da página inicial */
+.hero-aside {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.hero-aside .page-illustration {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  max-height: 440px;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 900px) {
+  .hero-aside {
+    display: flex;
+    width: min(100%, 480px);
+    margin: 0 auto;
+  }
+
+  .hero-aside .page-illustration {
+    max-width: 100%;
+    max-height: 360px;
+  }
+}
+
+@media (max-width: 620px) {
+  .hero-aside {
+    width: min(100%, 390px);
+  }
+
+  .hero-aside .page-illustration {
+    max-height: 300px;
+  }
+}
