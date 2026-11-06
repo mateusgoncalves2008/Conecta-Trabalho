@@ -67,3 +67,55 @@
 /* Ilustração exclusiva da página de cadastro */
 .auth-intro .page-illustration{display:block;width:min(100%,430px);height:auto;margin:26px auto 0 0;object-fit:contain}
 @media(max-width:760px){.auth-intro .page-illustration{width:min(100%,330px);margin:18px auto 0}}
+
+
+/* Campos adicionais e confirmação do cadastro empresarial */
+.auth-card form .form-fields,
+.auth-card form .company-fields {
+  display: contents;
+}
+
+.auth-card form .company-code-step {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+}
+
+.auth-card form .company-code-step > p {
+  margin: 0;
+  color: var(--text-muted, #536174);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.auth-card form .company-code-step > p strong {
+  color: var(--text, #142b49);
+  overflow-wrap: anywhere;
+}
+
+.auth-card form .company-code-step .button-outline {
+  margin-top: -6px;
+}
+
+.auth-card form .field-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted, #667085);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.auth-card form .field input[readonly] {
+  cursor: default;
+  opacity: .88;
+}
+
+.auth-card form .hidden {
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  .auth-card form .company-code-step {
+    grid-column: auto;
+  }
+}
