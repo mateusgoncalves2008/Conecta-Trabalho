@@ -4,11 +4,23 @@
   })[char]);
   const dateLabel = value => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(value));
   const card = vaga => `<article class="job-card">
-    <div class="job-card-top"><span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span><span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span></div>
-    <h3>${escapeHTML(vaga.titulo)}</h3>
-    <p class="job-description">${escapeHTML(vaga.descricao.length > 150 ? vaga.descricao.slice(0, 150) + '...' : vaga.descricao)}</p>
-    <div class="job-meta"><span>${escapeHTML(vaga.cidade)}</span><span>${escapeHTML(vaga.modalidade)}</span><span>${dateLabel(vaga.criado_em)}</span></div>
-    <div class="job-card-bottom"><span class="job-salary">${escapeHTML(vaga.salario || 'Salário a combinar')}</span><button class="button button-primary button-small" type="button" data-apply="${Number(vaga.id)}">Candidatar-se</button></div>
+    <div class="job-card-top">
+      <span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span>
+      <span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span>
+    </div>
+    <div class="job-card-content">
+      <h3>${escapeHTML(vaga.titulo)}</h3>
+      <p class="job-description">${escapeHTML((vaga.descricao || 'Confira os detalhes desta oportunidade.').length > 150 ? vaga.descricao.slice(0, 150) + '...' : (vaga.descricao || 'Confira os detalhes desta oportunidade.'))}</p>
+    </div>
+    <div class="job-details">
+      <span class="job-detail"><strong>Local</strong>${escapeHTML(vaga.cidade || 'Não informado')}</span>
+      <span class="job-detail"><strong>Modalidade</strong>${escapeHTML(vaga.modalidade || 'Não informada')}</span>
+      <span class="job-detail"><strong>Publicada em</strong>${dateLabel(vaga.criado_em)}</span>
+    </div>
+    <div class="job-card-bottom">
+      <div class="job-salary-block"><span class="job-salary-label">Remuneração</span><strong class="job-salary">${escapeHTML(vaga.salario || 'A combinar')}</strong></div>
+      <button class="button button-primary button-small" type="button" data-apply="${Number(vaga.id)}">Candidatar-se</button>
+    </div>
   </article>`;
 
   async function applyToJob(id, button) {
