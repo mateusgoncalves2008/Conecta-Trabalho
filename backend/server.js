@@ -190,11 +190,19 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   const existing = await pool.query('SELECT id FROM usuarios WHERE email=$1 OR cnpj=$2', [email, cnpj]);
   if (existing.rowCount) return res.status(409).json({ erro: 'Este e-mail ou CNPJ já está cadastrado.' });
 
+  const pendingExisting = await pool.query(
+    'SELECT email,cnpj FROM cadastros_empresa_pendentes WHERE email=$1 OR cnpj=$2', [email, cnpj]
+  );
+  if (pendingExisting.rows.some(row => row.email !== email)) {
+    return res.status(409).json({ erro: 'Já existe uma confirmação em andamento para este CNPJ.' });
+  }
+
   let company;
   try { company = await lookupCnpj(cnpj); }
   catch (error) { return res.status(error.statusCode || 503).json({ erro: error.message }); }
 
   const razaoSocial = clean(company.razao_social, 160);
+  if (!razaoSocial) return res.status(503).json({ erro: 'A consulta não retornou a razão social da empresa. Tente novamente.' });
   const nomeFantasia = clean(company.nome_fantasia, 160) || razaoSocial;
   const cidade = [clean(company.municipio, 90), clean(company.uf, 2)].filter(Boolean).join(' - ') || 'Não informado';
   const senhaHash = await bcrypt.hash(senha, 12);
@@ -202,7 +210,7 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   const codigoHash = hashVerificationCode(codigo);
   const nomeEmpresa = nomeFantasia || razaoSocial;
 
-  await pool.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1 OR cnpj=$2', [email, cnpj]);
+  await pool.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1', [email]);
   await pool.query(
     `INSERT INTO cadastros_empresa_pendentes
       (nome,email,senha_hash,telefone,cidade,cnpj,razao_social,nome_fantasia,codigo_hash,expira_em,tentativas)
