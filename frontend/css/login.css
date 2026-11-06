@@ -308,3 +308,39 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
     object-position: center;
   }
 }
+
+
+/* Mais destaque para o convite de cadastro abaixo do formulário */
+.auth-card .auth-switch {
+  margin-top: 24px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #536174;
+}
+
+.auth-card .auth-switch a {
+  color: #142b49;
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 43, 73, .35);
+  text-underline-offset: 3px;
+}
+
+.auth-card .auth-switch a:hover {
+  color: #1d3c60;
+  text-decoration-color: currentColor;
+}
+
+html[data-theme="dark"] .auth-card .auth-switch {
+  color: #c1ccda;
+}
+
+html[data-theme="dark"] .auth-card .auth-switch a {
+  color: #e7edf5;
+  text-decoration-color: rgba(231, 237, 245, .45);
+}
+
+html[data-theme="dark"] .auth-card .auth-switch a:hover {
+  color: #ffffff;
+}
