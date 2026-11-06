@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const phoneInput = document.getElementById('phone-input');
   const nameLabel = document.getElementById('name-label');
   const phoneLabel = document.getElementById('phone-label');
+  const emailLabel = document.getElementById('email-label');
   const feedback = document.getElementById('form-feedback');
   const registerButton = document.getElementById('register-submit');
   const confirmButton = document.getElementById('company-confirm-submit');
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     phoneInput.required = isCompany;
     phoneLabel.textContent = isCompany ? 'Telefone de contato (obrigatório)' : 'Telefone (opcional)';
+    emailLabel.textContent = isCompany ? 'E-mail de contato (receberá um código)' : 'E-mail';
     nameLabel.textContent = isCompany ? 'Nome completo do responsável' : 'Nome completo';
     registerButton.textContent = isCompany ? 'Enviar código de confirmação' : 'Criar conta';
     codeStep.classList.add('hidden');
