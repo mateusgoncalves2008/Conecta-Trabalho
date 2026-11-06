@@ -747,3 +747,15 @@ input[type="reset"]:hover {
     transition: none !important;
   }
 }
+
+
+/* Remove a divisória entre a chamada final e o rodapé */
+.cta-section {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.site-footer {
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
