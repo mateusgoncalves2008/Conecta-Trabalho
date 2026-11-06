@@ -472,3 +472,190 @@ html[data-theme="dark"] .cta-section p {
     font-size: 14px;
   }
 }
+
+
+/* Cards de vagas: hierarquia visual e informações bem separadas */
+.job-card {
+  min-height: 285px;
+  padding: 23px;
+  gap: 0;
+  border: 1px solid #dce3eb;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(20,43,73,.045);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.job-card:hover {
+  border-color: #aebfd2;
+  box-shadow: 0 9px 24px rgba(20,43,73,.09);
+}
+
+.job-card-top {
+  min-height: 28px;
+  align-items: flex-start;
+}
+
+.job-company {
+  color: #52647a;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: .15px;
+}
+
+.job-tag {
+  padding: 6px 10px;
+  border: 1px solid #dce5ef;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #294765;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.job-card-content {
+  flex: 1;
+}
+
+.job-card h3 {
+  margin: 17px 0 8px;
+  color: #142b49;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -.45px;
+}
+
+.job-description {
+  margin: 0;
+  color: #687789;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.job-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin-top: 21px;
+  padding-top: 16px;
+  border-top: 1px solid #e8edf2;
+}
+
+.job-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #52647a;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.job-detail strong {
+  color: #8995a3;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.job-card-bottom {
+  margin-top: 17px;
+  padding-top: 16px;
+  border-top: 1px solid #e8edf2;
+  align-items: center;
+  gap: 14px;
+}
+
+.job-salary-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.job-salary-label {
+  color: #8995a3;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.job-card .job-salary {
+  color: #142b49;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.job-card-bottom .button {
+  min-height: 42px;
+  padding-inline: 17px;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .job-card {
+  border-color: #2c3c50;
+  background: #172538;
+  box-shadow: 0 5px 18px rgba(0,0,0,.12);
+}
+
+html[data-theme="dark"] .job-card:hover {
+  border-color: #60758e;
+  box-shadow: 0 9px 24px rgba(0,0,0,.2);
+}
+
+html[data-theme="dark"] .job-company,
+html[data-theme="dark"] .job-detail {
+  color: #c0ccda;
+}
+
+html[data-theme="dark"] .job-tag {
+  border-color: #3b5068;
+  background: #22364d;
+  color: #e2ebf5;
+}
+
+html[data-theme="dark"] .job-card h3,
+html[data-theme="dark"] .job-card .job-salary {
+  color: #f3f7fb;
+}
+
+html[data-theme="dark"] .job-description {
+  color: #b2bfce;
+}
+
+html[data-theme="dark"] .job-details,
+html[data-theme="dark"] .job-card-bottom {
+  border-color: #34465a;
+}
+
+html[data-theme="dark"] .job-detail strong,
+html[data-theme="dark"] .job-salary-label {
+  color: #91a2b6;
+}
+
+@media (max-width: 620px) {
+  .job-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .job-card h3 {
+    font-size: 21px;
+  }
+
+  .job-details {
+    gap: 12px 18px;
+  }
+
+  .job-card-bottom {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .job-card-bottom .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
