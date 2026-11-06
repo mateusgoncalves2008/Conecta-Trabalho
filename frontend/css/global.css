@@ -843,3 +843,15 @@ html[data-theme="dark"] .site-footer {
     padding-bottom: 24px;
   }
 }
+
+
+/* CTA do rodapé: hover laranja igual aos demais botões da identidade visual */
+.footer-cta .button.button-light {
+  --button-hover-fill: #d66b3d !important;
+  --button-hover-text: #142b49 !important;
+}
+
+.footer-cta .button.button-light:hover,
+.footer-cta .button.button-light:focus-visible {
+  border-color: #d66b3d !important;
+}
