@@ -179,3 +179,18 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
   .field{margin-bottom:12px}
   .auth-switch{margin-top:14px}
 }
+
+
+/* Botão Entrar: branco no repouso e azul-marinho no hover */
+#login-form > button[type="submit"].button-primary {
+  background: #fff !important;
+  color: #142b49 !important;
+  border: 1px solid #d5dce5;
+  --button-hover-fill: #142b49 !important;
+  --button-hover-text: #fff !important;
+}
+
+#login-form > button[type="submit"].button-primary:hover,
+#login-form > button[type="submit"].button-primary:focus-visible {
+  border-color: #142b49 !important;
+}
