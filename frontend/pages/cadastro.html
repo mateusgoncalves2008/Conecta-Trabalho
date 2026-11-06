@@ -29,50 +29,76 @@
       <p class="form-subtitle">Preencha os dados para começar.</p>
 
       <form id="register-form" novalidate>
-        <label class="field">
-          Quero me cadastrar como
-          <select name="tipo" id="account-type" required>
-            <option value="candidato">Candidato</option>
-            <option value="empresa">Empresa</option>
-          </select>
-        </label>
+        <div id="registration-fields" class="form-fields">
+          <label class="field">
+            Quero me cadastrar como
+            <select name="tipo" id="account-type" required>
+              <option value="candidato">Candidato</option>
+              <option value="empresa">Empresa ou comércio</option>
+            </select>
+          </label>
 
-        <label class="field">
-          Nome completo
-          <input name="nome" type="text" required minlength="3" maxlength="120" autocomplete="name" placeholder="Seu nome">
-        </label>
+          <label class="field">
+            <span id="name-label">Nome completo</span>
+            <input name="nome" type="text" required minlength="3" maxlength="120" autocomplete="name" placeholder="Seu nome completo">
+          </label>
 
-        <label class="field hidden" id="company-field">
-          Nome da empresa
-          <input name="nomeEmpresa" type="text" maxlength="160" placeholder="Nome da empresa">
-        </label>
+          <div id="company-fields" class="company-fields hidden">
+            <label class="field">
+              CNPJ
+              <input name="cnpj" id="cnpj-input" type="text" maxlength="18" autocomplete="off" placeholder="00.000.000/0000-00" disabled>
+              <span class="field-hint" id="cnpj-feedback" aria-live="polite">Informe o CNPJ para consultar os dados oficiais da empresa.</span>
+            </label>
 
-        <label class="field">
-          E-mail
-          <input name="email" type="text" required maxlength="160" autocomplete="email" placeholder="Digite seu usuário ou e-mail">
-        </label>
+            <label class="field">
+              Razão social
+              <input name="razaoSocial" id="razao-social" type="text" maxlength="160" readonly disabled placeholder="Preenchida pela consulta do CNPJ">
+            </label>
 
-        <label class="field">
-          Telefone (opcional)
-          <input name="telefone" type="tel" maxlength="30" autocomplete="tel" placeholder="(33) 99999-9999">
-        </label>
+            <label class="field">
+              Nome fantasia
+              <input name="nomeFantasia" id="nome-fantasia" type="text" maxlength="160" readonly disabled placeholder="Preenchido pela consulta do CNPJ">
+            </label>
+          </div>
 
-        <label class="field">
-          Cidade
-          <input name="cidade" type="text" required maxlength="100" value="Capelinha">
-        </label>
+          <label class="field">
+            E-mail
+            <input name="email" type="text" required maxlength="160" autocomplete="email" placeholder="Digite seu usuário ou e-mail">
+          </label>
 
-        <label class="field">
-          Senha
-          <input name="senha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Mínimo de 8 caracteres">
-        </label>
+          <label class="field">
+            <span id="phone-label">Telefone (opcional)</span>
+            <input name="telefone" id="phone-input" type="tel" maxlength="30" autocomplete="tel" placeholder="(33) 99999-9999">
+          </label>
 
-        <label class="field">
-          Confirmar senha
-          <input name="confirmarSenha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Digite a senha novamente">
-        </label>
+          <label class="field">
+            Cidade
+            <input name="cidade" id="city-input" type="text" required maxlength="100" value="Capelinha">
+          </label>
 
-        <button class="button button-primary button-full" type="submit">Criar conta</button>
+          <label class="field">
+            Senha
+            <input name="senha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Mínimo de 8 caracteres">
+          </label>
+
+          <label class="field">
+            Confirmar senha
+            <input name="confirmarSenha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Digite a senha novamente">
+          </label>
+
+          <button class="button button-primary button-full" id="register-submit" type="submit">Criar conta</button>
+        </div>
+
+        <div id="company-code-step" class="company-code-step hidden">
+          <p>Enviamos um código de confirmação para <strong id="company-email-destination"></strong>. O código vale por 10 minutos.</p>
+          <label class="field">
+            Código de confirmação
+            <input name="codigo" id="company-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Digite os 6 números" disabled>
+          </label>
+          <button class="button button-primary button-full" id="company-confirm-submit" type="submit">Confirmar e criar conta</button>
+          <button class="button button-outline button-full" id="company-back-button" type="button">Voltar e corrigir os dados</button>
+        </div>
+
         <p class="form-feedback" id="form-feedback" aria-live="polite"></p>
       </form>
 
