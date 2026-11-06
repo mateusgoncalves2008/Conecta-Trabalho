@@ -7,6 +7,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { rateLimit } = require('express-rate-limit');
 
 const app = express();
@@ -47,6 +48,16 @@ const limitLogin = rateLimit({
   standardHeaders: 'draft-7', legacyHeaders: false,
   message: { erro: 'Muitas tentativas. Aguarde alguns minutos.' }
 });
+const limitCnpj = rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 12,
+  standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { erro: 'Muitas consultas de CNPJ. Aguarde alguns minutos.' }
+});
+const limitCompanySignup = rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 5,
+  standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { erro: 'Muitas tentativas de cadastro empresarial. Aguarde alguns minutos.' }
+});
 const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const normalizeEmail = value => {
@@ -56,18 +67,221 @@ const normalizeEmail = value => {
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const publicUser = user => ({
   id: user.id, nome: user.nome, email: user.email, tipo: user.tipo,
-  telefone: user.telefone, cidade: user.cidade, nomeEmpresa: user.nome_empresa
+  telefone: user.telefone, cidade: user.cidade, nomeEmpresa: user.nome_empresa,
+  emailVerificado: user.email_verificado === true
 });
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
   if (!req.session.user) return res.status(401).json({ erro: 'Faça login para continuar.' });
   if (req.session.user.tipo !== type) return res.status(403).json({ erro: 'Você não tem permissão para esta ação.' });
+  if (type === 'empresa' && !req.session.user.emailVerificado) {
+    return res.status(403).json({ erro: 'Esta conta empresarial precisa confirmar o e-mail e validar o CNPJ.' });
+  }
   next();
 };
+
+const normalizeCnpj = value => clean(value, 30).replace(/[^0-9a-z]/gi, '').toUpperCase();
+const validCnpj = value => {
+  const cnpj = normalizeCnpj(value);
+  if (!/^[0-9A-Z]{12}[0-9]{2}$/.test(cnpj)) return false;
+  const digit = (base, weights) => {
+    const sum = [...base].reduce((total, char, index) => total + (char.charCodeAt(0) - 48) * weights[index], 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  const first = digit(cnpj.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
+  const second = digit(cnpj.slice(0, 12) + first, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
+  return cnpj.slice(12) === String(first) + String(second);
+};
+const lookupCnpj = async cnpj => {
+  const response = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + encodeURIComponent(cnpj), {
+    signal: AbortSignal.timeout(6000)
+  });
+  if (response.status === 404) {
+    const error = new Error('CNPJ não encontrado. Confira o número informado.');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!response.ok) {
+    const error = new Error('Não foi possível consultar o CNPJ agora. Tente novamente em instantes.');
+    error.statusCode = 503;
+    throw error;
+  }
+  const data = await response.json();
+  if (Number(data.situacao_cadastral) !== 2) {
+    const error = new Error('Este CNPJ não está com situação ATIVA na Receita Federal.');
+    error.statusCode = 422;
+    throw error;
+  }
+  return data;
+};
+const sendCompanyVerificationEmail = async (email, code, companyName) => {
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    const error = new Error('A confirmação por e-mail ainda não está configurada no servidor.');
+    error.statusCode = 503;
+    throw error;
+  }
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM,
+      to: [email],
+      subject: 'Confirme seu e-mail - ConectaTrabalho',
+      text: 'Olá!\n\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\n\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
+    }),
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!response.ok) {
+    const error = new Error('Não foi possível enviar o código de confirmação. Tente novamente mais tarde.');
+    error.statusCode = 502;
+    throw error;
+  }
+};
+const hashVerificationCode = code => crypto.createHash('sha256')
+  .update(code + ':' + process.env.SESSION_SECRET).digest('hex');
+
 
 app.get('/api/health', asyncRoute(async (_req, res) => {
   await pool.query('SELECT 1');
   res.json({ sucesso: true, banco: 'conectado' });
+}));
+
+app.get('/api/empresa/consultar-cnpj/:cnpj', limitCnpj, asyncRoute(async (req, res) => {
+  const cnpj = normalizeCnpj(req.params.cnpj);
+  if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
+  try {
+    const data = await lookupCnpj(cnpj);
+    res.json({
+      cnpj,
+      razaoSocial: clean(data.razao_social, 160),
+      nomeFantasia: clean(data.nome_fantasia, 160),
+      municipio: clean(data.municipio, 100),
+      uf: clean(data.uf, 2),
+      cep: clean(data.cep, 12),
+      logradouro: clean(data.logradouro, 160),
+      numero: clean(data.numero, 30),
+      bairro: clean(data.bairro, 100),
+      situacao: 'ATIVA'
+    });
+  } catch (error) {
+    res.status(error.statusCode || 503).json({ erro: error.message || 'Falha ao consultar o CNPJ.' });
+  }
+}));
+
+app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRoute(async (req, res) => {
+  const nome = clean(req.body.nome, 120);
+  const email = normalizeEmail(req.body.email);
+  const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
+  const telefone = clean(req.body.telefone, 30);
+  const cnpj = normalizeCnpj(req.body.cnpj);
+  if (nome.length < 3) return res.status(400).json({ erro: 'Informe o nome completo do responsável.' });
+  if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
+  if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
+  if (telefone.replace(/\\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
+  if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
+  }
+
+  const existing = await pool.query('SELECT id FROM usuarios WHERE email=$1 OR cnpj=$2', [email, cnpj]);
+  if (existing.rowCount) return res.status(409).json({ erro: 'Este e-mail ou CNPJ já está cadastrado.' });
+
+  let company;
+  try { company = await lookupCnpj(cnpj); }
+  catch (error) { return res.status(error.statusCode || 503).json({ erro: error.message }); }
+
+  const razaoSocial = clean(company.razao_social, 160);
+  const nomeFantasia = clean(company.nome_fantasia, 160) || razaoSocial;
+  const cidade = [clean(company.municipio, 90), clean(company.uf, 2)].filter(Boolean).join(' - ') || 'Não informado';
+  const senhaHash = await bcrypt.hash(senha, 12);
+  const codigo = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+  const codigoHash = hashVerificationCode(codigo);
+  const nomeEmpresa = nomeFantasia || razaoSocial;
+
+  await pool.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1 OR cnpj=$2', [email, cnpj]);
+  await pool.query(
+    `INSERT INTO cadastros_empresa_pendentes
+      (nome,email,senha_hash,telefone,cidade,cnpj,razao_social,nome_fantasia,codigo_hash,expira_em,tentativas)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW() + INTERVAL '10 minutes',0)`,
+    [nome,email,senhaHash,telefone,cidade,cnpj,razaoSocial,nomeFantasia,codigoHash]
+  );
+  try {
+    await sendCompanyVerificationEmail(email, codigo, nomeEmpresa);
+  } catch (error) {
+    await pool.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1', [email]);
+    return res.status(error.statusCode || 502).json({ erro: error.message });
+  }
+  res.status(200).json({ sucesso: true, mensagem: 'Enviamos um código de confirmação para seu e-mail.' });
+}));
+
+app.post('/api/cadastro/empresa/confirmar-codigo', limitCompanySignup, asyncRoute(async (req, res) => {
+  const email = normalizeEmail(req.body.email);
+  const codigo = clean(req.body.codigo, 6);
+  if (!validEmail(email) || !/^\\d{6}$/.test(codigo)) {
+    return res.status(400).json({ erro: 'Informe o e-mail e o código de 6 dígitos.' });
+  }
+
+  const client = await pool.connect();
+  let user;
+  try {
+    await client.query('BEGIN');
+    const pending = await client.query('SELECT * FROM cadastros_empresa_pendentes WHERE email=$1 FOR UPDATE', [email]);
+    if (!pending.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ erro: 'Código não encontrado. Solicite um novo código.' });
+    }
+    const registration = pending.rows[0];
+    if (new Date(registration.expira_em).getTime() <= Date.now()) {
+      await client.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1', [email]);
+      await client.query('COMMIT');
+      return res.status(400).json({ erro: 'O código expirou. Faça o cadastro novamente.' });
+    }
+    if (registration.tentativas >= 5) {
+      await client.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1', [email]);
+      await client.query('COMMIT');
+      return res.status(429).json({ erro: 'Limite de tentativas atingido. Faça o cadastro novamente.' });
+    }
+
+    const expected = Buffer.from(registration.codigo_hash, 'hex');
+    const received = Buffer.from(hashVerificationCode(codigo), 'hex');
+    const matches = expected.length === received.length && crypto.timingSafeEqual(expected, received);
+    if (!matches) {
+      await client.query('UPDATE cadastros_empresa_pendentes SET tentativas=tentativas+1 WHERE email=$1', [email]);
+      await client.query('COMMIT');
+      return res.status(400).json({ erro: 'Código incorreto. Confira o e-mail e tente novamente.' });
+    }
+
+    const inserted = await client.query(
+      `INSERT INTO usuarios
+        (nome,email,senha_hash,tipo,telefone,cidade,nome_empresa,cnpj,razao_social,nome_fantasia,email_verificado)
+       VALUES ($1,$2,$3,'empresa',$4,$5,$6,$7,$8,$9,TRUE) RETURNING *`,
+      [registration.nome,registration.email,registration.senha_hash,registration.telefone,
+       registration.cidade,registration.nome_fantasia || registration.razao_social,registration.cnpj,
+       registration.razao_social,registration.nome_fantasia]
+    );
+    user = inserted.rows[0];
+    await client.query('DELETE FROM cadastros_empresa_pendentes WHERE email=$1', [email]);
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.code === '23505') return res.status(409).json({ erro: 'Este e-mail ou CNPJ já está cadastrado.' });
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  req.session.regenerate(error => {
+    if (error) return res.status(500).json({ erro: 'Conta criada, mas não foi possível iniciar sua sessão. Faça login.' });
+    req.session.user = publicUser(user);
+    req.session.save(saveError => {
+      if (saveError) return res.status(500).json({ erro: 'Conta criada, mas não foi possível salvar sua sessão. Faça login.' });
+      res.status(201).json({ sucesso: true, usuario: req.session.user });
+    });
+  });
 }));
 
 app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
@@ -82,7 +296,7 @@ app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
   if (!['candidato', 'empresa'].includes(tipo)) return res.status(400).json({ erro: 'Tipo de cadastro inválido.' });
-  if (tipo === 'empresa' && nomeEmpresa.length < 2) return res.status(400).json({ erro: 'Informe o nome da empresa.' });
+  if (tipo === 'empresa') return res.status(400).json({ erro: 'Use a confirmação de CNPJ e e-mail para criar uma conta empresarial.' });
   const hash = await bcrypt.hash(senha, 12);
   try {
     const result = await pool.query(
