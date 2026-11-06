@@ -34,11 +34,13 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 3. Crie um banco PostgreSQL e execute todo o conteúdo de `database/schema.sql` nele.
 4. Copie `.env.example` para um arquivo chamado `.env`.
 5. Preencha `DATABASE_URL` com a conexão do PostgreSQL e defina `SESSION_SECRET` com uma chave aleatória longa (mínimo 32 caracteres).
-6. Inicie:
+6. Para habilitar cadastro empresarial, configure `RESEND_API_KEY` e `EMAIL_FROM` com um remetente/domínio autorizado no Resend.
+7. Se o banco já existia, execute `database/migration_empresa_verificacao.sql` nele antes de iniciar a nova versão.
+8. Inicie:
    ```bash
    npm start
    ```
-7. Acesse http://localhost:3000.
+9. Acesse http://localhost:3000.
 
 ## Variáveis de ambiente
 
@@ -46,6 +48,8 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 - `NODE_ENV`: use `production` no ambiente publicado.
 - `DATABASE_URL`: string de conexão PostgreSQL.
 - `SESSION_SECRET`: segredo usado para assinar a sessão.
+- `RESEND_API_KEY`: chave da API Resend usada para enviar códigos de confirmação do cadastro empresarial.
+- `EMAIL_FROM`: remetente autorizado no Resend, por exemplo `ConectaTrabalho <cadastro@seudominio.com.br>`.
 
 ## Publicação
 
