@@ -116,27 +116,31 @@ const lookupCnpj = async cnpj => {
   return data;
 };
 const sendCompanyVerificationEmail = async (email, code, companyName) => {
-  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
     const error = new Error('A confirmação por e-mail ainda não está configurada no servidor.');
     error.statusCode = 503;
     throw error;
   }
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
-      Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
-      'Content-Type': 'application/json'
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+      accept: 'application/json'
     },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM,
-      to: [email],
+      sender: {
+        name: process.env.BREVO_SENDER_NAME || 'ConectaTrabalho',
+        email: process.env.BREVO_SENDER_EMAIL
+      },
+      to: [{ email }],
       subject: 'Confirme seu e-mail - ConectaTrabalho',
-      text: 'Olá!\n\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\n\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
+      textContent: 'Olá!\\n\\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\\n\\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
     }),
     signal: AbortSignal.timeout(10000)
   });
   if (!response.ok) {
-    const error = new Error('Não foi possível enviar o código de confirmação. Tente novamente mais tarde.');
+    const error = new Error('Não foi possível enviar o código de confirmação. Confira a configuração do remetente no Brevo e tente novamente.');
     error.statusCode = 502;
     throw error;
   }
@@ -183,7 +187,7 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
   if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
   if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
-  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
   }
 
