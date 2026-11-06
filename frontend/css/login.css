@@ -194,3 +194,11 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 #login-form > button[type="submit"].button-primary:focus-visible {
   border-color: #142b49 !important;
 }
+
+
+/* Garante contraste do texto do botão Entrar durante o preenchimento azul */
+#login-form > button[type="submit"].button-primary:hover,
+#login-form > button[type="submit"].button-primary:focus-visible {
+  color: #ffffff !important;
+  --button-hover-text: #ffffff !important;
+}
