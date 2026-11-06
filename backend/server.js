@@ -181,7 +181,7 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe o nome completo do responsável.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
-  if (telefone.replace(/\\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
+  if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
   if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
   if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
@@ -221,7 +221,7 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
 app.post('/api/cadastro/empresa/confirmar-codigo', limitCompanySignup, asyncRoute(async (req, res) => {
   const email = normalizeEmail(req.body.email);
   const codigo = clean(req.body.codigo, 6);
-  if (!validEmail(email) || !/^\\d{6}$/.test(codigo)) {
+  if (!validEmail(email) || !/^\d{6}$/.test(codigo)) {
     return res.status(400).json({ erro: 'Informe o e-mail e o código de 6 dígitos.' });
   }
 
