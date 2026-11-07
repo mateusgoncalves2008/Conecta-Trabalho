@@ -146,6 +146,11 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     socketTimeout: 15000
   });
 
+  const logoPng = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAABmJLR0QA/wD/AP+gvaeTAAAEKElEQVR4nO3dWUhUURzH8e446oyNU4rihFYWWtqkRmTQSkV7ti8UBK1oEJQ+SGQUhLQ99GBBGwUVRRDteyS04UMIQbYXLUSSpGmZ5TZqD70UZPg/9wy/8vw+j3LnnD9+R2fmXrlaMf4pXQjHgR7AdAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAOYMxqIOhzXI329IRkqGPzkxwdczPs7tCvd6ujoclp1lYwdO/ePXH4+vsrOsdv7imI4frDlAcp+eyxdOmz5xZFxstN6VOyttAXon+Dbnr5w6bphl2Xqam0ZDAMuyshfP3Ji7NDw8zP5qprEbICzUuWdb/szJo7RMYyBbAUKdziNFG8ePztQ1jYFsvQ3dWrCK332b1APMyxq7dMGf3xdSxykGiI7yblmXo3cUMykGWLNifnSUV+8oZlIJ0N3rWb4wS/soZlIJMC9rrNsVrn0UM6kEmDNtjO4xzCUOENUtcnBa/2CMYiZxgBGZ6SEOnsTWRvxJOC21r8I2T1682Xv0XElpWWVVTUNjk8IKf9Hx079qJ65Fp5elxAFSkhKlDzl79fbq9TubAwHpA00g/mUS3yNWdPz7D5W5m4r43W+POIBPeKXl+Jnr3+sbpLuYQxzA09UtOv7uvQfSLYwiDiC96vLqbbl0C6OIAzhDQkTH136tk25hlKC/o29q5svv3/AjFRgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAWNADhIUG5XYUnYY4QKClRXS8N9Ij3cIo4gCNwj8uT+qTIN3CKOIAdd/qRcePHJou3cIo4gAVldWi4xfPnRThdkl3MYc4QPmHStHx8b7YosJcvhS3Rxzg6cu30ofMmjy6+OSuRbMn9Ir3uXhLm9+Jn5iPnr1W2CY1OXFXYZ7CA3/V3i3L/mvin4CS0rKW1tZgjGImcYCaL1/vP3wejFHMpPJJ+MzlW7rHMJdKgFOXbtY3NGofxUwqAT7X1h06cVH7KGZSPBm3+9Cp6ppavaOYSTFA9efagu379I5iJvXT0acv3zp88orGUcxk63pAwdZ9xXdKdY1iJlsBmgOBJWsLz127o2saA9m9ItbUHMjO37Fh+37pdQL6ScMlyba2tgPHzg+fserSjZLW1jb7CxpF2zXhd+UVy/K2jJiRc/D4hYqPn3Qt2+lZMf4p2hd1OKz01KTMQQMy/Ek//4FDhNsV6Ymwea8z+2dD/8E7ZgUlAHUc/y4IjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwH4ALmO/pR3T5fkAAAAASUVORK5CYII=',
+    'base64'
+  );
+
   const safeCompanyName = String(companyName)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -201,10 +206,11 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     text,
     html,
     attachments: [{
-      filename: 'logo-conectatrabalho.svg',
-      path: path.join(__dirname, '../frontend/img/logo-conectatrabalho.svg'),
+      filename: 'logo-conectatrabalho.png',
+      content: logoPng,
       cid: 'conectatrabalho-logo',
-      contentType: 'image/svg+xml'
+      contentType: 'image/png',
+      contentDisposition: 'inline'
     }]
   });
 };
