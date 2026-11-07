@@ -9,6 +9,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { rateLimit } = require('express-rate-limit');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
@@ -116,34 +117,29 @@ const lookupCnpj = async cnpj => {
   return data;
 };
 const sendCompanyVerificationEmail = async (email, code, companyName) => {
-  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
-    const error = new Error('A confirmação por e-mail ainda não está configurada no servidor.');
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    const error = new Error('O envio de e-mails ainda não está configurado no servidor.');
     error.statusCode = 503;
     throw error;
   }
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      'api-key': process.env.BREVO_API_KEY,
-      'Content-Type': 'application/json',
-      accept: 'application/json'
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD.replace(/\\s/g, '')
     },
-    body: JSON.stringify({
-      sender: {
-        name: process.env.BREVO_SENDER_NAME || 'ConectaTrabalho',
-        email: process.env.BREVO_SENDER_EMAIL
-      },
-      to: [{ email }],
-      subject: 'Confirme seu e-mail - ConectaTrabalho',
-      textContent: 'Olá!\\n\\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\\n\\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
-    }),
-    signal: AbortSignal.timeout(10000)
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000
   });
-  if (!response.ok) {
-    const error = new Error('Não foi possível enviar o código de confirmação. Confira a configuração do remetente no Brevo e tente novamente.');
-    error.statusCode = 502;
-    throw error;
-  }
+
+  await transporter.sendMail({
+    from: '"ConectaTrabalho" <' + process.env.GMAIL_USER + '>',
+    to: email,
+    subject: 'Confirme seu e-mail - ConectaTrabalho',
+    text: 'Olá!\\n\\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\\n\\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
+  });
 };
 const hashVerificationCode = code => crypto.createHash('sha256')
   .update(code + ':' + process.env.SESSION_SECRET).digest('hex');
@@ -187,7 +183,7 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
   if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
   if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
-  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
   }
 
