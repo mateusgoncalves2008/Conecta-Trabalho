@@ -192,8 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
           'yahoo.com': 'https://mail.yahoo.com/'
         };
         const emailUrl = emailProviders[emailDomain];
-        openEmailButton.href = emailUrl || 'https://mail.google.com/';
-        openEmailButton.textContent = emailUrl ? 'Abrir e-mail' : 'Abrir Gmail';
+        openEmailButton.hidden = !emailUrl;
+        if (emailUrl) openEmailButton.href = emailUrl;
         sentNotice.classList.add('is-open');
         sentNotice.setAttribute('aria-hidden', 'false');
         sentNoticeClose.focus();
