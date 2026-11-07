@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sentNotice = document.getElementById('company-code-sent-notice');
   const sentNoticeEmail = document.getElementById('company-code-sent-email');
   const sentNoticeClose = document.getElementById('company-code-sent-close');
+  const openEmailButton = document.getElementById('company-open-email');
 
   let cnpjValidated = false;
   let companyCodeSent = false;
@@ -181,6 +182,18 @@ document.addEventListener('DOMContentLoaded', () => {
         codeInput.required = true;
         codeInput.focus();
         sentNoticeEmail.textContent = values.email;
+        const emailDomain = values.email.split('@')[1]?.toLowerCase();
+        const emailProviders = {
+          'gmail.com': 'https://mail.google.com/',
+          'googlemail.com': 'https://mail.google.com/',
+          'outlook.com': 'https://outlook.live.com/mail/',
+          'hotmail.com': 'https://outlook.live.com/mail/',
+          'live.com': 'https://outlook.live.com/mail/',
+          'yahoo.com': 'https://mail.yahoo.com/'
+        };
+        const emailUrl = emailProviders[emailDomain];
+        openEmailButton.href = emailUrl || 'https://mail.google.com/';
+        openEmailButton.textContent = emailUrl ? 'Abrir e-mail' : 'Abrir Gmail';
         sentNotice.classList.add('is-open');
         sentNotice.setAttribute('aria-hidden', 'false');
         sentNoticeClose.focus();
