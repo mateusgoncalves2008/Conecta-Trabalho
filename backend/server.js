@@ -146,11 +146,6 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     socketTimeout: 15000
   });
 
-  const logoPng = Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAD6UlEQVR42u3df0jUdxzH8df3PPXOzitF8cZp03GW7kpjzMGmi4rW0lytstEgWKtIYdDsDxlzNBhSa3/sDxusHyzYRjKIcv1cRcLM8I8QgtrvjW0xkiRLndrUPL39MfbvBvuct759ns9/5YNf35/H9+70+/XOyYlWx0XW5mEEACAAEAAIAAQAAgABgABAACAAEAAIAAQAAgABgABAACAAEAAIAAQAAgABgABAACAAEAAIAAQAcknepIvzOFoUnacny0tUHi1WYX5IBeE8+X3pCgZmyeNxEv49cxfU/OPXv1l+x9WbGO3IefABFBcVaMvGVXphRZXycrM59Wx5BHg0P6R3mrapZtnTchyHidsCwHEcbd+0RrsaNys9PY1J2wQgLdWrD99t0pqVzzJh2wCker36pHWXli+uYLo2/hq4p7mBzbcVQF3tUm1+qYap2gggOyuo3W/UM1FbAezYukHZWUEmaiOAOcGAtmysZZq2AqirXSq/L51p2gpg3aolTNJWAFmzM/XEwvlM0lYAlRVlSvFwVdmtGf8lcGHpYwk5kG9//FX7Pz2h7p7r6r8zqPGJ+0kbwn+9nJqoy8gml3P/dwAlkULjg/j83CW99ub7mozFOCXd9hQQfiTXaP3NW/1qfLuVzXcrgJDhzR1t7Rf0x9g4O+FWAIFZfqP1l69cYxfcDMD0Zo+fb/SyC24G4E1JMVo/PDLKLrgZgGn3J3nxZzUAAgABgABAACAAEAAIAAQAAgABgABAACAAEAAIAAQAAgABgABAAKCHAEBaqpddcDOA2NSU0fpgZoBdcDOACcN/444U5bMLbgYwem/MaH3VU2XsgpsB9PUPGK3ftP55Zfh97IRbAfTe6jdaHw7lqrWlkReDbgXw3U83jA/ixZWL1XF0n15e+5zmhkPy8fbyScv4tPv6+18SciClxYXa17JzRn7If/vIGB4BDOruua6p6WkmaSuAwd9HdPWrH5ikrQAkqf1sJ5O0GcCxM19qbHyCadoKYGh4VIc/O800bQUgSR8cPqaBwWEmaiuAgaFhNe89wERtBSBJx8926uOjXzBVWwFIUvOeA+ro6mGytgKYjMX0yustOnG+i+naCED6673/tje9p7f2HjS+X4BcCECS4vG4Dh05qWdWN+jMxW5NT8eZtk0A/u633j69unO3KlfX66O2U+q7fZepP0A5OdHqpJ6aHo+jstKIKhY9rvJoRIX5IRWE85Th9ykzkDEjHz8zU1cDH4ZPDEk6ALLsKYAAQAAgABAACAAEAAIAAYAAQAAgABAACAAEAAIAAYAAQAAgABAACAAEAAIAAYAAQAAgABAACACUoP4EEojConCl/ZYAAAAASUVORK5CYII=',
-    'base64'
-  );
-
   const safeCompanyName = String(companyName)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -181,9 +176,9 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">Seu código de confirmação do ConectaTrabalho.</div>',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f5f8;padding:32px 12px;"><tr><td align="center">',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#ffffff;border:1px solid #e4e8ee;border-radius:12px;overflow:hidden;">',
-    '<tr><td style="background-color:#142b49;padding:24px 28px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>',
-    '<td width="46" height="46" align="center" valign="middle" style="width:46px;height:46px;"><img src="cid:conectatrabalho-logo" width="46" height="46" alt="ConectaTrabalho" style="display:block;width:46px;height:46px;border:0;"></td>',
-    '<td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.4px;">ConectaTrabalho</td>',
+    '<tr><td style="padding:26px 28px 22px;border-bottom:1px solid #e9edf2;background-color:#ffffff;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>',
+    '<td width="48" height="48" align="center" valign="middle" style="width:48px;height:48px;background-color:#142b49;border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:25px;font-weight:800;letter-spacing:-3px;white-space:nowrap;"><span style="color:#ffffff;">C</span><span style="color:#e96f35;">F</span></td>',
+    '<td style="padding-left:13px;color:#142b49;font-size:19px;font-weight:700;line-height:1.3;">' + safeCompanyName + '<br><span style="color:#7a8797;font-size:12px;font-weight:400;">ConectaTrabalho</span></td>',
     '</tr></table></td></tr>',
     '<tr><td style="padding:34px 28px 12px;"><p style="margin:0 0 10px;color:#e96f35;font-size:12px;font-weight:700;letter-spacing:1.2px;">CONFIRMAÇÃO DE CADASTRO</p>',
     '<h1 style="margin:0 0 18px;color:#142b49;font-size:25px;line-height:1.25;">Confirme seu e-mail</h1>',
@@ -204,14 +199,7 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     to: email,
     subject: 'Confirme seu e-mail | ConectaTrabalho',
     text,
-    html,
-    attachments: [{
-      filename: 'logo-conectatrabalho.png',
-      content: logoPng,
-      cid: 'conectatrabalho-logo',
-      contentType: 'image/png',
-      contentDisposition: 'inline'
-    }]
+    html
   });
 };
 
