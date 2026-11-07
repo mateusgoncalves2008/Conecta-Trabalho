@@ -177,7 +177,7 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f5f8;padding:32px 12px;"><tr><td align="center">',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#ffffff;border:1px solid #e4e8ee;border-radius:12px;overflow:hidden;">',
     '<tr><td style="background-color:#142b49;padding:24px 28px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>',
-    '<td width="42" height="42" align="center" valign="middle" style="width:42px;height:42px;background-color:#ffffff;border-radius:9px;font-size:17px;font-weight:700;letter-spacing:-1px;"><span style="color:#142b49;">C</span><span style="color:#e96f35;">T</span></td>',
+    '<td width="46" height="46" align="center" valign="middle" style="width:46px;height:46px;"><img src="cid:conectatrabalho-logo" width="46" height="46" alt="ConectaTrabalho" style="display:block;width:46px;height:46px;border:0;"></td>',
     '<td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.4px;">ConectaTrabalho</td>',
     '</tr></table></td></tr>',
     '<tr><td style="padding:34px 28px 12px;"><p style="margin:0 0 10px;color:#e96f35;font-size:12px;font-weight:700;letter-spacing:1.2px;">CONFIRMAÇÃO DE CADASTRO</p>',
@@ -199,7 +199,13 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     to: email,
     subject: 'Confirme seu e-mail | ConectaTrabalho',
     text,
-    html
+    html,
+    attachments: [{
+      filename: 'logo-conectatrabalho.svg',
+      path: path.join(__dirname, '../frontend/img/logo-conectatrabalho.svg'),
+      cid: 'conectatrabalho-logo',
+      contentType: 'image/svg+xml'
+    }]
   });
 };
 
