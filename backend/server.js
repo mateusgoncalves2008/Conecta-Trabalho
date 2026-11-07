@@ -13,6 +13,7 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
+const companyCnpjTestMode = process.env.NODE_ENV === 'development' && process.env.COMPANY_CNPJ_TEST_MODE === 'true';
 const port = Number(process.env.PORT) || 3000;
 
 if (!process.env.DATABASE_URL) throw new Error('Configure DATABASE_URL no arquivo .env.');
@@ -94,6 +95,17 @@ const validCnpj = value => {
   const second = digit(cnpj.slice(0, 12) + first, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
   return cnpj.slice(12) === String(first) + String(second);
 };
+const calculateCnpjDigit = (base, weights) => {
+  const sum = [...base].reduce((total, char, index) => total + (char.charCodeAt(0) - 48) * weights[index], 0);
+  const remainder = sum % 11;
+  return remainder < 2 ? 0 : 11 - remainder;
+};
+const generateTestCnpj = () => {
+  const base = String(crypto.randomInt(10000000, 99999999)) + '0001';
+  const first = calculateCnpjDigit(base, [5,4,3,2,9,8,7,6,5,4,3,2]);
+  const second = calculateCnpjDigit(base + first, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
+  return base + first + second;
+};
 const lookupCnpj = async cnpj => {
   const response = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + encodeURIComponent(cnpj), {
     signal: AbortSignal.timeout(6000)
@@ -145,6 +157,10 @@ const hashVerificationCode = code => crypto.createHash('sha256')
   .update(code + ':' + process.env.SESSION_SECRET).digest('hex');
 
 
+app.get('/api/config', (_req, res) => {
+  res.json({ modoTesteCnpj: companyCnpjTestMode });
+});
+
 app.get('/api/health', asyncRoute(async (_req, res) => {
   await pool.query('SELECT 1');
   res.json({ sucesso: true, banco: 'conectado' });
@@ -177,12 +193,12 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   const email = normalizeEmail(req.body.email);
   const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
   const telefone = clean(req.body.telefone, 30);
-  const cnpj = normalizeCnpj(req.body.cnpj);
+  let cnpj = normalizeCnpj(req.body.cnpj);
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe o nome completo do responsável.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
   if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
-  if (!validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
+  if (!companyCnpjTestMode && !validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
   }
@@ -198,8 +214,18 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   }
 
   let company;
-  try { company = await lookupCnpj(cnpj); }
-  catch (error) { return res.status(error.statusCode || 503).json({ erro: error.message }); }
+  if (companyCnpjTestMode) {
+    cnpj = generateTestCnpj();
+    company = {
+      razao_social: 'EMPRESA DE TESTE ' + cnpj,
+      nome_fantasia: 'Empresa de Teste',
+      municipio: clean(req.body.cidade, 90) || 'Capelinha',
+      uf: ''
+    };
+  } else {
+    try { company = await lookupCnpj(cnpj); }
+    catch (error) { return res.status(error.statusCode || 503).json({ erro: error.message }); }
+  }
 
   const razaoSocial = clean(company.razao_social, 160);
   if (!razaoSocial) return res.status(503).json({ erro: 'A consulta não retornou a razão social da empresa. Tente novamente.' });
