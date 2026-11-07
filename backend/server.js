@@ -146,13 +146,63 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     socketTimeout: 15000
   });
 
+  const safeCompanyName = String(companyName)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  const text = [
+    'ConectaTrabalho',
+    '',
+    'CONFIRME SEU E-MAIL',
+    '',
+    'Olá!',
+    'Use o código abaixo para concluir o cadastro da empresa ' + companyName + ':',
+    '',
+    code,
+    '',
+    'Este código expira em 10 minutos.',
+    '',
+    'Se você não solicitou este cadastro, ignore esta mensagem.',
+    '',
+    'ConectaTrabalho - Conectando talentos a oportunidades.'
+  ].join('\n');
+
+  const html = [
+    '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Confirme seu e-mail</title></head>',
+    '<body style="margin:0;padding:0;background-color:#f3f5f8;font-family:Arial,Helvetica,sans-serif;color:#263445;">',
+    '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">Seu código de confirmação do ConectaTrabalho.</div>',
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f5f8;padding:32px 12px;"><tr><td align="center">',
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#ffffff;border:1px solid #e4e8ee;border-radius:12px;overflow:hidden;">',
+    '<tr><td style="background-color:#142b49;padding:24px 28px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>',
+    '<td width="42" height="42" align="center" valign="middle" style="width:42px;height:42px;background-color:#ffffff;border-radius:9px;font-size:17px;font-weight:700;letter-spacing:-1px;"><span style="color:#142b49;">C</span><span style="color:#e96f35;">T</span></td>',
+    '<td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.4px;">ConectaTrabalho</td>',
+    '</tr></table></td></tr>',
+    '<tr><td style="padding:34px 28px 12px;"><p style="margin:0 0 10px;color:#e96f35;font-size:12px;font-weight:700;letter-spacing:1.2px;">CONFIRMAÇÃO DE CADASTRO</p>',
+    '<h1 style="margin:0 0 18px;color:#142b49;font-size:25px;line-height:1.25;">Confirme seu e-mail</h1>',
+    '<p style="margin:0 0 12px;font-size:15px;line-height:1.7;">Olá!</p>',
+    '<p style="margin:0;font-size:15px;line-height:1.7;">Use o código abaixo para concluir o cadastro da empresa <strong>' + safeCompanyName + '</strong>.</p></td></tr>',
+    '<tr><td align="center" style="padding:22px 28px 18px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:340px;background-color:#f4f6f9;border:1px solid #e1e6ed;border-radius:10px;"><tr>',
+    '<td align="center" style="padding:20px 12px;"><p style="margin:0 0 8px;color:#667386;font-size:12px;font-weight:700;letter-spacing:1px;">SEU CÓDIGO DE CONFIRMAÇÃO</p>',
+    '<p style="margin:0;color:#142b49;font-family:Arial,Helvetica,sans-serif;font-size:34px;font-weight:700;letter-spacing:8px;">' + code + '</p></td></tr></table></td></tr>',
+    '<tr><td style="padding:4px 28px 30px;"><p style="margin:0 0 12px;color:#263445;font-size:14px;line-height:1.7;"><strong>Importante:</strong> este código expira em 10 minutos.</p>',
+    '<p style="margin:0;color:#667386;font-size:13px;line-height:1.7;">Se você não solicitou este cadastro, ignore esta mensagem. Nenhuma ação é necessária.</p></td></tr>',
+    '<tr><td style="border-top:1px solid #e9edf2;padding:18px 28px;background-color:#fafbfd;"><p style="margin:0;color:#7a8797;font-size:12px;line-height:1.6;">Esta é uma mensagem automática do ConectaTrabalho. Por favor, não responda a este e-mail.</p>',
+    '<p style="margin:7px 0 0;color:#7a8797;font-size:12px;">Conectando talentos a oportunidades.</p></td></tr>',
+    '</table></td></tr></table></body></html>'
+  ].join('');
+
   await transporter.sendMail({
     from: '"ConectaTrabalho" <' + process.env.GMAIL_USER + '>',
     to: email,
-    subject: 'Confirme seu e-mail - ConectaTrabalho',
-    text: 'Olá!\\n\\nSeu código para concluir o cadastro da empresa ' + companyName + ' é: ' + code + '\\n\\nO código expira em 10 minutos. Se você não solicitou este cadastro, ignore esta mensagem.'
+    subject: 'Confirme seu e-mail | ConectaTrabalho',
+    text,
+    html
   });
 };
+
 const hashVerificationCode = code => crypto.createHash('sha256')
   .update(code + ':' + process.env.SESSION_SECRET).digest('hex');
 
