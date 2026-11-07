@@ -25,6 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let cnpjValidated = false;
   let companyCodeSent = false;
   let cnpjRequestRunning = false;
+  let cnpjTestMode = false;
+
+  const cnpjField = cnpjInput.closest('.field');
+  const companyTestNotice = document.getElementById('company-test-notice');
+  const configPromise = Conecta.api('/api/config').then(config => {
+    cnpjTestMode = config.modoTesteCnpj === true;
+    if (cnpjTestMode) {
+      cnpjField.classList.add('hidden');
+      cnpjInput.disabled = true;
+      cnpjInput.required = false;
+      razaoSocialInput.value = 'Empresa de Teste';
+      nomeFantasiaInput.value = 'Empresa de Teste';
+      cnpjFeedback.textContent = 'CNPJ dispensado no modo de teste local.';
+      companyTestNotice.classList.remove('hidden');
+    }
+    updateType();
+    return config;
+  }).catch(() => ({ modoTesteCnpj: false }));
 
   const normalizeEmail = value => {
     const email = value.trim().toLowerCase();
@@ -43,17 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const clearCompanyData = () => {
     cnpjValidated = false;
-    razaoSocialInput.value = '';
-    nomeFantasiaInput.value = '';
-    cnpjFeedback.textContent = 'Informe o CNPJ para consultar os dados oficiais da empresa.';
+    razaoSocialInput.value = cnpjTestMode ? 'Empresa de Teste' : '';
+    nomeFantasiaInput.value = cnpjTestMode ? 'Empresa de Teste' : '';
+    cnpjFeedback.textContent = cnpjTestMode
+      ? 'CNPJ dispensado no modo de teste local.'
+      : 'Informe o CNPJ para consultar os dados oficiais da empresa.';
   };
 
   const updateType = () => {
     const isCompany = type.value === 'empresa';
     companyFields.classList.toggle('hidden', !isCompany);
     companyFields.querySelectorAll('input').forEach(input => {
-      input.disabled = !isCompany;
-      input.required = isCompany;
+      const isDisabledTestCnpj = cnpjTestMode && input === cnpjInput;
+      input.disabled = !isCompany || isDisabledTestCnpj;
+      input.required = isCompany && !isDisabledTestCnpj;
     });
     phoneInput.required = isCompany;
     phoneLabel.textContent = isCompany ? 'Telefone de contato (obrigatório)' : 'Telefone (opcional)';
@@ -84,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   cnpjInput.addEventListener('blur', async () => {
+    if (cnpjTestMode) return;
     const cnpj = normalizeCnpj(cnpjInput.value);
     if (cnpj.length !== 14 || cnpjRequestRunning) return;
     cnpjRequestRunning = true;
@@ -119,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     feedback.textContent = '';
     feedback.classList.remove('success');
 
+    await configPromise;
     const isCompany = type.value === 'empresa';
     if (!companyCodeSent && !form.reportValidity()) return;
 
@@ -129,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       if (isCompany && !companyCodeSent) {
-        if (!cnpjValidated) throw new Error('Consulte e valide o CNPJ antes de continuar.');
+        if (!cnpjTestMode && !cnpjValidated) throw new Error('Consulte e valide o CNPJ antes de continuar.');
         const values = Object.fromEntries(new FormData(form));
         values.email = normalizeEmail(values.email);
         if (values.senha !== values.confirmarSenha) throw new Error('As senhas não são iguais.');
