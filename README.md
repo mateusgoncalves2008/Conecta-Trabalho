@@ -34,7 +34,7 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 3. Crie um banco PostgreSQL e execute todo o conteúdo de `database/schema.sql` nele.
 4. Copie `.env.example` para um arquivo chamado `.env`.
 5. Preencha `DATABASE_URL` com a conexão do PostgreSQL e defina `SESSION_SECRET` com uma chave aleatória longa (mínimo 32 caracteres).
-6. Para habilitar cadastro empresarial, configure `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` e, opcionalmente, `BREVO_SENDER_NAME`. O endereço remetente precisa estar cadastrado e verificado no Brevo.
+6. Para habilitar cadastro empresarial, configure `GMAIL_USER` com o endereço Gmail remetente e `GMAIL_APP_PASSWORD` com a senha de app de 16 caracteres. Nunca compartilhe essa senha nem a envie ao GitHub.
 7. Se o banco já existia, execute `database/migration_empresa_verificacao.sql` nele antes de iniciar a nova versão.
 8. Inicie:
    ```bash
@@ -48,9 +48,8 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 - `NODE_ENV`: use `production` no ambiente publicado.
 - `DATABASE_URL`: string de conexão PostgreSQL.
 - `SESSION_SECRET`: segredo usado para assinar a sessão.
-- `BREVO_API_KEY`: chave da API Brevo usada para enviar códigos de confirmação do cadastro empresarial.
-- `BREVO_SENDER_EMAIL`: endereço remetente cadastrado e verificado no Brevo.
-- `BREVO_SENDER_NAME`: nome exibido como remetente (padrão: `ConectaTrabalho`).
+- `GMAIL_USER`: endereço Gmail usado para enviar os códigos de confirmação.
+- `GMAIL_APP_PASSWORD`: senha de app do Google usada pelo Nodemailer. Mantenha-a somente no `.env` local ou nas variáveis protegidas da hospedagem.
 
 ## Publicação
 
