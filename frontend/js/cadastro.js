@@ -101,22 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
     codeInput.focus();
   });
 
-  sentNotice.addEventListener('click', event => {
-    if (event.target === sentNotice) {
-      sentNotice.classList.remove('is-open');
-      sentNotice.setAttribute('aria-hidden', 'true');
-      codeInput.focus();
-    }
-  });
-
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && sentNotice.classList.contains('is-open')) {
-      sentNotice.classList.remove('is-open');
-      sentNotice.setAttribute('aria-hidden', 'true');
-      codeInput.focus();
-    }
-  });
-
   type.addEventListener('change', updateType);
   updateType();
 
