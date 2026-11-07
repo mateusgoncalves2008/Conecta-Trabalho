@@ -42,6 +42,10 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
    ```
 9. Acesse http://localhost:3000.
 
+### Teste local do cadastro empresarial sem CNPJ
+
+No `.env` local, mantenha `NODE_ENV=development` e defina `COMPANY_CNPJ_TEST_MODE=true`. Reinicie o servidor. A tela de cadastro empresarial dispensará o CNPJ e usará dados fictícios, mas continuará enviando o código para o e-mail informado. Esse modo só funciona em desenvolvimento; em produção ele fica desativado mesmo que a variável esteja configurada. Antes de publicar, mantenha `COMPANY_CNPJ_TEST_MODE=false`.
+
 ## Variáveis de ambiente
 
 - `PORT`: porta HTTP (padrão 3000).
@@ -50,6 +54,7 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 - `SESSION_SECRET`: segredo usado para assinar a sessão.
 - `GMAIL_USER`: endereço Gmail usado para enviar os códigos de confirmação.
 - `GMAIL_APP_PASSWORD`: senha de app do Google usada pelo Nodemailer. Mantenha-a somente no `.env` local ou nas variáveis protegidas da hospedagem.
+- `COMPANY_CNPJ_TEST_MODE`: use `true` somente no `.env` local, junto de `NODE_ENV=development`, para testar o cadastro empresarial sem consultar um CNPJ real. O modo é automaticamente desativado quando `NODE_ENV=production`.
 
 ## Publicação
 
