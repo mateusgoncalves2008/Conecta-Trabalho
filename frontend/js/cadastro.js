@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerButton = document.getElementById('register-submit');
   const confirmButton = document.getElementById('company-confirm-submit');
   const backButton = document.getElementById('company-back-button');
+  const sentNotice = document.getElementById('company-code-sent-notice');
+  const sentNoticeEmail = document.getElementById('company-code-sent-email');
+  const sentNoticeClose = document.getElementById('company-code-sent-close');
 
   let cnpjValidated = false;
   let companyCodeSent = false;
@@ -91,6 +94,28 @@ document.addEventListener('DOMContentLoaded', () => {
     feedback.classList.remove('success');
     if (!isCompany) clearCompanyData();
   };
+
+  sentNoticeClose.addEventListener('click', () => {
+    sentNotice.classList.remove('is-open');
+    sentNotice.setAttribute('aria-hidden', 'true');
+    codeInput.focus();
+  });
+
+  sentNotice.addEventListener('click', event => {
+    if (event.target === sentNotice) {
+      sentNotice.classList.remove('is-open');
+      sentNotice.setAttribute('aria-hidden', 'true');
+      codeInput.focus();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && sentNotice.classList.contains('is-open')) {
+      sentNotice.classList.remove('is-open');
+      sentNotice.setAttribute('aria-hidden', 'true');
+      codeInput.focus();
+    }
+  });
 
   type.addEventListener('change', updateType);
   updateType();
@@ -171,8 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
         codeInput.disabled = false;
         codeInput.required = true;
         codeInput.focus();
-        feedback.textContent = result.mensagem || 'Código enviado. Confira seu e-mail.';
-        feedback.classList.add('success');
+        sentNoticeEmail.textContent = values.email;
+        sentNotice.classList.add('is-open');
+        sentNotice.setAttribute('aria-hidden', 'false');
+        sentNoticeClose.focus();
+        feedback.textContent = '';
         return;
       }
 
