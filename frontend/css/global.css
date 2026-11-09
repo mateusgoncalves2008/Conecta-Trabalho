@@ -877,3 +877,21 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
   }
 }
 
+
+
+/* Duração de 2 segundos para a transição curva entre páginas */
+.page-transition-overlay {
+  display: grid !important;
+}
+
+.page-transition-overlay.is-leaving {
+  animation-duration: 2000ms;
+}
+
+.page-transition-overlay.is-entering {
+  animation-duration: 2000ms;
+}
+
+.page-transition-overlay.is-leaving .page-transition-label {
+  animation-delay: 550ms;
+}
