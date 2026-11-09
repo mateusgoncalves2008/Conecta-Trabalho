@@ -35,7 +35,7 @@
     overlay.setAttribute('aria-hidden', 'true');
     overlay.innerHTML = '<span class="page-transition-label"><span class="page-transition-dot"></span><span class="page-transition-name"></span></span>';
     overlay.querySelector('.page-transition-name').textContent = label;
-    document.documentElement.appendChild(overlay);
+    document.body.appendChild(overlay);
     if (state === 'entering') {
       requestAnimationFrame(() => overlay.classList.add('is-entering'));
       overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
@@ -66,7 +66,7 @@
     if (incomingLabel) createPageTransition(incomingLabel, 'entering');
 
     document.addEventListener('click', event => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target.closest('a[href]');
       if (!link || link.hasAttribute('download') || link.target === '_blank' || link.hasAttribute('data-no-transition')) return;
 
@@ -81,7 +81,7 @@
       const overlay = createPageTransition(label, 'leaving');
       overlay.classList.add('is-leaving');
       window.setTimeout(() => { window.location.href = destination.href; }, 850);
-    });
+    }, true);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
