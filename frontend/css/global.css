@@ -677,59 +677,6 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 
 
 /* Efeito circular de hover: a cor oposta é definida pelo JavaScript */
-:root {
-  --button-hover-fill: #142b49;
-  --button-hover-text: #ffffff;
-}
-
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle),
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle) {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  transition: color .28s ease, background-color .28s ease, border-color .28s ease;
-}
-
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: 0;
-  aspect-ratio: 1;
-  left: var(--hover-x, 50%);
-  top: var(--hover-y, 50%);
-  border-radius: 50%;
-  background: var(--button-hover-fill);
-  transform: translate(-50%, -50%);
-  transition: width .48s cubic-bezier(.2,.75,.25,1);
-  pointer-events: none;
-}
-
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):not(:disabled):hover::before,
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):hover::before,
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible::before,
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible::before {
-  width: 230%;
-}
-
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):not(:disabled):hover,
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):hover,
-button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible,
-.button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle):focus-visible {
-  background-color: transparent !important;
-  color: var(--button-hover-text) !important;
-  border-color: var(--button-hover-fill) !important;
-}
-
-input[type="submit"]:hover,
-input[type="button"]:hover,
-input[type="reset"]:hover {
-  background-color: var(--button-hover-fill);
-  color: var(--button-hover-text);
-  border-color: var(--button-hover-fill);
-}
-
 .site-header .main-nav a {
   display: inline-block;
   transition: transform .18s ease, color .18s ease;
@@ -845,13 +792,4 @@ html[data-theme="dark"] .site-footer {
 }
 
 
-/* CTA do rodapé: hover laranja igual aos demais botões da identidade visual */
-.footer-cta .button.button-light {
-  --button-hover-fill: #d66b3d !important;
-  --button-hover-text: #142b49 !important;
-}
 
-.footer-cta .button.button-light:hover,
-.footer-cta .button.button-light:focus-visible {
-  border-color: #d66b3d !important;
-}
