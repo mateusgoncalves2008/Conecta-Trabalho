@@ -25,6 +25,65 @@
     window.location.href = user.tipo === 'empresa' ? '/pages/empresa.html' : '/pages/candidato.html';
   };
 
+  // Transição curva entre páginas internas
+  const pageTransitionKey = 'conecta-page-transition';
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const createPageTransition = (label, state) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'page-transition-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = '<span class="page-transition-label"><span class="page-transition-dot"></span><span class="page-transition-name"></span></span>';
+    overlay.querySelector('.page-transition-name').textContent = label;
+    document.documentElement.appendChild(overlay);
+    if (state === 'entering') {
+      requestAnimationFrame(() => overlay.classList.add('is-entering'));
+      overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
+    }
+    return overlay;
+  };
+
+  const destinationLabel = (url, link) => {
+    const text = link.textContent.replace(/\\s+/g, ' ').trim();
+    if (text) return text;
+    const labels = {
+      '/': 'Início',
+      '/pages/vagas.html': 'Vagas',
+      '/pages/login.html': 'Entrar',
+      '/pages/cadastro.html': 'Cadastrar',
+      '/pages/empresa.html': 'Painel da empresa',
+      '/pages/candidato.html': 'Painel do candidato'
+    };
+    return labels[url.pathname] || 'Carregando página';
+  };
+
+  if (!prefersReducedMotion) {
+    let incomingLabel = '';
+    try {
+      incomingLabel = sessionStorage.getItem(pageTransitionKey) || '';
+      sessionStorage.removeItem(pageTransitionKey);
+    } catch {}
+    if (incomingLabel) createPageTransition(incomingLabel, 'entering');
+
+    document.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest('a[href]');
+      if (!link || link.hasAttribute('download') || link.target === '_blank' || link.hasAttribute('data-no-transition')) return;
+
+      let destination;
+      try { destination = new URL(link.href, window.location.href); } catch { return; }
+      if (destination.origin !== window.location.origin) return;
+      if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
+
+      event.preventDefault();
+      const label = destinationLabel(destination, link);
+      try { sessionStorage.setItem(pageTransitionKey, label); } catch {}
+      const overlay = createPageTransition(label, 'leaving');
+      overlay.classList.add('is-leaving');
+      window.setTimeout(() => { window.location.href = destination.href; }, 850);
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[type="password"]').forEach(input => {
       const wrapper = document.createElement('span');
