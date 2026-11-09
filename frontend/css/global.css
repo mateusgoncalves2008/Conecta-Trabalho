@@ -55,7 +55,9 @@
   color: var(--orange-dark);
 }
 
-.site-header .main-nav a:hover {
+.site-header .main-nav a:hover,
+.site-header .main-nav a.active,
+.site-header .main-nav a.is-magnetic {
   font-weight: 400;
 }
 
