@@ -80,7 +80,7 @@
       try { sessionStorage.setItem(pageTransitionKey, label); } catch {}
       const overlay = createPageTransition(label, 'leaving');
       overlay.classList.add('is-leaving');
-      window.setTimeout(() => { window.location.href = destination.href; }, 850);
+      window.setTimeout(() => { window.location.href = destination.href; }, 2000);
     }, true);
   }
 
