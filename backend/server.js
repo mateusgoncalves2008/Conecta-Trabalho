@@ -177,8 +177,8 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f5f8;padding:32px 12px;"><tr><td align="center">',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#ffffff;border:1px solid #e4e8ee;border-radius:12px;overflow:hidden;">',
     '<tr><td style="padding:26px 28px 22px;border-bottom:1px solid #e9edf2;background-color:#ffffff;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>',
-    '<td width="48" height="48" align="center" valign="middle" style="width:48px;height:48px;"><img src="cid:conectatrabalho-logo" width="48" height="48" alt="ConectaTrabalho" style="display:block;width:48px;height:48px;border:0;"></td>',
-    '<td style="padding-left:13px;color:#142b49;font-size:19px;font-weight:700;line-height:1.3;">' + safeCompanyName + '<br><span style="color:#7a8797;font-size:12px;font-weight:400;">ConectaTrabalho</span></td>',
+    '<td valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:25px;font-weight:700;letter-spacing:-1px;line-height:1.2;white-space:nowrap;"><span style="color:#142b49;">Conecta</span><span style="color:#e96f35;">Trabalho</span></td>',
+    '<td style="padding-left:18px;color:#142b49;font-size:19px;font-weight:700;line-height:1.3;">' + safeCompanyName + '</td>',
     '</tr></table></td></tr>',
     '<tr><td style="padding:34px 28px 12px;"><p style="margin:0 0 10px;color:#e96f35;font-size:12px;font-weight:700;letter-spacing:1.2px;">CONFIRMAÇÃO DE CADASTRO</p>',
     '<h1 style="margin:0 0 18px;color:#142b49;font-size:25px;line-height:1.25;">Confirme seu e-mail</h1>',
@@ -194,21 +194,12 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     '</table></td></tr></table></body></html>'
   ].join('');
 
-  const logoPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAABmJLR0QA/wD/AP+gvaeTAAAEKElEQVR4nO3dWUhUURzH8e446oyNU4rihFYWWtqkRmTQSkV7tiS04UMIQbYXLUSSpGmZ5TZqD70UZPg/9wy/8vw+j3LnnD9+R2fmXrlaMf4pXQjHgR7AdAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAMYAYAwAxgBgDADGAGAMAOYMxqIOhzXI329IRkqGPzkxwdczPs7tCvd6ujoclp1lYwdO/ePXH4+vsrOsdv7imI4frDlAcp+eyxdOmz5xZFxstN6VOyttAXon+Dbnr5w6bphl2Xqam0ZDAMuyshfP3Ji7NDw8zP5qprEbICzUuWdb/szJo7RMYyBbAUKdziNFG8ePztQ1jYFsvQ3dWrCK332b1APMyxq7dMGf3xdSxykGiI7yblmXo3cUMykGWLNifnSUV+8oZlIJ0N3rWb4wS/soZlIJMC9rrNsVrn0UM6kEmDNtjO4xzCUOENUtcnBa/2CMYiZxgBGZ6SEOnsTWRvxJOC21r8I2T1682Xv0XElpWWVVTUNjk8IKf9Hx079qJ65Fp5elxAFSkhKlDzl79fbq9TubAwHpA00g/mUS3yNWdPz7D5W5m4r43W+POIBPeKXl+Jnr3+sbpLuYQxzA09UtOv7uvQfSLYwiDiC96vLqbbl0C6OIAzhDQkTH136tk25hlKC/o29q5svv3/AjFRgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAGAOAMQAYA4AxABgDgDEAWNADhIUG5XYUnYY4QKClRXS8N9Ij3cIo4gCNwj8uT+qTIN3CKOIAdd/qRcePHJou3cIo4gAVldWi4xfPnRThdkl3MYc4QPmHStHx8b7YosJcvhS3Rxzg6cu30ofMmjy6+OSuRbMn9Ir3uXhLm9+Jn5iPnr1W2CY1OXFXYZ7CA3/V3i3L/mvin4CS0rKW1tZgjGImcYCaL1/vP3wejFHMpPJJ+MzlW7rHMJdKgFOXbtY3NGofxUwqAT7X1h06cVH7KGZSPBm3+9Cp6ppavaOYSTFA9efagu379I5iJvXT0acv3zp88orGUcxk63pAwdZ9xXdKdY1iJlsBmgOBJWsLz127o2saA9m9ItbUHMjO37Fh+37pdQL6ScMlyba2tgPHzg+fserSjZLW1jb7CxpF2zXhd+UVy/K2jJiRc/D4hYqPn3Qt2+lZMf4p2hd1OKz01KTMQQMy/Ek//4FDhNsV6Ymwea8z+2dD/8E7ZgUlAHUc/y4IjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwBgAjAHAGACMAcAYAIwBwH4ALmO/pR3T5fkAAAAASUVORK5CYII=', 'base64');
-
   await transporter.sendMail({
     from: '"ConectaTrabalho" <' + process.env.GMAIL_USER + '>',
     to: email,
     subject: 'Confirme seu e-mail | ConectaTrabalho',
     text,
-    html,
-    attachments: [{
-      filename: 'logo-conectatrabalho.png',
-      content: logoPng,
-      cid: 'conectatrabalho-logo',
-      contentType: 'image/png',
-      contentDisposition: 'inline'
-    }]
+    html
   });
 };
 
