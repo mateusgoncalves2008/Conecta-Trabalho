@@ -178,7 +178,7 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#ffffff;border:1px solid #e4e8ee;border-radius:12px;overflow:hidden;">',
     '<tr><td align="center" style="padding:22px 28px 20px;border-bottom:1px solid #e9edf2;background-color:#ffffff;"><table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0"><tr>',
     '<td align="center" style="font-family:Arial,Helvetica,sans-serif;font-size:25px;font-weight:700;letter-spacing:-1px;line-height:1.2;white-space:nowrap;"><span style="color:#142b49;">Conecta</span><span style="color:#e96f35;">Trabalho</span></td>',
-    '</tr><tr><td align="center" style="padding-top:8px;color:#142b49;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;line-height:1.3;">' + safeCompanyName + '</td></tr></table></td></tr>',
+    '</tr></table></td></tr>',
     '<tr><td style="padding:34px 28px 12px;"><p style="margin:0 0 10px;color:#e96f35;font-size:12px;font-weight:700;letter-spacing:1.2px;">CONFIRMAÇÃO DE CADASTRO</p>',
     '<h1 style="margin:0 0 18px;color:#142b49;font-size:25px;line-height:1.25;">Confirme seu e-mail</h1>',
     '<p style="margin:0 0 12px;font-size:15px;line-height:1.7;">Olá!</p>',
