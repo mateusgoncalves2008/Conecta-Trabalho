@@ -122,7 +122,6 @@
   width:34px;height:34px;display:grid;place-items:center;
   border:0;border-radius:6px;background:transparent;color:#788596;cursor:pointer
 }
-.password-toggle:hover{background:#f1f4f7;color:var(--navy)}
 .password-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 html[data-theme="dark"] .auth-page{background:#111925}
 html[data-theme="dark"] .auth-card{background:#1c2838;border-color:#354255}
@@ -188,11 +187,6 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
   border: 1px solid #d5dce5;
   --button-hover-fill: #142b49 !important;
   --button-hover-text: #fff !important;
-}
-
-#login-form > button[type="submit"].button-primary:hover,
-#login-form > button[type="submit"].button-primary:focus-visible {
-  border-color: #142b49 !important;
 }
 
 
