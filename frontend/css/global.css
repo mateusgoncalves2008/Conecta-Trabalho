@@ -919,7 +919,7 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 }
 
 @keyframes page-halfmoon-cover {
-  from { clip-path: ellipse(160% 100% at 50% -50%); }
+  from { clip-path: ellipse(160% 100% at 50% -100%); }
   to { clip-path: ellipse(160% 100% at 50% 50%); }
 }
 
