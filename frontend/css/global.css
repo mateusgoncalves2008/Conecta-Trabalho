@@ -791,14 +791,13 @@ html[data-theme="dark"] .site-footer {
   }
 }
 
-/* Hover visível e simples nos botões, sem brilho ou sombra */
+/* Hover discreto dos botões, sem brilho ou sombra */
 button:not(.theme-toggle):not(.accessibility-launcher),
 .button:not(.theme-toggle):not(.accessibility-launcher) {
-  transition: filter .16s ease, transform .16s ease;
+  transition: filter .15s ease;
 }
 
 button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
-.button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover {
-  filter: brightness(.88);
-  transform: translateY(-1px);
+.button:not(.theme-toggle):not(.accessibility-launcher):hover {
+  filter: brightness(.95);
 }
