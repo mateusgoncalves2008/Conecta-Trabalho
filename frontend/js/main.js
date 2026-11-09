@@ -277,7 +277,7 @@
     // Efeito magnético ampliado: os links começam a ser atraídos antes de o cursor chegar até eles.
     const magneticLinks = [...document.querySelectorAll('.site-header .main-nav a')];
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const attractionRadius = 145;
+      const attractionRadius = 90;
       const maxMagneticX = 55;
       const maxMagneticY = 34;
       document.addEventListener('pointermove', event => {
