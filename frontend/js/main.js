@@ -37,8 +37,12 @@
     overlay.querySelector('.page-transition-name').textContent = label;
     document.body.appendChild(overlay);
     if (state === 'entering') {
+      overlay.addEventListener('animationend', event => {
+        if (event.target === overlay && event.animationName === 'page-halfmoon-reveal') {
+          overlay.remove();
+        }
+      });
       requestAnimationFrame(() => overlay.classList.add('is-entering'));
-      overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
     }
     return overlay;
   };
@@ -59,6 +63,7 @@
 
   if (!prefersReducedMotion) {
     let incomingLabel = '';
+    let navigationStarted = false;
     try {
       incomingLabel = sessionStorage.getItem(pageTransitionKey) || '';
       sessionStorage.removeItem(pageTransitionKey);
@@ -66,7 +71,7 @@
     if (incomingLabel) createPageTransition(incomingLabel, 'entering');
 
     document.addEventListener('click', event => {
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (navigationStarted || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target.closest('a[href]');
       if (!link || link.hasAttribute('download') || link.target === '_blank' || link.hasAttribute('data-no-transition')) return;
 
@@ -76,11 +81,16 @@
       if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
 
       event.preventDefault();
+      navigationStarted = true;
       const label = destinationLabel(destination, link);
       try { sessionStorage.setItem(pageTransitionKey, label); } catch {}
       const overlay = createPageTransition(label, 'leaving');
+      overlay.addEventListener('animationend', event => {
+        if (event.target === overlay && event.animationName === 'page-halfmoon-cover') {
+          window.location.href = destination.href;
+        }
+      });
       overlay.classList.add('is-leaving');
-      window.setTimeout(() => { window.location.href = destination.href; }, 2000);
     }, true);
   }
 
