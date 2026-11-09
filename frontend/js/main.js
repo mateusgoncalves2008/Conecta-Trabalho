@@ -274,22 +274,44 @@
       button.style.removeProperty('--button-hover-text');
     });
 
-    // Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
-    const magneticLinks = document.querySelectorAll('.site-header .main-nav a');
+    // Efeito magnético ampliado: os links começam a ser atraídos antes de o cursor chegar até eles.
+    const magneticLinks = [...document.querySelectorAll('.site-header .main-nav a')];
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      magneticLinks.forEach(link => {
-        link.addEventListener('pointermove', event => {
+      const attractionRadius = 220;
+      const maxMagneticX = 55;
+      const maxMagneticY = 34;
+      document.addEventListener('pointermove', event => {
+        magneticLinks.forEach(link => {
           const rect = link.getBoundingClientRect();
-          const dx = event.clientX - (rect.left + rect.width / 2);
-          const dy = event.clientY - (rect.top + rect.height / 2);
-          link.style.setProperty('--magnetic-x', (dx * 0.16).toFixed(1) + 'px');
-          link.style.setProperty('--magnetic-y', (dy * 0.16).toFixed(1) + 'px');
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const dx = event.clientX - centerX;
+          const dy = event.clientY - centerY;
+          const distance = Math.hypot(dx, dy);
+
+          if (distance >= attractionRadius) {
+            link.classList.remove('is-magnetic');
+            link.style.setProperty('--magnetic-x', '0px');
+            link.style.setProperty('--magnetic-y', '0px');
+            return;
+          }
+
+          const proximity = 1 - distance / attractionRadius;
+          const strength = proximity * proximity;
+          const moveX = Math.max(-maxMagneticX, Math.min(maxMagneticX, dx * 0.48 * strength));
+          const moveY = Math.max(-maxMagneticY, Math.min(maxMagneticY, dy * 0.48 * strength));
+
+          link.style.setProperty('--magnetic-x', moveX.toFixed(1) + 'px');
+          link.style.setProperty('--magnetic-y', moveY.toFixed(1) + 'px');
           link.classList.add('is-magnetic');
         });
-        link.addEventListener('pointerleave', () => {
+      }, { passive: true });
+
+      document.addEventListener('pointerleave', () => {
+        magneticLinks.forEach(link => {
           link.classList.remove('is-magnetic');
-          link.style.removeProperty('--magnetic-x');
-          link.style.removeProperty('--magnetic-y');
+          link.style.setProperty('--magnetic-x', '0px');
+          link.style.setProperty('--magnetic-y', '0px');
         });
       });
     }
