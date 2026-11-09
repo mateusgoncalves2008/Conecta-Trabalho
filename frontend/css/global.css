@@ -38,12 +38,14 @@
   background: var(--orange);
   transform: translateX(-50%) scale(0);
   transform-origin: center;
-  transition: transform .22s ease;
+  opacity: 0;
+  transition: transform .28s cubic-bezier(.2,.7,.25,1), opacity .28s ease;
 }
 
 .site-header .main-nav a:hover::after,
 .site-header .main-nav a.active::after {
   transform: translateX(-50%) scale(1);
+  opacity: 1;
 }
 
 .site-header .main-nav a:hover,
