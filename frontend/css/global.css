@@ -915,7 +915,9 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 }
 
 .page-transition-overlay.is-entering .page-transition-label {
-  animation: page-label-hide 220ms ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+  animation: page-label-hide 220ms ease 1780ms forwards;
 }
 
 @keyframes page-halfmoon-cover {
