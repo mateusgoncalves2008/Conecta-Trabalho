@@ -791,5 +791,13 @@ html[data-theme="dark"] .site-footer {
   }
 }
 
+/* Hover discreto dos botões, sem brilho ou sombra */
+button:not(.theme-toggle):not(.accessibility-launcher),
+.button:not(.theme-toggle):not(.accessibility-launcher) {
+  transition: filter .15s ease;
+}
 
-
+button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
+.button:not(.theme-toggle):not(.accessibility-launcher):hover {
+  filter: brightness(.95);
+}
