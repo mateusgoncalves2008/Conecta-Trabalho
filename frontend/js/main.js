@@ -44,7 +44,7 @@
   };
 
   const destinationLabel = (url, link) => {
-    const text = link.textContent.replace(/\\s+/g, ' ').trim();
+    const text = link.textContent.replace(/\s+/g, ' ').trim();
     if (text) return text;
     const labels = {
       '/': 'Início',
