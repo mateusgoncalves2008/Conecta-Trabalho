@@ -274,45 +274,58 @@
       button.style.removeProperty('--button-hover-text');
     });
 
-    // Efeito magnético ampliado: os links começam a ser atraídos antes de o cursor chegar até eles.
+    // Apenas o link mais próximo do cursor recebe a atração magnética.
     const magneticLinks = [...document.querySelectorAll('.site-header .main-nav a')];
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const attractionRadius = 90;
+      const attractionRadius = 80;
       const maxMagneticX = 55;
       const maxMagneticY = 34;
+      const resetMagneticLink = link => {
+        link.classList.remove('is-magnetic');
+        link.style.setProperty('--magnetic-x', '0px');
+        link.style.setProperty('--magnetic-y', '0px');
+      };
+
       document.addEventListener('pointermove', event => {
+        let closestLink = null;
+        let closestDistance = Infinity;
+        let closestDx = 0;
+        let closestDy = 0;
+
         magneticLinks.forEach(link => {
           const rect = link.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          const dx = event.clientX - centerX;
-          const dy = event.clientY - centerY;
+          const dx = event.clientX - (rect.left + rect.width / 2);
+          const dy = event.clientY - (rect.top + rect.height / 2);
           const distance = Math.hypot(dx, dy);
 
-          if (distance >= attractionRadius) {
-            link.classList.remove('is-magnetic');
-            link.style.setProperty('--magnetic-x', '0px');
-            link.style.setProperty('--magnetic-y', '0px');
-            return;
+          if (distance < closestDistance) {
+            closestLink = link;
+            closestDistance = distance;
+            closestDx = dx;
+            closestDy = dy;
           }
-
-          const proximity = 1 - distance / attractionRadius;
-          const strength = proximity * proximity;
-          const moveX = Math.max(-maxMagneticX, Math.min(maxMagneticX, dx * 0.48 * strength));
-          const moveY = Math.max(-maxMagneticY, Math.min(maxMagneticY, dy * 0.48 * strength));
-
-          link.style.setProperty('--magnetic-x', moveX.toFixed(1) + 'px');
-          link.style.setProperty('--magnetic-y', moveY.toFixed(1) + 'px');
-          link.classList.add('is-magnetic');
         });
+
+        magneticLinks.forEach(link => {
+          if (link !== closestLink || closestDistance >= attractionRadius) {
+            resetMagneticLink(link);
+          }
+        });
+
+        if (!closestLink || closestDistance >= attractionRadius) return;
+
+        const proximity = 1 - closestDistance / attractionRadius;
+        const strength = proximity * proximity;
+        const moveX = Math.max(-maxMagneticX, Math.min(maxMagneticX, closestDx * 0.48 * strength));
+        const moveY = Math.max(-maxMagneticY, Math.min(maxMagneticY, closestDy * 0.48 * strength));
+
+        closestLink.style.setProperty('--magnetic-x', moveX.toFixed(1) + 'px');
+        closestLink.style.setProperty('--magnetic-y', moveY.toFixed(1) + 'px');
+        closestLink.classList.add('is-magnetic');
       }, { passive: true });
 
       document.addEventListener('pointerleave', () => {
-        magneticLinks.forEach(link => {
-          link.classList.remove('is-magnetic');
-          link.style.setProperty('--magnetic-x', '0px');
-          link.style.setProperty('--magnetic-y', '0px');
-        });
+        magneticLinks.forEach(resetMagneticLink);
       });
     }
 
