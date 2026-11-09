@@ -55,6 +55,10 @@
   color: var(--orange-dark);
 }
 
+.site-header .main-nav a:hover {
+  font-weight: 400;
+}
+
 @media (max-width: 760px) {
   .site-header {
     width: calc(100% - 20px);
