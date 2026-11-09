@@ -823,8 +823,7 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
   transition: opacity .2s ease, transform .25s cubic-bezier(.2,.7,.25,1);
 }
 
-.site-header .main-nav a:hover::after,
-.site-header .main-nav a.active::after {
+.site-header .main-nav a:hover::after {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
