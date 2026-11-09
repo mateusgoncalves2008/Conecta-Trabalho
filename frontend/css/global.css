@@ -43,13 +43,15 @@
 }
 
 .site-header .main-nav a:hover::after,
-.site-header .main-nav a.active::after {
+.site-header .main-nav a.active::after,
+.site-header .main-nav a.is-magnetic::after {
   transform: translateX(-50%) scale(1);
   opacity: 1;
 }
 
 .site-header .main-nav a:hover,
-.site-header .main-nav a.active {
+.site-header .main-nav a.active,
+.site-header .main-nav a.is-magnetic {
   color: var(--orange-dark);
 }
 
