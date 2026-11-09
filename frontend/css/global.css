@@ -897,9 +897,9 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 }
 
 
-/* Meia-lua: a cortina chega de cima e revela a página pelo lado oposto */
+/* Meia-lua: entra cobrindo a tela e sai completamente pelo lado oposto */
 .page-transition-overlay {
-  clip-path: ellipse(160% 100% at 50% -100%);
+  clip-path: ellipse(160% 100% at 50% 50%);
 }
 
 .page-transition-overlay.is-leaving {
@@ -907,7 +907,6 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 }
 
 .page-transition-overlay.is-entering {
-  clip-path: ellipse(160% 100% at 50% 100%);
   animation: page-halfmoon-reveal 2000ms cubic-bezier(.68, 0, .24, 1) forwards;
 }
 
@@ -920,11 +919,11 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 }
 
 @keyframes page-halfmoon-cover {
-  from { clip-path: ellipse(160% 100% at 50% -100%); }
-  to { clip-path: ellipse(160% 100% at 50% 100%); }
+  from { clip-path: ellipse(160% 100% at 50% -50%); }
+  to { clip-path: ellipse(160% 100% at 50% 50%); }
 }
 
 @keyframes page-halfmoon-reveal {
-  from { clip-path: ellipse(160% 100% at 50% 100%); }
-  to { clip-path: ellipse(160% 100% at 50% 300%); }
+  from { clip-path: ellipse(160% 100% at 50% 50%); }
+  to { clip-path: ellipse(160% 100% at 50% 250%); }
 }
