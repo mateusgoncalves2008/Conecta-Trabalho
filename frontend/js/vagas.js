@@ -7,7 +7,7 @@
     const description = vaga.descricao || 'Confira os detalhes desta oportunidade.';
     return `<a class="job-card job-card-link" href="/pages/vaga-detalhes.html?id=${encodeURIComponent(vaga.id)}" aria-label="Ver detalhes da vaga ${escapeHTML(vaga.titulo)}">
       <div class="job-card-top">
-        <span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span>
+        <span class="job-company job-company-identity">${vaga.empresa_logo ? '<img src="' + escapeHTML(vaga.empresa_logo) + '" alt="" loading="lazy">' : '<span class="job-company-initials">' + escapeHTML(String(vaga.nome_empresa || 'EMP').trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase()) + '</span>'}<span>${escapeHTML(vaga.nome_empresa || 'Empresa')}</span></span>
         <span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span>
       </div>
       <div class="job-card-content">
