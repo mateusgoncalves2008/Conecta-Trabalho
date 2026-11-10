@@ -17,8 +17,10 @@
       if (!session.usuario) return window.location.href = '/pages/login.html';
       const expected = page === 'empresa' ? 'empresa' : 'candidato';
       if (session.usuario.tipo !== expected) return Conecta.redirectByUser(session.usuario);
-      document.getElementById('welcome-name').textContent = session.usuario.nomeEmpresa || session.usuario.nome.split(' ')[0];
-      document.getElementById('user-name').textContent = session.usuario.nomeEmpresa || session.usuario.nome;
+      const welcomeName = document.getElementById('welcome-name');
+      if (welcomeName) welcomeName.textContent = session.usuario.nomeEmpresa || session.usuario.nome.split(' ')[0];
+      const userName = document.getElementById('user-name');
+      if (userName) userName.textContent = session.usuario.nomeEmpresa || session.usuario.nome;
       if (page === 'empresa') await loadCompany();
       else await loadCandidate();
     } catch (error) {
@@ -28,9 +30,9 @@
 
   async function loadCandidate() {
     const container = document.getElementById('candidate-applications');
-    const [data, session] = await Promise.all([
+    const [data, profileData] = await Promise.all([
       Conecta.api('/api/painel/candidato'),
-      Conecta.api('/api/me')
+      Conecta.api('/api/perfil')
     ]);
     const applications = data.candidaturas || [];
     const active = applications.filter(item => ['recebida', 'em_analise'].includes(item.status)).length;
@@ -38,18 +40,116 @@
     document.getElementById('candidate-total').textContent = applications.length;
     document.getElementById('candidate-active').textContent = active;
     document.getElementById('candidate-interviews').textContent = interviews;
-    const user = session.usuario || {};
-    document.getElementById('candidate-profile-name').textContent = user.nome || '—';
-    document.getElementById('candidate-profile-email').textContent = user.email || '—';
-    document.getElementById('candidate-profile-phone').textContent = user.telefone || 'Não informado';
-    document.getElementById('candidate-profile-city').textContent = user.cidade || '—';
+    renderCandidateProfile(profileData.perfil || {});
     if (!applications.length) {
       container.innerHTML = '<div class="dashboard-empty">Você ainda não se candidatou a nenhuma vaga. <a class="text-link" href="vagas.html">Explore as oportunidades disponíveis.</a></div>';
-      return;
+    } else {
+      container.innerHTML = applications.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.titulo)}</h3><p>${escapeHTML(item.nome_empresa || 'Empresa')} · ${escapeHTML(item.cidade)}</p><p>Candidatura enviada em ${dateLabel(item.criada_em)}</p></div><div class="dashboard-item-actions"><span class="status-label">${statusText(item.status)}</span></div></article>`).join('');
     }
-    container.innerHTML = applications.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.titulo)}</h3><p>${escapeHTML(item.nome_empresa || 'Empresa')} · ${escapeHTML(item.cidade)}</p><p>Candidatura enviada em ${dateLabel(item.criada_em)}</p></div><div class="dashboard-item-actions"><span class="status-label">${statusText(item.status)}</span></div></article>`).join('');
   }
 
+  let candidatePhotoData = null;
+  let candidateProfileCache = {};
+  const candidateInitials = name => String(name || 'CT').trim().split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+  const setCandidateImage = (image, initials, photo, name) => {
+    initials.textContent = candidateInitials(name);
+    if (photo) { image.src = photo; image.hidden = false; initials.hidden = true; }
+    else { image.removeAttribute('src'); image.hidden = true; initials.hidden = false; }
+  };
+  function renderCandidateProfile(profile) {
+    candidateProfileCache = profile;
+    const name = profile.nome || 'Seu nome';
+    document.getElementById('candidate-profile-name').textContent = name;
+    document.getElementById('candidate-profile-title').textContent = profile.titulo_profissional || 'Adicione seu título profissional';
+    document.getElementById('candidate-profile-location').textContent = profile.cidade || 'Cidade não informada';
+    document.getElementById('candidate-profile-email').textContent = profile.email || '—';
+    document.getElementById('candidate-profile-phone').textContent = profile.telefone || 'Telefone não informado';
+    document.getElementById('candidate-profile-summary').textContent = profile.resumo_profissional || 'Conte um pouco sobre sua trajetória, seus conhecimentos e seus pontos fortes.';
+    document.getElementById('candidate-profile-objective').textContent = profile.objetivo_profissional || 'Adicione seus objetivos profissionais.';
+    document.getElementById('candidate-profile-opportunity').textContent = profile.tipo_oportunidade || 'Tipo de oportunidade não informado';
+    document.getElementById('candidate-profile-modality').textContent = profile.modalidade_preferida || 'Modalidade não informada';
+    document.getElementById('candidate-profile-experience').textContent = profile.experiencias || 'Adicione suas experiências profissionais.';
+    document.getElementById('candidate-profile-education').textContent = profile.formacao || 'Adicione sua formação e cursos.';
+    document.getElementById('candidate-profile-skills').textContent = profile.competencias || 'Adicione suas habilidades e conhecimentos.';
+    const cv = document.getElementById('candidate-profile-cv');
+    cv.hidden = !profile.curriculo_url;
+    cv.href = profile.curriculo_url || '#';
+    document.getElementById('candidate-profile-no-cv').hidden = Boolean(profile.curriculo_url);
+    setCandidateImage(document.getElementById('candidate-profile-avatar'), document.getElementById('candidate-profile-initials'), profile.foto_perfil, name);
+    setCandidateImage(document.getElementById('candidate-menu-avatar'), document.getElementById('candidate-menu-initials'), profile.foto_perfil, name);
+    const values = {
+      'candidate-edit-name': name, 'candidate-edit-email': profile.email || '',
+      'candidate-edit-phone': profile.telefone || '', 'candidate-edit-city': profile.cidade || '',
+      'candidate-edit-title-input': profile.titulo_profissional || '',
+      'candidate-edit-summary': profile.resumo_profissional || '',
+      'candidate-edit-objective': profile.objetivo_profissional || '',
+      'candidate-edit-opportunity': profile.tipo_oportunidade || '',
+      'candidate-edit-modality': profile.modalidade_preferida || '',
+      'candidate-edit-experience': profile.experiencias || '',
+      'candidate-edit-education': profile.formacao || '',
+      'candidate-edit-skills': profile.competencias || '',
+      'candidate-edit-cv': profile.curriculo_url || ''
+    };
+    Object.entries(values).forEach(([id, value]) => { document.getElementById(id).value = value; });
+    const preview = document.getElementById('candidate-photo-preview');
+    const placeholder = document.getElementById('candidate-photo-placeholder');
+    if (candidatePhotoData === null) {
+      if (profile.foto_perfil) { preview.src = profile.foto_perfil; preview.hidden = false; placeholder.hidden = true; }
+      else { preview.removeAttribute('src'); preview.hidden = true; placeholder.hidden = false; }
+    }
+  }
+
+  function setupCandidateProfileEditor() {
+    const modal = document.getElementById('candidate-edit-modal');
+    const form = document.getElementById('candidate-profile-form');
+    if (!modal || !form) return;
+    const open = () => { candidatePhotoData = null; renderCandidateProfile(candidateProfileCache); modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('candidate-edit-open'); };
+    const close = () => { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('candidate-edit-open'); };
+    ['candidate-edit-profile', 'candidate-edit-profile-side'].forEach(id => document.getElementById(id)?.addEventListener('click', open));
+    ['candidate-edit-close', 'candidate-edit-cancel'].forEach(id => document.getElementById(id)?.addEventListener('click', close));
+    modal.addEventListener('click', event => { if (event.target === modal) close(); });
+    document.getElementById('candidate-photo-input').addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 1.5 * 1024 * 1024) {
+        Conecta.toast('Escolha uma imagem JPG, PNG ou WebP de até 1,5 MB.');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        candidatePhotoData = reader.result;
+        document.getElementById('candidate-photo-preview').src = candidatePhotoData;
+        document.getElementById('candidate-photo-preview').hidden = false;
+        document.getElementById('candidate-photo-placeholder').hidden = true;
+      };
+      reader.readAsDataURL(file);
+    });
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = form.querySelector('button[type="submit"]');
+      const feedback = document.getElementById('candidate-edit-feedback');
+      button.disabled = true;
+      button.textContent = 'Salvando...';
+      feedback.textContent = '';
+      const payload = Object.fromEntries(new FormData(form));
+      delete payload.nome;
+      delete payload.email;
+      if (candidatePhotoData !== null) payload.foto_perfil = candidatePhotoData;
+      try {
+        await Conecta.api('/api/perfil', { method: 'PUT', body: JSON.stringify(payload) });
+        candidatePhotoData = null;
+        await loadCandidate();
+        close();
+        Conecta.toast('Perfil atualizado com sucesso.');
+      } catch (error) {
+        feedback.textContent = error.message || 'Não foi possível salvar as alterações.';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Salvar alterações';
+      }
+    });
+  }
   async function loadCompany() {
     const data = await Conecta.api('/api/painel/empresa');
     const jobs = document.getElementById('company-jobs');
@@ -106,6 +206,7 @@
       applyFontSize(['normal', 'large', 'larger'].includes(savedFontSize) ? savedFontSize : 'normal');
       fontButtons.forEach(button => button.addEventListener('click', () => applyFontSize(button.dataset.fontSize)));
     }
+    setupCandidateProfileEditor();
     initPanel();
   });
 })();
