@@ -627,7 +627,7 @@ body.candidate-camera-open{overflow:hidden}
 
 /* Perfil institucional da empresa */
 .company-profile-card{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(22,45,75,.035)}
-.company-cover{position:relative;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(120deg,#e8edf3,#dce5ef);background-position:center;background-size:cover}
+.company-cover{position:relative;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e5ebf2;background-position:center;background-size:cover}
 .company-cover.has-image .company-cover-placeholder{display:none}
 .company-cover-placeholder{display:flex;flex-direction:column;align-items:center;gap:9px;color:#738195;font-size:13px}
 .company-cover-placeholder i{font-size:30px}
