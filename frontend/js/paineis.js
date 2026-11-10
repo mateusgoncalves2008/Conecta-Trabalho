@@ -201,8 +201,8 @@
     const visibilityFeedback = document.getElementById('candidate-photo-visibility-feedback');
     const visibilitySave = document.getElementById('candidate-photo-visibility-save');
     const visibilityNames = {
-      conexoes: 'Somente conexões de 1° grau',
-      rede: 'Sua rede',
+      conexoes: 'Somente conexões de 1° grau (em breve)',
+      rede: 'Sua rede (em breve)',
       usuarios: 'Todos os usuários',
       todos: 'Todos'
     };
@@ -222,6 +222,10 @@
         if (!visibilityPopover.hidden && !event.target.closest('.candidate-photo-visibility-wrap')) setVisibilityPopover(false);
       });
       visibilitySave.addEventListener('click', async () => {
+        if (selectedPhotoVisibility === 'conexoes' || selectedPhotoVisibility === 'rede') {
+          visibilityFeedback.textContent = 'Essa opção ficará disponível quando o sistema de conexões estiver pronto.';
+          return;
+        }
         visibilitySave.disabled = true;
         visibilityFeedback.textContent = '';
         try {
