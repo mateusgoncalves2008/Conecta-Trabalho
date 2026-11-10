@@ -660,7 +660,7 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
     where += ' AND v.cidade ILIKE $' + values.length;
   }
   const result = await pool.query(
-    `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,u.nome_empresa
+    `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,u.id AS empresa_id,u.nome_empresa,u.foto_perfil AS empresa_logo
      FROM vagas v JOIN usuarios u ON u.id=v.empresa_id WHERE ${where} ORDER BY v.criado_em DESC LIMIT 60`, values
   );
   res.json({ vagas: result.rows });
