@@ -771,9 +771,14 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
   const profile = result.rows[0];
+  const jobs = await pool.query(
+    `SELECT id,titulo,cidade,modalidade,tipo_contrato,salario,criado_em
+     FROM vagas WHERE empresa_id=$1 AND status='aberta' ORDER BY criado_em DESC LIMIT 20`,
+    [companyId]
+  );
   profile.foto_perfil = imageReference(profile.id, 'foto_perfil', profile.foto_perfil);
   profile.banner_perfil = imageReference(profile.id, 'banner_perfil', profile.banner_perfil);
-  res.json({ empresa: profile });
+  res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
