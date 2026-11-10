@@ -325,6 +325,63 @@
         }
       }).catch(() => {});
     }
+
+    // Registro do PWA: permite instalar o site e disponibiliza o modo offline básico.
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+          .catch(error => console.warn('Não foi possível registrar o PWA:', error));
+      });
+    }
+
+    // Instalação iniciada pelo próprio usuário na página "Baixe o aplicativo".
+    const installButton = document.getElementById('install-pwa-button');
+    const installStatus = document.getElementById('install-pwa-status');
+    let deferredInstallPrompt = null;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (installButton && installStatus) {
+      if (isStandalone) {
+        installButton.hidden = true;
+        installStatus.textContent = 'O ConectaTrabalho já está instalado neste dispositivo.';
+      } else if (isAppleMobile) {
+        installButton.hidden = true;
+        installStatus.textContent = 'No iPhone ou iPad: abra esta página no Safari, toque em Compartilhar e escolha “Adicionar à Tela de Início”.';
+      } else {
+        installButton.hidden = false;
+        installStatus.textContent = 'Se o navegador oferecer a instalação, use o botão abaixo para adicionar o ConectaTrabalho ao dispositivo.';
+      }
+
+      window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installButton.hidden = false;
+        installStatus.textContent = 'O ConectaTrabalho está pronto para ser instalado neste dispositivo.';
+      });
+
+      installButton.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) {
+          installStatus.textContent = 'A instalação ainda não está disponível neste navegador. Verifique se está usando um navegador compatível e se o site está em HTTPS ou localhost.';
+          return;
+        }
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice.outcome === 'accepted') {
+          installButton.hidden = true;
+          installStatus.textContent = 'Instalação solicitada. Procure o ConectaTrabalho na tela inicial ou na lista de aplicativos.';
+        } else {
+          installStatus.textContent = 'A instalação não foi concluída. Você pode tentar novamente quando o navegador oferecer essa opção.';
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        installButton.hidden = true;
+        installStatus.textContent = 'ConectaTrabalho instalado com sucesso neste dispositivo.';
+      });
+    }
+
   });
 
   window.Conecta = { api, toast, redirectByUser };
