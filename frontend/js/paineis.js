@@ -171,7 +171,55 @@
 
     const quickPhotoInput = document.getElementById('candidate-quick-photo-input');
     const quickCoverInput = document.getElementById('candidate-quick-cover-input');
-    document.getElementById('candidate-change-photo').addEventListener('click', () => quickPhotoInput.click());
+    const photoViewer = document.getElementById('candidate-photo-viewer');
+    const photoViewerImage = document.getElementById('candidate-photo-viewer-image');
+    const openPhotoViewer = () => {
+      const photo = candidateProfileCache.foto_perfil;
+      if (!photo) return quickPhotoInput.click();
+      photoViewerImage.src = photo;
+      photoViewer.classList.add('is-open');
+      photoViewer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('candidate-photo-viewer-open');
+    };
+    const closePhotoViewer = () => {
+      photoViewer.classList.remove('is-open');
+      photoViewer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-photo-viewer-open');
+    };
+    document.getElementById('candidate-change-photo').addEventListener('click', openPhotoViewer);
+    document.getElementById('candidate-profile-avatar').addEventListener('click', openPhotoViewer);
+    document.getElementById('candidate-profile-initials').addEventListener('click', openPhotoViewer);
+    document.getElementById('candidate-photo-viewer-close').addEventListener('click', closePhotoViewer);
+    photoViewer.addEventListener('click', event => { if (event.target === photoViewer) closePhotoViewer(); });
+    document.getElementById('candidate-photo-edit').addEventListener('click', () => {
+      closePhotoViewer();
+      document.getElementById('candidate-edit-profile').click();
+    });
+    document.getElementById('candidate-photo-update').addEventListener('click', () => {
+      closePhotoViewer();
+      quickPhotoInput.click();
+    });
+    document.getElementById('candidate-photo-seals').addEventListener('click', () => {
+      Conecta.toast('O recurso de selos ainda será disponibilizado.');
+    });
+    document.getElementById('candidate-photo-delete').addEventListener('click', async () => {
+      if (!window.confirm('Tem certeza de que deseja excluir sua foto de perfil?')) return;
+      const button = document.getElementById('candidate-photo-delete');
+      button.disabled = true;
+      try {
+        await Conecta.api('/api/perfil/imagem', {
+          method: 'PUT',
+          body: JSON.stringify({ campo: 'foto_perfil', imagem: null })
+        });
+        await loadCandidate();
+        closePhotoViewer();
+        Conecta.toast('Foto de perfil excluída.');
+      } catch (error) {
+        Conecta.toast(error.message || 'Não foi possível excluir a foto.');
+      } finally {
+        button.disabled = false;
+      }
+    });
     document.getElementById('candidate-change-cover').addEventListener('click', () => quickCoverInput.click());
 
     async function handleQuickImage(input, field, maxDimension) {
