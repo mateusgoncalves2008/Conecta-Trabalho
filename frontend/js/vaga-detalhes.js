@@ -43,8 +43,8 @@
         <div class="job-detail-primary">
           <section class="job-detail-panel">
             <div class="job-detail-company">
-              <div class="job-detail-company-mark" aria-hidden="true">${escapeHTML(initials(company))}</div>
-              <div><p class="job-detail-company-name">${escapeHTML(company)}</p><p class="job-detail-company-location">${escapeHTML(vaga.empresa_cidade || 'Localização não informada')}</p></div>
+              <a class="job-detail-company-mark-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}" aria-label="Ver perfil de ${escapeHTML(company)}"><div class="job-detail-company-mark" aria-hidden="true">${vaga.empresa_logo ? '<img src="' + escapeHTML(vaga.empresa_logo) + '" alt="">' : escapeHTML(initials(company))}</div></a>
+              <div><a class="job-detail-company-name job-detail-company-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">${escapeHTML(company)}</a><p class="job-detail-company-location">${escapeHTML(vaga.empresa_cidade || 'Localização não informada')}</p><a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Conhecer empresa</a></div>
             </div>
             <h1 class="job-detail-title">${escapeHTML(vaga.titulo)}</h1>
             <div class="job-detail-meta">
@@ -60,7 +60,7 @@
           <section class="job-detail-panel">
             <div class="job-detail-section"><h2>Sobre a oportunidade</h2><div class="job-detail-copy">${escapeHTML(vaga.descricao || 'A empresa não informou uma descrição para esta oportunidade.')}</div></div>
             <div class="job-detail-section"><h2>Requisitos</h2><div class="job-detail-copy">${escapeHTML(vaga.requisitos || 'A empresa não informou requisitos específicos.')}</div></div>
-            <div class="job-detail-section"><h2>Sobre a empresa</h2><div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div></div>
+            <div class="job-detail-section"><h2>Sobre a empresa</h2><div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div><a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil completo da empresa</a></div>
           </section>
         </div>
         <aside class="job-detail-aside">
