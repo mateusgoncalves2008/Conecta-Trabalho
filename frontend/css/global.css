@@ -27,6 +27,31 @@
   padding: 8px 0;
 }
 
+.site-header .main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .22s ease;
+}
+
+.site-header .main-nav a:hover::after,
+.site-header .main-nav a.active::after {
+  transform: scaleX(1);
+}
+
+.site-header .main-nav a:hover,
+.site-header .main-nav a.active {
+  color: var(--orange-dark);
+}
+
+
 @media (max-width: 760px) {
   .site-header {
     width: calc(100% - 20px);
@@ -886,10 +911,13 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
   to { clip-path: ellipse(160% 100% at 50% 250%); }
 }
 
-
-/* Mantém a largura dos links estável ao passar o mouse, sem afastar os vizinhos. */
-.site-header .main-nav a,
-.site-header .main-nav a:hover,
-.site-header .main-nav a.active {
-  font-weight: 500;
+.site-header .main-nav a {
+  display: inline-block;
+  transition: transform .18s ease, color .18s ease;
+  transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
 }
+
+.site-header .main-nav a.is-magnetic {
+  will-change: transform;
+}
+
