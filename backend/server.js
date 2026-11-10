@@ -34,7 +34,7 @@ const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
 delete directives['upgrade-insecure-requests'];
 app.use(helmet({ contentSecurityPolicy: { directives }, crossOriginEmbedderPolicy: false }));
 // Entrega arquivos estáticos antes de abrir sessão no PostgreSQL.
- // CSS, JavaScript, imagens e demais arquivos existentes não precisam consultar o banco.
+// CSS, JavaScript, imagens e demais arquivos existentes não precisam consultar o banco.
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.use(express.json({ limit: '3mb' }));
