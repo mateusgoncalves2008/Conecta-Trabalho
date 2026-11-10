@@ -129,11 +129,21 @@
           <button type="button" id="candidate-camera-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
         </header>
         <div class="candidate-camera-content">
-          <video id="candidate-camera-video" autoplay playsinline muted></video>
+          <div class="candidate-camera-stage">
+            <video id="candidate-camera-video" autoplay playsinline muted></video>
+            <img id="candidate-camera-preview" alt="Pré-visualização da foto" hidden>
+            <span class="candidate-camera-countdown" id="candidate-camera-countdown" aria-live="assertive"></span>
+            <span class="candidate-camera-flash" id="candidate-camera-flash" aria-hidden="true"><i class="fa-solid fa-camera"></i></span>
+          </div>
           <p id="candidate-camera-feedback" role="status">Posicione seu rosto dentro da área da câmera.</p>
         </div>
         <footer class="candidate-camera-actions">
-          <button type="button" id="candidate-camera-capture"><i class="fa-solid fa-camera"></i> Tirar foto</button>
+          <button type="button" class="candidate-camera-cancel" id="candidate-camera-cancel">Cancelar</button>
+          <div class="candidate-camera-preview-actions" id="candidate-camera-preview-actions" hidden>
+            <button type="button" id="candidate-camera-retake">Tirar novamente</button>
+            <button type="button" class="candidate-camera-use" id="candidate-camera-use">Usar foto</button>
+          </div>
+          <button type="button" class="candidate-camera-capture" id="candidate-camera-capture"><i class="fa-solid fa-camera"></i> Tirar foto</button>
         </footer>
       </section>
     </div>
