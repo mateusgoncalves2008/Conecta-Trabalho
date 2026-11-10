@@ -70,14 +70,3 @@ CREATE TABLE IF NOT EXISTS cadastros_empresa_pendentes (
 CREATE INDEX IF NOT EXISTS idx_cadastros_empresa_pendentes_expira
   ON cadastros_empresa_pendentes (expira_em);
 
--- Campos do perfil profissional do candidato.
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_oportunidade VARCHAR(80);
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS modalidade_preferida VARCHAR(40);
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS experiencias TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS formacao TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS competencias TEXT;
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS curriculo_url VARCHAR(500);
