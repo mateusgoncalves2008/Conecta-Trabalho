@@ -13,9 +13,6 @@
 <body class="dashboard-page" data-panel="candidato">
   <header class="dashboard-header site-header">
     <a class="brand" href="../"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
-    <div class="dashboard-user candidate-header-user">
-      <button class="button button-outline button-small" data-logout>Sair</button>
-    </div>
   </header>
 
   <main class="dashboard-main candidate-profile-page">
@@ -29,7 +26,10 @@
           <p id="candidate-profile-title">Adicione seu título profissional</p>
           <span id="candidate-profile-location">Cidade não informada</span>
         </div>
-        <button type="button" class="candidate-edit-button" id="candidate-edit-profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Editar perfil</span></button>
+        <div class="profile-account-actions">
+          <button type="button" class="button button-outline button-small" data-logout><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sair da conta</button>
+          <button type="button" class="candidate-edit-button" id="candidate-edit-profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Editar perfil</span></button>
+        </div>
       </div>
       <div class="candidate-contact-line"><span id="candidate-profile-email">—</span><span id="candidate-profile-phone">Telefone não informado</span></div>
     </section>
