@@ -195,7 +195,7 @@
     const editorCanvas = document.getElementById('candidate-image-editor-canvas');
     const editorContext = editorCanvas.getContext('2d');
     const editorInput = document.getElementById('candidate-image-editor-input');
-    const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none' };
+    const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
     function renderImageEditor() {
       const image = editorState.image;
       if (!image) return;
@@ -211,9 +211,15 @@
       editorContext.translate(size / 2, size / 2);
       editorContext.rotate(radians);
       editorContext.scale(editorState.flipX * scale, editorState.flipY * scale);
-      editorContext.filter = editorState.filter;
+      editorContext.filter = `brightness(${editorState.brightness}%) contrast(${editorState.contrast}%) saturate(${editorState.saturation}%) ${editorState.filter}`;
       editorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
       editorContext.restore();
+      if (editorState.vignette > 0) {
+        const gradient = editorContext.createRadialGradient(size / 2, size / 2, size * 0.18, size / 2, size / 2, size * 0.72);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, `rgba(0,0,0,${editorState.vignette / 100})`);
+        editorContext.save(); editorContext.fillStyle = gradient; editorContext.fillRect(0, 0, size, size); editorContext.restore();
+      }
     }
     function openImageEditor() {
       const current = candidateProfileCache.foto_perfil;
@@ -222,6 +228,9 @@
       image.onload = () => {
         editorState.image = image;
         editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+        editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; });
+        document.getElementById('candidate-image-vignette').value = '0';
         document.getElementById('candidate-image-zoom').value = '1';
         document.getElementById('candidate-image-angle').value = '0';
         document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
@@ -259,6 +268,9 @@
       image.onload = () => {
         URL.revokeObjectURL(url);
         editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+        editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; });
+        document.getElementById('candidate-image-vignette').value = '0';
         document.getElementById('candidate-image-zoom').value = '1';
         document.getElementById('candidate-image-angle').value = '0';
         document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
@@ -280,6 +292,13 @@
       document.querySelectorAll('[data-image-filter]').forEach(item => item.classList.toggle('active', item === button));
       renderImageEditor();
     }));
+    ['brightness','contrast','saturation','vignette'].forEach(key => {
+      document.getElementById(`candidate-image-${key}`).addEventListener('input', event => {
+        editorState[key] = Number(event.target.value);
+        document.getElementById(`candidate-image-${key}-value`).textContent = `${event.target.value}${key === 'vignette' ? '%' : '%'}`;
+        renderImageEditor();
+      });
+    });
     document.getElementById('candidate-image-editor-save').addEventListener('click', async () => {
       const button = document.getElementById('candidate-image-editor-save');
       const feedback = document.getElementById('candidate-image-editor-feedback');
