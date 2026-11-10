@@ -663,6 +663,9 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
     `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,u.id AS empresa_id,u.nome_empresa,u.foto_perfil AS empresa_logo
      FROM vagas v JOIN usuarios u ON u.id=v.empresa_id WHERE ${where} ORDER BY v.criado_em DESC LIMIT 60`, values
   );
+  for (const vaga of result.rows) {
+    vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
+  }
   res.json({ vagas: result.rows });
 }));
 
