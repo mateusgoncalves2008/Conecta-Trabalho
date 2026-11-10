@@ -1,6 +1,5 @@
 const CACHE_NAME = 'conectatrabalho-pwa-v1';
 const APP_SHELL = [
-  '/',
   '/pages/aplicativo.html',
   '/offline.html',
   '/manifest.webmanifest',
