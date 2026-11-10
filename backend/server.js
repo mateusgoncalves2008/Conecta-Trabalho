@@ -76,6 +76,7 @@ const publicUser = user => ({
 
 const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
@@ -440,7 +441,7 @@ app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   const result = await pool.query(
     `SELECT nome,email,telefone,cidade,foto_perfil,titulo_profissional,resumo_profissional,
       objetivo_profissional,tipo_oportunidade,modalidade_preferida,experiencias,formacao,
-      competencias,curriculo_url FROM usuarios WHERE id=$1 AND tipo='candidato'`,
+      competencias,curriculo_url,banner_perfil FROM usuarios WHERE id=$1 AND tipo='candidato'`,
     [req.session.user.id]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
@@ -492,6 +493,25 @@ app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   res.json({ sucesso: true, fotoPerfil: req.session.user.fotoPerfil });
 }));
 
+
+app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const field = req.body.campo;
+  const image = req.body.imagem;
+  if (!['foto_perfil', 'banner_perfil'].includes(field)) {
+    return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
+  }
+  if (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) {
+    return res.status(400).json({ erro: 'A imagem não pôde ser processada ou ultrapassou o limite permitido.' });
+  }
+  const query = field === 'foto_perfil'
+    ? 'UPDATE usuarios SET foto_perfil=$1 WHERE id=$2 AND tipo=\'candidato\' RETURNING foto_perfil'
+    : 'UPDATE usuarios SET banner_perfil=$1 WHERE id=$2 AND tipo=\'candidato\' RETURNING banner_perfil';
+  const result = await pool.query(query, [image, req.session.user.id]);
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  if (field === 'foto_perfil') req.session.user.fotoPerfil = result.rows[0].foto_perfil || null;
+  res.json({ sucesso: true });
+}));
 
 app.get('/api/vagas', asyncRoute(async (req, res) => {
   const busca = clean(req.query.busca, 100);
