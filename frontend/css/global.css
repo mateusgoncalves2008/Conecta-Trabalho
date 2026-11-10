@@ -958,3 +958,13 @@ body.page-leaving .listing-main {
   transform: none !important;
   transition: none !important;
 }
+
+
+/* Ações de conta exibidas junto à foto no menu superior */
+.site-header .header-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
+.site-header .header-actions .theme-toggle{order:2}
+.site-header .header-actions .candidate-header-profile-link{order:1}
+.site-header .header-actions .menu-logout{order:3;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.dashboard-header .dashboard-user{display:flex;align-items:center;gap:10px}
+.dashboard-header .dashboard-user .header-actions{display:flex;align-items:center;gap:9px}
+@media(max-width:760px){.site-header .header-actions{gap:6px}.site-header .header-actions .menu-logout{padding:8px 9px;font-size:11px}}
