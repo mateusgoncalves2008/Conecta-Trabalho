@@ -54,7 +54,7 @@
     if (year) year.textContent = new Date().getFullYear();
 
     // Tema claro/escuro compartilhado entre todas as páginas
-    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user, .auth-intro');
+    const themeButtonHost = document.querySelector('.profile-account-actions, .header-actions, .dashboard-user, .auth-intro');
     const savedTheme = localStorage.getItem('conecta-theme');
     const applyTheme = theme => {
       document.documentElement.dataset.theme = theme;
