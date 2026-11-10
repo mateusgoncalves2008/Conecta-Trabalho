@@ -701,6 +701,11 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
   will-change: transform;
 }
 
+.site-header .main-nav a.is-returning {
+  /* Retorno com impulso e pequena ultrapassagem, como uma mola. */
+  transition: transform .8s cubic-bezier(.2, 1.7, .4, 1), color .18s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
   .button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle)::before,
