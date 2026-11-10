@@ -249,9 +249,19 @@
     const editorContext = editorCanvas.getContext('2d');
     const editorInput = document.getElementById('candidate-image-editor-input');
     const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
+    function updateImageFilterPreviews() {
+      if (!editorState.image) return;
+      document.querySelectorAll('[data-image-filter]').forEach(button => {
+        const preview = button.querySelector('.candidate-filter-preview');
+        if (!preview) return;
+        preview.src = editorState.image.currentSrc || editorState.image.src;
+        preview.style.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
+      });
+    }
     function renderImageEditor() {
       const image = editorState.image;
       if (!image) return;
+      updateImageFilterPreviews();
       const size = editorCanvas.width;
       const radians = editorState.angle * Math.PI / 180;
       const cos = Math.abs(Math.cos(radians));
