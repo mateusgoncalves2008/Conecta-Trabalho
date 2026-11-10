@@ -690,11 +690,14 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 /* Efeito circular de hover: a cor oposta é definida pelo JavaScript */
 .site-header .main-nav a {
   display: inline-block;
-  transition: transform .32s cubic-bezier(.2, .8, .2, 1), color .18s ease;
+  /* Ao perder a atração, retorna com impulso e pequeno balanço de mola. */
+  transition: transform .55s cubic-bezier(.34, 1.56, .64, 1), color .18s ease;
   transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
 }
 
 .site-header .main-nav a.is-magnetic {
+  /* A aproximação do cursor permanece controlada e suave. */
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1), color .18s ease;
   will-change: transform;
 }
 
