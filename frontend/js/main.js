@@ -274,6 +274,26 @@
       button.style.removeProperty('--button-hover-text');
     });
 
+    // Efeito magnético nos links do menu: eles acompanham suavemente o cursor.
+    const magneticLinks = document.querySelectorAll('.site-header .main-nav a');
+    if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      magneticLinks.forEach(link => {
+        link.addEventListener('pointermove', event => {
+          const rect = link.getBoundingClientRect();
+          const dx = event.clientX - (rect.left + rect.width / 2);
+          const dy = event.clientY - (rect.top + rect.height / 2);
+          link.style.setProperty('--magnetic-x', (dx * 0.16).toFixed(1) + 'px');
+          link.style.setProperty('--magnetic-y', (dy * 0.16).toFixed(1) + 'px');
+          link.classList.add('is-magnetic');
+        });
+        link.addEventListener('pointerleave', () => {
+          link.classList.remove('is-magnetic');
+          link.style.removeProperty('--magnetic-x');
+          link.style.removeProperty('--magnetic-y');
+        });
+      });
+    }
+
     const header = document.querySelector('.site-header');
     if (header) {
       const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
