@@ -409,7 +409,7 @@
     document.getElementById('candidate-photo-update').addEventListener('click', () => {
       photoUpdatePreview.src = candidateProfileCache.foto_perfil || '';
       document.getElementById('candidate-photo-update-greeting').textContent =
-        candidateProfileCache.nome ? candidateProfileCache.nome.split(/\\s+/)[0] + '_, ajude outras pessoas a reconhecer você.' : 'Ajude outras pessoas a reconhecer você.';
+        candidateProfileCache.nome ? candidateProfileCache.nome.split(/\s+/)[0] + '_, ajude outras pessoas a reconhecer você.' : 'Ajude outras pessoas a reconhecer você.';
       closePhotoViewer();
       photoUpdateModal.classList.add('is-open');
       photoUpdateModal.setAttribute('aria-hidden', 'false');
@@ -647,12 +647,14 @@
     });
   }
   let companyProfileCache = {};
-  const companyInitials = name => String(name || 'EMP').trim().split(/\\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase() || 'EMP';
+  const companyInitials = name => String(name || 'EMP').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase() || 'EMP';
 
   async function loadCompanyProfile() {
     const data = await Conecta.api('/api/empresa/perfil');
     companyProfileCache = data.perfil || {};
     const profile = companyProfileCache;
+    const publicPreview = document.getElementById('company-public-preview');
+    if (publicPreview) publicPreview.href = '/pages/empresa-perfil.html?id=' + encodeURIComponent(profile.id);
     const form = document.getElementById('company-profile-form');
     ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
       if (form.elements[key]) form.elements[key].value = profile[key] || '';
