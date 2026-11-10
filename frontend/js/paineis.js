@@ -391,9 +391,39 @@
         cameraButton.disabled = false;
       }
     });
-    document.getElementById('candidate-camera-close').addEventListener('click', closeCandidateCamera);
-    cameraModal.addEventListener('click', event => { if (event.target === cameraModal) closeCandidateCamera(); });
-    document.getElementById('candidate-camera-capture').addEventListener('click', () => {
+    const cameraTitle = document.getElementById('candidate-camera-title');
+    const cameraPreview = document.getElementById('candidate-camera-preview');
+    const cameraCountdown = document.getElementById('candidate-camera-countdown');
+    const cameraFlash = document.getElementById('candidate-camera-flash');
+    const cameraCaptureButton = document.getElementById('candidate-camera-capture');
+    const cameraCancelButton = document.getElementById('candidate-camera-cancel');
+    const cameraPreviewActions = document.getElementById('candidate-camera-preview-actions');
+    let capturedCameraCanvas = null;
+    let cameraCountdownTimer = null;
+    const resetCameraView = () => {
+      if (cameraCountdownTimer) window.clearTimeout(cameraCountdownTimer);
+      cameraCountdownTimer = null;
+      capturedCameraCanvas = null;
+      cameraTitle.textContent = 'Tirar foto';
+      cameraVideo.hidden = false;
+      cameraPreview.hidden = true;
+      cameraPreview.removeAttribute('src');
+      cameraCountdown.textContent = '';
+      cameraCountdown.classList.remove('is-visible');
+      cameraFlash.classList.remove('is-visible');
+      cameraCaptureButton.hidden = false;
+      cameraCancelButton.hidden = false;
+      cameraPreviewActions.hidden = true;
+      cameraFeedback.textContent = 'Posicione seu rosto dentro da área da câmera.';
+    };
+    const closeCameraPreview = () => {
+      resetCameraView();
+      closeCandidateCamera();
+    };
+    document.getElementById('candidate-camera-close').addEventListener('click', closeCameraPreview);
+    cameraCancelButton.addEventListener('click', closeCameraPreview);
+    cameraModal.addEventListener('click', event => { if (event.target === cameraModal) closeCameraPreview(); });
+    const captureCameraFrame = () => {
       if (!cameraStream || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
         cameraFeedback.textContent = 'A câmera ainda está iniciando. Aguarde um instante.';
         return;
@@ -408,9 +438,67 @@
         cameraFeedback.textContent = 'Não foi possível preparar a foto. Tente novamente.';
         return;
       }
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
       context.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+      capturedCameraCanvas = canvas;
+      cameraPreview.src = canvas.toDataURL('image/jpeg', .92);
+      cameraVideo.hidden = true;
+      cameraPreview.hidden = false;
+      cameraTitle.textContent = 'Pré-visualização da foto';
+      cameraFeedback.textContent = 'Confira sua foto. Você pode tirar novamente ou usar esta imagem.';
+      cameraCaptureButton.hidden = true;
+      cameraCancelButton.hidden = true;
+      cameraPreviewActions.hidden = false;
+      cameraFlash.classList.add('is-visible');
+      window.setTimeout(() => cameraFlash.classList.remove('is-visible'), 260);
+    };
+    cameraCaptureButton.addEventListener('click', () => {
+      if (cameraCaptureButton.disabled || cameraCountdownTimer) return;
+      if (!cameraStream || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
+        cameraFeedback.textContent = 'A câmera ainda está iniciando. Aguarde um instante.';
+        return;
+      }
+      cameraCaptureButton.disabled = true;
+      cameraCancelButton.disabled = true;
+      let count = 3;
+      cameraFeedback.textContent = 'A foto será tirada em...';
+      const tick = () => {
+        cameraCountdown.textContent = String(count);
+        cameraCountdown.classList.add('is-visible');
+        if (count > 1) {
+          count -= 1;
+          cameraCountdownTimer = window.setTimeout(tick, 1000);
+          return;
+        }
+        cameraCountdownTimer = window.setTimeout(() => {
+          cameraCountdownTimer = null;
+          cameraCountdown.classList.remove('is-visible');
+          cameraCountdown.textContent = '';
+          captureCameraFrame();
+          cameraCaptureButton.disabled = false;
+          cameraCancelButton.disabled = false;
+        }, 850);
+      };
+      tick();
+    });
+    document.getElementById('candidate-camera-retake').addEventListener('click', () => {
+      capturedCameraCanvas = null;
+      cameraTitle.textContent = 'Tirar foto';
+      cameraVideo.hidden = false;
+      cameraPreview.hidden = true;
+      cameraPreview.removeAttribute('src');
+      cameraPreviewActions.hidden = true;
+      cameraCancelButton.hidden = false;
+      cameraCaptureButton.hidden = false;
+      cameraFeedback.textContent = 'Posicione seu rosto dentro da área da câmera.';
+    });
+    document.getElementById('candidate-camera-use').addEventListener('click', () => {
+      if (!capturedCameraCanvas) return;
+      const photo = capturedCameraCanvas;
       closeCandidateCamera();
-      openImageInEditor(canvas);
+      resetCameraView();
+      openImageInEditor(photo);
     });
     document.getElementById('candidate-photo-upload').addEventListener('click', () => {
       closePhotoUpdateModal();
