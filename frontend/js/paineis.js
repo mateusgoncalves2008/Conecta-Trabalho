@@ -403,7 +403,6 @@
       const scale = Math.min(1, maxSide / Math.max(cameraVideo.videoWidth, cameraVideo.videoHeight));
       canvas.width = Math.round(cameraVideo.videoWidth * scale);
       canvas.height = Math.round(cameraVideo.videoHeight * scale);
-      canvas.getContext('2d').drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
       const context = canvas.getContext('2d');
       if (!context) {
         cameraFeedback.textContent = 'Não foi possível preparar a foto. Tente novamente.';
