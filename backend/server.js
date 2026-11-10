@@ -76,6 +76,7 @@ const publicUser = user => ({
 
 const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
@@ -441,7 +442,7 @@ app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   const result = await pool.query(
     `SELECT nome,email,telefone,cidade,foto_perfil,titulo_profissional,resumo_profissional,
       objetivo_profissional,tipo_oportunidade,modalidade_preferida,experiencias,formacao,
-      competencias,curriculo_url,banner_perfil FROM usuarios WHERE id=$1 AND tipo='candidato'`,
+      competencias,curriculo_url,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo='candidato'`,
     [req.session.user.id]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
@@ -493,6 +494,16 @@ app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   res.json({ sucesso: true, fotoPerfil: req.session.user.fotoPerfil });
 }));
 
+
+app.put('/api/perfil/visibilidade-foto', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const visibility = clean(req.body.visibilidade, 20);
+  if (!['conexoes', 'rede', 'usuarios', 'todos'].includes(visibility)) {
+    return res.status(400).json({ erro: 'Selecione uma opção de visibilidade válida.' });
+  }
+  await pool.query("UPDATE usuarios SET visibilidade_foto=$1 WHERE id=$2 AND tipo='candidato'", [visibility, req.session.user.id]);
+  res.json({ sucesso: true, visibilidade: visibility });
+}));
 
 app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
