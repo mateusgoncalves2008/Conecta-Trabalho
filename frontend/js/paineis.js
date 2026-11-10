@@ -50,6 +50,50 @@
 
   let candidatePhotoData = null;
   let candidateProfileCache = {};
+
+  async function prepareCandidateImage(file, maxDimension) {
+    if (file.size > 5 * 1024 * 1024) throw new Error('Escolha uma imagem de até 5 MB.');
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch {
+      bitmap = await new Promise((resolve, reject) => {
+        const image = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        image.onload = () => { URL.revokeObjectURL(objectUrl); resolve(image); };
+        image.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Este formato de imagem não é compatível com o navegador.')); };
+        image.src = objectUrl;
+      });
+    }
+    const width = bitmap.width || bitmap.naturalWidth;
+    const height = bitmap.height || bitmap.naturalHeight;
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    let quality = 0.9;
+    let converted = canvas.toDataURL('image/jpeg', quality);
+    while (converted.length > 1400000 && quality > 0.45) {
+      quality -= 0.1;
+      converted = canvas.toDataURL('image/jpeg', quality);
+    }
+    if (converted.length > 1400000) throw new Error('Não foi possível reduzir essa imagem para o tamanho permitido.');
+    return converted;
+  }
+
+  async function saveCandidateImage(field, imageData) {
+    await Conecta.api('/api/perfil/imagem', {
+      method: 'PUT',
+      body: JSON.stringify({ campo: field, imagem: imageData })
+    });
+    await loadCandidate();
+    Conecta.toast(field === 'foto_perfil' ? 'Foto de perfil atualizada.' : 'Banner atualizado.');
+  }
   const candidateInitials = name => String(name || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
   const setCandidateImage = (image, initials, photo, name) => {
     initials.textContent = candidateInitials(name);
@@ -76,6 +120,9 @@
     cv.href = profile.curriculo_url || '#';
     document.getElementById('candidate-profile-no-cv').hidden = Boolean(profile.curriculo_url);
     setCandidateImage(document.getElementById('candidate-profile-avatar'), document.getElementById('candidate-profile-initials'), profile.foto_perfil, name);
+    const cover = document.getElementById('candidate-cover');
+    cover.style.backgroundImage = profile.banner_perfil ? `url(\"${profile.banner_perfil}\")` : '';
+    cover.classList.toggle('has-image', Boolean(profile.banner_perfil));
     const values = {
       'candidate-edit-name': name, 'candidate-edit-email': profile.email || '',
       'candidate-edit-phone': profile.telefone || '', 'candidate-edit-city': profile.cidade || '',
@@ -110,53 +157,44 @@
     document.getElementById('candidate-photo-input').addEventListener('change', async event => {
       const file = event.target.files[0];
       if (!file) return;
-      const maxOriginalSize = 5 * 1024 * 1024;
-      if (file.size > maxOriginalSize) {
-        Conecta.toast('Escolha uma imagem de até 5 MB.');
-        event.target.value = '';
-        return;
-      }
       try {
-        let bitmap;
-        try {
-          bitmap = await createImageBitmap(file);
-        } catch {
-          bitmap = await new Promise((resolve, reject) => {
-            const image = new Image();
-            const objectUrl = URL.createObjectURL(file);
-            image.onload = () => { URL.revokeObjectURL(objectUrl); resolve(image); };
-            image.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Este formato de imagem não é compatível com o navegador.')); };
-            image.src = objectUrl;
-          });
-        }
-        const imageWidth = bitmap.width || bitmap.naturalWidth;
-        const imageHeight = bitmap.height || bitmap.naturalHeight;
-        const scale = Math.min(1, 600 / Math.max(imageWidth, imageHeight));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(imageWidth * scale));
-        canvas.height = Math.max(1, Math.round(imageHeight * scale));
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#ffffff';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        bitmap.close?.();
-        let quality = 0.9;
-        let converted = canvas.toDataURL('image/jpeg', quality);
-        while (converted.length > 1400000 && quality > 0.45) {
-          quality -= 0.1;
-          converted = canvas.toDataURL('image/jpeg', quality);
-        }
-        if (converted.length > 1400000) throw new Error('Não foi possível reduzir essa imagem para o tamanho permitido.');
-        candidatePhotoData = converted;
+        candidatePhotoData = await prepareCandidateImage(file, 600);
         const preview = document.getElementById('candidate-photo-preview');
-        preview.src = converted;
+        preview.src = candidatePhotoData;
         preview.hidden = false;
         document.getElementById('candidate-photo-placeholder').hidden = true;
       } catch (error) {
-        Conecta.toast(error.message || 'Não foi possível abrir essa imagem. Tente outro formato de foto.');
+        Conecta.toast(error.message || 'Não foi possível processar essa imagem.');
         event.target.value = '';
       }
     });
+
+    const quickPhotoInput = document.getElementById('candidate-quick-photo-input');
+    const quickCoverInput = document.getElementById('candidate-quick-cover-input');
+    document.getElementById('candidate-change-photo').addEventListener('click', () => quickPhotoInput.click());
+    document.getElementById('candidate-change-cover').addEventListener('click', () => quickCoverInput.click());
+
+    async function handleQuickImage(input, field, maxDimension) {
+      input.addEventListener('change', async event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const trigger = field === 'foto_perfil'
+          ? document.getElementById('candidate-change-photo')
+          : document.getElementById('candidate-change-cover');
+        trigger.disabled = true;
+        try {
+          const imageData = await prepareCandidateImage(file, maxDimension);
+          await saveCandidateImage(field, imageData);
+        } catch (error) {
+          Conecta.toast(error.message || 'Não foi possível atualizar a imagem.');
+        } finally {
+          trigger.disabled = false;
+          input.value = '';
+        }
+      });
+    }
+    handleQuickImage(quickPhotoInput, 'foto_perfil', 600);
+    handleQuickImage(quickCoverInput, 'banner_perfil', 1600);
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const button = form.querySelector('button[type="submit"]');
