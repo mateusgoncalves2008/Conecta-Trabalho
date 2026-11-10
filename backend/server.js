@@ -683,7 +683,10 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
     [vagaId]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Esta vaga não foi encontrada ou não está mais disponível.' });
-  res.json({ vaga: result.rows[0] });
+  const vaga = result.rows[0];
+  vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
+  vaga.empresa_banner = imageReference(vaga.empresa_id, 'banner_perfil', vaga.empresa_banner);
+  res.json({ vaga });
 }));
 
 app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
