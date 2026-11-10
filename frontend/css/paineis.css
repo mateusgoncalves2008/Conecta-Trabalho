@@ -422,7 +422,7 @@ html[data-theme=dark] .accessibility-launcher:focus-visible svg{
 .candidate-identity-copy h1{margin:5px 0 4px;color:var(--ink);font-size:clamp(24px,3vw,32px)}
 .candidate-identity-copy p{margin:0 0 5px;color:var(--muted)}
 .candidate-identity-copy>span:last-child{color:var(--muted);font-size:13px}
-.candidate-edit-button{display:flex;align-items:center;gap:9px;margin-bottom:8px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
+.candidate-edit-button svg{width:17px;height:17px;flex:0 0 17px}\n.candidate-edit-button{display:flex;align-items:center;gap:9px;margin-bottom:8px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
 .candidate-contact-line{display:flex;flex-wrap:wrap;gap:12px 24px;padding:18px 28px 22px 164px;color:var(--muted);font-size:13px}
 .candidate-profile-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px;align-items:start}
 .candidate-profile-main-column,.candidate-profile-side{display:grid;gap:18px;min-width:0}
