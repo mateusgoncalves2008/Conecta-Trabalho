@@ -84,6 +84,25 @@
       <div id="candidate-applications" class="dashboard-list"><div class="dashboard-empty">Carregando suas candidaturas...</div></div>
     </section>
 
+    <div class="candidate-photo-viewer" id="candidate-photo-viewer" aria-hidden="true">
+      <section class="candidate-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-photo-dialog-title">
+        <header class="candidate-photo-dialog-header">
+          <h2 id="candidate-photo-dialog-title">Foto do perfil</h2>
+          <button type="button" id="candidate-photo-viewer-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+        <div class="candidate-photo-dialog-body">
+          <img id="candidate-photo-viewer-image" alt="Foto de perfil ampliada">
+          <div class="candidate-photo-visibility"><i class="fa-regular fa-eye"></i><span>Todos</span></div>
+          <div class="candidate-photo-actions">
+            <button type="button" id="candidate-photo-edit"><i class="fa-solid fa-pen"></i><span>Editar</span></button>
+            <button type="button" id="candidate-photo-update"><i class="fa-solid fa-camera"></i><span>Atualizar</span></button>
+            <button type="button" id="candidate-photo-seals"><i class="fa-regular fa-image"></i><span>Selos</span></button>
+            <button type="button" id="candidate-photo-delete"><i class="fa-regular fa-trash-can"></i><span>Excluir</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <div class="candidate-edit-backdrop" id="candidate-edit-modal" aria-hidden="true">
       <section class="candidate-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-edit-title">
         <div class="candidate-edit-heading"><div><span class="eyebrow">SEUS DADOS</span><h2 id="candidate-edit-title">Editar perfil</h2><p>Atualize suas informações profissionais.</p></div><button type="button" id="candidate-edit-close" class="candidate-edit-close" aria-label="Fechar">×</button></div>
