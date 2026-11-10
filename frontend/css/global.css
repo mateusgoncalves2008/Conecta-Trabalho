@@ -49,17 +49,17 @@
   opacity: 1;
 }
 
-/* Os links do menu mantêm a mesma cor no hover, ao clicar e durante a atração magnética. */
-.site-header .main-nav a:hover,
-.site-header .main-nav a.active,
-.site-header .main-nav a.is-magnetic {
-  color: #586575;
+/* Links do menu com tom mais escuro e peso levemente maior, sem mudar no hover ou clique. */
+.site-header .main-nav a {
+  color: #344255;
+  font-weight: 500;
 }
 
 .site-header .main-nav a:hover,
 .site-header .main-nav a.active,
 .site-header .main-nav a.is-magnetic {
-  font-weight: 400;
+  color: #344255;
+  font-weight: 500;
 }
 
 @media (max-width: 760px) {
