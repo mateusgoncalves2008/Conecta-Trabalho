@@ -659,3 +659,9 @@ html[data-theme="dark"] .company-logo-wrap{border-color:#172538;background:#263b
 html[data-theme="dark"] .company-profile-heading-copy strong,html[data-theme="dark"] .company-profile-form-heading h3{color:#f4f7fb}
 html[data-theme="dark"] .company-profile-fields input,html[data-theme="dark"] .company-profile-fields select,html[data-theme="dark"] .company-profile-fields textarea{background:#1e3046;border-color:#40536a;color:#e8eef5}
 @media(max-width:650px){.company-cover{height:155px}.company-profile-identity{padding:0 17px 18px;gap:13px}.company-logo-wrap{width:88px;height:88px;flex-basis:88px;margin-top:-35px;font-size:21px}.company-profile-heading-copy strong{font-size:18px}.company-profile-form{padding:22px 18px}.company-profile-fields{grid-template-columns:1fr}.company-profile-fields .field-wide{grid-column:auto}.company-profile-form-footer{align-items:stretch;flex-direction:column-reverse}.company-profile-form-footer .button{width:100%}.company-image-hint{padding:0 18px 20px}}
+
+.company-profile-preview-link{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border:1px solid var(--line);border-radius:7px;color:var(--navy);font-size:12px;font-weight:700;text-decoration:none}
+.company-profile-preview-link:hover{border-color:var(--orange);color:var(--orange-dark)}
+.company-cover-placeholder-mark{display:grid;place-items:center;width:58px;height:58px;border:1px solid #cbd5e1;border-radius:14px;background:#f5f7fa;color:#52647a;font-size:10px;font-weight:800;letter-spacing:1px}
+html[data-theme="dark"] .company-profile-preview-link{border-color:#40536a;color:#e7edf5}
+html[data-theme="dark"] .company-cover-placeholder-mark{background:#22364d;border-color:#40536a;color:#d6dfeb}
