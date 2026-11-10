@@ -103,6 +103,57 @@
       </section>
     </div>
 
+    <div class="candidate-image-editor" id="candidate-image-editor" aria-hidden="true">
+      <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-image-editor-title">
+        <header class="candidate-image-editor-header">
+          <h2 id="candidate-image-editor-title">Editar imagem</h2>
+          <button type="button" id="candidate-image-editor-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+        <div class="candidate-image-editor-main">
+          <div class="candidate-image-editor-stage">
+            <canvas id="candidate-image-editor-canvas" width="600" height="600"></canvas>
+            <div class="candidate-image-crop-guide" aria-hidden="true"></div>
+          </div>
+          <aside class="candidate-image-editor-tools">
+            <nav class="candidate-image-editor-tabs" aria-label="Ferramentas de edição">
+              <button type="button" class="active" data-editor-tab="crop">Recortar</button>
+              <button type="button" data-editor-tab="filter">Filtrar</button>
+              <button type="button" data-editor-tab="change">Alterar</button>
+            </nav>
+            <div class="candidate-editor-panel active" data-editor-panel="crop">
+              <div class="candidate-editor-transform">
+                <button type="button" id="candidate-image-rotate-left" aria-label="Girar para a esquerda"><i class="fa-solid fa-rotate-left"></i></button>
+                <button type="button" id="candidate-image-rotate-right" aria-label="Girar para a direita"><i class="fa-solid fa-rotate-right"></i></button>
+                <button type="button" id="candidate-image-flip-horizontal" aria-label="Inverter horizontalmente"><i class="fa-solid fa-arrows-left-right"></i></button>
+                <button type="button" id="candidate-image-flip-vertical" aria-label="Inverter verticalmente"><i class="fa-solid fa-arrows-up-down"></i></button>
+              </div>
+              <label>Zoom<input id="candidate-image-zoom" type="range" min="1" max="3" step="0.01" value="1"></label>
+              <label>Girar<input id="candidate-image-angle" type="range" min="-180" max="180" step="1" value="0"></label>
+            </div>
+            <div class="candidate-editor-panel" data-editor-panel="filter">
+              <p>Escolha um filtro para sua foto.</p>
+              <div class="candidate-editor-filters">
+                <button type="button" data-image-filter="none" class="active">Original</button>
+                <button type="button" data-image-filter="grayscale(1)">Preto e branco</button>
+                <button type="button" data-image-filter="sepia(.75)">Sépia</button>
+                <button type="button" data-image-filter="brightness(1.15) contrast(1.05)">Claro</button>
+                <button type="button" data-image-filter="contrast(1.2) saturate(1.2)">Vívido</button>
+              </div>
+            </div>
+            <div class="candidate-editor-panel" data-editor-panel="change">
+              <p>Escolha outra imagem para editar.</p>
+              <button type="button" class="button button-outline" id="candidate-image-editor-choose"><i class="fa-solid fa-camera"></i> Escolher imagem</button>
+            </div>
+          </aside>
+        </div>
+        <footer class="candidate-image-editor-footer">
+          <span id="candidate-image-editor-feedback" role="status"></span>
+          <button type="button" class="button button-primary" id="candidate-image-editor-save">Salvar alterações</button>
+        </footer>
+        <input type="file" id="candidate-image-editor-input" accept="image/*" hidden>
+      </section>
+    </div>
+
     <div class="candidate-edit-backdrop" id="candidate-edit-modal" aria-hidden="true">
       <section class="candidate-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-edit-title">
         <div class="candidate-edit-heading"><div><span class="eyebrow">SEUS DADOS</span><h2 id="candidate-edit-title">Editar perfil</h2><p>Atualize suas informações profissionais.</p></div><button type="button" id="candidate-edit-close" class="candidate-edit-close" aria-label="Fechar">×</button></div>
