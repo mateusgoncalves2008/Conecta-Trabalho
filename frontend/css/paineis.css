@@ -416,7 +416,7 @@ html[data-theme=dark] .accessibility-launcher:focus-visible svg{
 .candidate-profile-hero,.candidate-profile-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .candidate-cover{height:150px;background:#e7edf3;border-bottom:1px solid var(--line)}
 .candidate-identity{display:flex;align-items:flex-end;gap:20px;padding:0 28px}
-.candidate-avatar-wrap{width:116px;height:116px;flex:0 0 116px;margin-top:-48px;display:grid;place-items:center;overflow:hidden;border:5px solid var(--surface);border-radius:50%;background:#dce5ee;color:#142b49;font-size:30px;font-weight:700}
+.candidate-avatar-wrap{position:relative;width:116px;height:116px;flex:0 0 116px;margin-top:-48px;display:grid;place-items:center;overflow:hidden;border:5px solid var(--surface);border-radius:50%;background:#dce5ee;color:#142b49;font-size:30px;font-weight:700}
 .candidate-avatar-wrap img{width:100%;height:100%;object-fit:cover}
 .candidate-identity-copy{min-width:0;flex:1;padding:16px 0 4px}
 .candidate-identity-copy h1{margin:5px 0 4px;color:var(--ink);font-size:clamp(24px,3vw,32px)}
