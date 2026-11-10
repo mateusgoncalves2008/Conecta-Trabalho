@@ -3,25 +3,28 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
   const dateLabel = value => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(value));
-  const card = vaga => `<article class="job-card">
-    <div class="job-card-top">
-      <span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span>
-      <span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span>
-    </div>
-    <div class="job-card-content">
-      <h3>${escapeHTML(vaga.titulo)}</h3>
-      <p class="job-description">${escapeHTML((vaga.descricao || 'Confira os detalhes desta oportunidade.').length > 150 ? vaga.descricao.slice(0, 150) + '...' : (vaga.descricao || 'Confira os detalhes desta oportunidade.'))}</p>
-    </div>
-    <div class="job-details">
-      <span class="job-detail"><strong>Local</strong>${escapeHTML(vaga.cidade || 'Não informado')}</span>
-      <span class="job-detail"><strong>Modalidade</strong>${escapeHTML(vaga.modalidade || 'Não informada')}</span>
-      <span class="job-detail"><strong>Publicada em</strong>${dateLabel(vaga.criado_em)}</span>
-    </div>
-    <div class="job-card-bottom">
-      <div class="job-salary-block"><span class="job-salary-label">Remuneração</span><strong class="job-salary">${escapeHTML(vaga.salario || 'A combinar')}</strong></div>
-      <button class="button button-primary button-small" type="button" data-apply="${Number(vaga.id)}">Candidatar-se</button>
-    </div>
-  </article>`;
+  const card = vaga => {
+    const description = vaga.descricao || 'Confira os detalhes desta oportunidade.';
+    return `<a class="job-card job-card-link" href="/pages/vaga-detalhes.html?id=${encodeURIComponent(vaga.id)}" aria-label="Ver detalhes da vaga ${escapeHTML(vaga.titulo)}">
+      <div class="job-card-top">
+        <span class="job-company">${escapeHTML(vaga.nome_empresa || 'Empresa')}</span>
+        <span class="job-tag">${escapeHTML(vaga.tipo_contrato)}</span>
+      </div>
+      <div class="job-card-content">
+        <h3>${escapeHTML(vaga.titulo)}</h3>
+        <p class="job-description">${escapeHTML(description.length > 150 ? description.slice(0, 150) + '...' : description)}</p>
+      </div>
+      <div class="job-details">
+        <span class="job-detail"><strong>Local</strong>${escapeHTML(vaga.cidade || 'Não informado')}</span>
+        <span class="job-detail"><strong>Modalidade</strong>${escapeHTML(vaga.modalidade || 'Não informada')}</span>
+        <span class="job-detail"><strong>Publicada em</strong>${dateLabel(vaga.criado_em)}</span>
+      </div>
+      <div class="job-card-bottom">
+        <div class="job-salary-block"><span class="job-salary-label">Remuneração</span><strong class="job-salary">${escapeHTML(vaga.salario || 'A combinar')}</strong></div>
+        <span class="button button-primary button-small">Ver detalhes</span>
+      </div>
+    </a>`;
+  };
 
   async function applyToJob(id, button) {
     try {
