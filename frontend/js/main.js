@@ -281,10 +281,21 @@
       const maxMagneticX = 55;
       const maxMagneticY = 34;
       const resetMagneticLink = link => {
+        if (!link.classList.contains('is-magnetic')) return;
+
         link.classList.remove('is-magnetic');
+        link.classList.add('is-returning');
         link.style.setProperty('--magnetic-x', '0px');
         link.style.setProperty('--magnetic-y', '0px');
       };
+
+      magneticLinks.forEach(link => {
+        link.addEventListener('transitionend', event => {
+          if (event.propertyName === 'transform') {
+            link.classList.remove('is-returning');
+          }
+        });
+      });
 
       document.addEventListener('pointermove', event => {
         let closestLink = null;
@@ -319,6 +330,7 @@
         const moveX = Math.max(-maxMagneticX, Math.min(maxMagneticX, closestDx * 0.48 * strength));
         const moveY = Math.max(-maxMagneticY, Math.min(maxMagneticY, closestDy * 0.48 * strength));
 
+        closestLink.classList.remove('is-returning');
         closestLink.style.setProperty('--magnetic-x', moveX.toFixed(1) + 'px');
         closestLink.style.setProperty('--magnetic-y', moveY.toFixed(1) + 'px');
         closestLink.classList.add('is-magnetic');
