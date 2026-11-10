@@ -12,7 +12,7 @@
 <body class="dashboard-page" data-panel="empresa">
   <header class="dashboard-header site-header">
     <a class="brand" href="../"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
-    <div class="dashboard-user"><span id="user-name">Minha empresa</span><button class="button button-outline button-small" data-logout>Sair</button></div>
+    <div class="dashboard-user"><span id="user-name">Minha empresa</span></div>
   </header>
 
   <main class="dashboard-main">
@@ -42,6 +42,9 @@
             <input type="file" id="company-logo-input" accept="image/*" hidden>
           </div>
           <div class="company-profile-heading-copy"><strong id="company-profile-name">Sua empresa</strong><span id="company-profile-location">Localização não informada</span></div>
+          <div class="profile-account-actions">
+            <button type="button" class="button button-outline button-small" data-logout><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sair da conta</button>
+          </div>
         </div>
         <form id="company-profile-form" class="company-profile-form" novalidate>
           <div class="company-profile-form-heading"><div><h3>Informações institucionais</h3><p>Esses dados poderão ser vistos por pessoas interessadas nas vagas.</p></div></div>
