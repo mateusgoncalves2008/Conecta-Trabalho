@@ -372,7 +372,7 @@
           photo.alt = '';
           link.appendChild(photo);
         } else {
-          const initials = String(user.nome || 'CT').trim().split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          const initials = String(user.nome || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
           link.textContent = initials;
         }
         publicHeaderActions.replaceChildren(link);
