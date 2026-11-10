@@ -54,7 +54,7 @@
     if (year) year.textContent = new Date().getFullYear();
 
     // Tema claro/escuro compartilhado entre todas as páginas
-    const themeButtonHost = document.querySelector('.profile-account-actions, .header-actions, .dashboard-user, .auth-intro');
+    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user, .auth-intro');
     const savedTheme = localStorage.getItem('conecta-theme');
     const applyTheme = theme => {
       document.documentElement.dataset.theme = theme;
@@ -281,15 +281,15 @@
       });
     });
 
-    // Atalho do perfil do candidato nas páginas públicas, somente com sessão ativa.
+    // Ações da conta no menu superior, em todas as páginas com cabeçalho.
     const publicHeaderActions = document.querySelector('.site-header .header-actions');
-    if (publicHeaderActions && window.location.pathname !== '/pages/candidato.html') {
+    if (publicHeaderActions) {
       api('/api/me').then(session => {
         const user = session.usuario;
-        if (!user || user.tipo !== 'candidato') return;
+        if (!user) return;
         const link = document.createElement('a');
         link.className = 'candidate-header-profile-link';
-        link.href = '/pages/candidato.html#meu-perfil';
+        link.href = user.tipo === 'empresa' ? '/pages/empresa.html#company-profile-heading' : '/pages/candidato.html#meu-perfil';
         link.setAttribute('aria-label', 'Abrir meu perfil');
         link.title = 'Meu perfil';
         if (user.fotoPerfil) {
@@ -298,10 +298,24 @@
           photo.alt = '';
           link.appendChild(photo);
         } else {
-          const initials = String(user.nome || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          const initials = String(user.nomeEmpresa || user.nome || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
           link.textContent = initials;
         }
-        publicHeaderActions.replaceChildren(link);
+        publicHeaderActions.prepend(link);
+
+        if (!publicHeaderActions.querySelector('[data-logout]')) {
+          const logout = document.createElement('button');
+          logout.type = 'button';
+          logout.className = 'button button-outline button-small menu-logout';
+          logout.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sair da conta';
+          logout.addEventListener('click', async () => {
+            try {
+              await api('/api/logout', { method: 'POST' });
+              window.location.href = '/';
+            } catch (error) { toast(error.message); }
+          });
+          publicHeaderActions.appendChild(logout);
+        }
       }).catch(() => {});
     }
   });
