@@ -555,3 +555,21 @@ body.candidate-image-editor-open{overflow:hidden}
 body.candidate-photo-update-open{overflow:hidden}
 @media(max-width:480px){.candidate-photo-update-content{padding:24px 20px}.candidate-photo-update-content>img{width:150px;height:150px}.candidate-photo-update-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.candidate-photo-update-modal{transition:none}}
+
+
+/* Captura direta pela câmera do dispositivo */
+.candidate-camera-modal{position:fixed;inset:0;z-index:1350;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.76);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+.candidate-camera-modal.is-open{opacity:1;visibility:visible}
+.candidate-camera-dialog{width:min(100%,680px);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 18px 60px rgba(0,0,0,.35)}
+.candidate-camera-header{height:60px;flex:0 0 60px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line)}
+.candidate-camera-header h2{margin:0;font-size:20px}
+.candidate-camera-header button{width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:21px;cursor:pointer}
+.candidate-camera-content{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 20px}
+.candidate-camera-content video{width:100%;max-height:58vh;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#111;transform:scaleX(-1)}
+.candidate-camera-content p{margin:0;color:var(--muted);font-size:13px;text-align:center;line-height:1.5}
+.candidate-camera-actions{display:flex;justify-content:center;padding:0 20px 20px}
+.candidate-camera-actions button{min-height:46px;display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 24px;border:1px solid var(--orange);border-radius:7px;background:var(--orange);color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.candidate-camera-actions button:disabled{opacity:.6;cursor:wait}
+body.candidate-camera-open{overflow:hidden}
+@media(max-width:520px){.candidate-camera-modal{padding:8px}.candidate-camera-content{padding:14px 12px}.candidate-camera-content video{max-height:55vh}.candidate-camera-actions{padding:0 12px 14px}.candidate-camera-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.candidate-camera-modal{transition:none}}
