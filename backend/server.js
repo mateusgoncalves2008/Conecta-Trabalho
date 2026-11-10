@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { rateLimit } = require('express-rate-limit');
 const nodemailer = require('nodemailer');
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
@@ -67,10 +68,62 @@ const normalizeEmail = value => {
   return email && !email.includes('@') ? email + '@gmail.com' : email;
 };
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const storageBucket = 'conecta-trabalho-imagens';
+const storageConfigured = [
+  process.env.AWS_ENDPOINT_URL_S3, process.env.AWS_ACCESS_KEY_ID,
+  process.env.AWS_SECRET_ACCESS_KEY, process.env.AWS_REGION
+].every(Boolean);
+const s3 = storageConfigured ? new S3Client({
+  region: process.env.AWS_REGION,
+  endpoint: process.env.AWS_ENDPOINT_URL_S3,
+  credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY },
+  forcePathStyle: true,
+  requestChecksumCalculation: 'WHEN_REQUIRED'
+}) : null;
+const imageReference = (userId, field, value) => {
+  if (!value) return null;
+  if (typeof value === 'string' && value.startsWith('s3:')) {
+    return '/api/imagens/perfil/' + encodeURIComponent(userId) + '/' + (field === 'foto_perfil' ? 'foto' : 'banner');
+  }
+  return value;
+};
+const uploadProfileImage = async (userId, field, dataUrl) => {
+  if (!s3) {
+    const error = new Error('Configure as credenciais do Neon Object Storage no arquivo .env.');
+    error.statusCode = 503;
+    throw error;
+  }
+  if (typeof dataUrl !== 'string' || !/^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(dataUrl) || dataUrl.length > 1400000) {
+    const error = new Error('A imagem não pôde ser processada ou ultrapassou o limite permitido.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const body = Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64');
+  if (body.length < 4 || body[0] !== 0xff || body[1] !== 0xd8 || body[2] !== 0xff) {
+    const error = new Error('O arquivo enviado não é uma imagem JPEG válida.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const key = 'usuarios/' + userId + '/' + field + '-' + crypto.randomUUID() + '.jpg';
+  await s3.send(new PutObjectCommand({
+    Bucket: storageBucket, Key: key, Body: body,
+    ContentType: 'image/jpeg', CacheControl: 'private, max-age=300'
+  }));
+  return 's3:' + key;
+};
+const deleteStoredImage = async value => {
+  if (!s3 || typeof value !== 'string' || !value.startsWith('s3:')) return;
+  try {
+    await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: value.slice(3) }));
+  } catch (error) {
+    console.warn('Não foi possível excluir a imagem antiga do Object Storage:', error.message);
+  }
+};
+
 const publicUser = user => ({
   id: user.id, nome: user.nome, email: user.email, tipo: user.tipo,
   telefone: user.telefone, cidade: user.cidade, nomeEmpresa: user.nome_empresa,
-  fotoPerfil: user.foto_perfil || null,
+  fotoPerfil: imageReference(user.id, 'foto_perfil', user.foto_perfil),
   emailVerificado: user.email_verificado === true
 });
 
@@ -437,6 +490,41 @@ app.post('/api/logout', (req, res) => {
   });
 });
 app.get('/api/me', (req, res) => res.json({ usuario: req.session.user || null }));
+app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const field = req.params.tipo === 'foto' ? 'foto_perfil'
+    : req.params.tipo === 'banner' ? 'banner_perfil' : null;
+  if (!field) return res.status(404).end();
+  const result = await pool.query(
+    "SELECT id,foto_perfil,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo='candidato'",
+    [req.params.id]
+  );
+  if (!result.rowCount) return res.status(404).end();
+  const profile = result.rows[0];
+  const owner = req.session.user && String(req.session.user.id) === String(profile.id);
+  if (!owner) {
+    if (field === 'banner_perfil') return res.status(403).end();
+    const visibility = profile.visibilidade_foto || 'todos';
+    if (!(visibility === 'todos' || (visibility === 'usuarios' && Boolean(req.session.user)))) {
+      return res.status(403).end();
+    }
+  }
+  const value = profile[field];
+  if (!value) return res.status(404).end();
+  res.set('Cache-Control', 'private, no-store');
+  if (typeof value === 'string' && value.startsWith('data:image/jpeg;base64,')) {
+    return res.type('image/jpeg').send(Buffer.from(value.slice(value.indexOf(',') + 1), 'base64'));
+  }
+  if (typeof value !== 'string' || !value.startsWith('s3:') || !s3) return res.status(404).end();
+  const object = await s3.send(new GetObjectCommand({ Bucket: storageBucket, Key: value.slice(3) }));
+  res.type('image/jpeg');
+  if (object.Body && typeof object.Body.pipe === 'function') return object.Body.pipe(res);
+  if (object.Body && typeof object.Body.transformToByteArray === 'function') {
+    return res.send(Buffer.from(await object.Body.transformToByteArray()));
+  }
+  return res.status(502).end();
+}));
+
 app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const result = await pool.query(
@@ -447,59 +535,69 @@ app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
   const profile = result.rows[0];
-  req.session.user.fotoPerfil = profile.foto_perfil || null;
+  req.session.user.fotoPerfil = imageReference(req.session.user.id, 'foto_perfil', profile.foto_perfil);
+  profile.foto_perfil = imageReference(req.session.user.id, 'foto_perfil', profile.foto_perfil);
+  profile.banner_perfil = imageReference(req.session.user.id, 'banner_perfil', profile.banner_perfil);
   res.json({ perfil: profile });
 }));
 
 app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const fields = {
-    telefone: clean(req.body.telefone, 30),
-    cidade: clean(req.body.cidade, 100) || 'Capelinha',
-    foto: req.body.foto_perfil,
-    titulo: clean(req.body.titulo_profissional, 120),
-    resumo: clean(req.body.resumo_profissional, 3000),
-    objetivo: clean(req.body.objetivo_profissional, 2000),
-    tipo: clean(req.body.tipo_oportunidade, 80),
-    modalidade: clean(req.body.modalidade_preferida, 40),
-    experiencias: clean(req.body.experiencias, 5000),
-    formacao: clean(req.body.formacao, 4000),
-    competencias: clean(req.body.competencias, 2000),
-    curriculo: clean(req.body.curriculo_url, 500)
+    telefone: clean(req.body.telefone, 30), cidade: clean(req.body.cidade, 100) || 'Capelinha',
+    foto: req.body.foto_perfil, titulo: clean(req.body.titulo_profissional, 120),
+    resumo: clean(req.body.resumo_profissional, 3000), objetivo: clean(req.body.objetivo_profissional, 2000),
+    tipo: clean(req.body.tipo_oportunidade, 80), modalidade: clean(req.body.modalidade_preferida, 40),
+    experiencias: clean(req.body.experiencias, 5000), formacao: clean(req.body.formacao, 4000),
+    competencias: clean(req.body.competencias, 2000), curriculo: clean(req.body.curriculo_url, 500)
   };
+  if (fields.curriculo && !/^https:\/\//i.test(fields.curriculo)) {
+    return res.status(400).json({ erro: 'Informe um link HTTPS válido para o currículo.' });
+  }
   if (fields.foto !== undefined && fields.foto !== null && fields.foto !== '') {
     if (typeof fields.foto !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(fields.foto) || fields.foto.length > 1400000) {
       return res.status(400).json({ erro: 'A foto não pôde ser processada ou ultrapassou o limite permitido.' });
     }
   }
-  if (fields.curriculo && !/^https:\/\//i.test(fields.curriculo)) {
-    return res.status(400).json({ erro: 'Informe um link HTTPS válido para o currículo.' });
+  const current = await pool.query("SELECT foto_perfil FROM usuarios WHERE id=$1 AND tipo='candidato'", [req.session.user.id]);
+  if (!current.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  let newPhoto = current.rows[0].foto_perfil;
+  let uploadedPhoto = null;
+  if (fields.foto) {
+    uploadedPhoto = await uploadProfileImage(req.session.user.id, 'foto_perfil', fields.foto);
+    newPhoto = uploadedPhoto;
   }
-  const result = await pool.query(
-    `UPDATE usuarios SET telefone=$1,cidade=$2,
-      foto_perfil=CASE WHEN $3::text IS NULL THEN foto_perfil ELSE $3 END,
-      titulo_profissional=$4,resumo_profissional=$5,objetivo_profissional=$6,
-      tipo_oportunidade=$7,modalidade_preferida=$8,experiencias=$9,formacao=$10,
-      competencias=$11,curriculo_url=$12
-     WHERE id=$13 AND tipo='candidato'
-     RETURNING foto_perfil`,
-    [fields.telefone || null,fields.cidade,fields.foto === undefined ? null : (fields.foto || null),
-      fields.titulo,fields.resumo,fields.objetivo,fields.tipo,fields.modalidade,
-      fields.experiencias,fields.formacao,fields.competencias,fields.curriculo,req.session.user.id]
-  );
-  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
-  req.session.user.telefone = fields.telefone || null;
-  req.session.user.cidade = fields.cidade;
-  req.session.user.fotoPerfil = result.rows[0].foto_perfil || null;
-  res.json({ sucesso: true, fotoPerfil: req.session.user.fotoPerfil });
+  try {
+    const result = await pool.query(
+      `UPDATE usuarios SET telefone=$1,cidade=$2,foto_perfil=$3,
+        titulo_profissional=$4,resumo_profissional=$5,objetivo_profissional=$6,
+        tipo_oportunidade=$7,modalidade_preferida=$8,experiencias=$9,formacao=$10,
+        competencias=$11,curriculo_url=$12
+       WHERE id=$13 AND tipo='candidato' RETURNING foto_perfil`,
+      [fields.telefone || null,fields.cidade,newPhoto,fields.titulo,fields.resumo,fields.objetivo,
+        fields.tipo,fields.modalidade,fields.experiencias,fields.formacao,fields.competencias,
+        fields.curriculo,req.session.user.id]
+    );
+    if (!result.rowCount) {
+      await deleteStoredImage(uploadedPhoto);
+      return res.status(404).json({ erro: 'Perfil não encontrado.' });
+    }
+    if (uploadedPhoto) await deleteStoredImage(current.rows[0].foto_perfil);
+    req.session.user.telefone = fields.telefone || null;
+    req.session.user.cidade = fields.cidade;
+    req.session.user.fotoPerfil = imageReference(req.session.user.id, 'foto_perfil', result.rows[0].foto_perfil);
+    res.json({ sucesso: true, fotoPerfil: req.session.user.fotoPerfil });
+  } catch (error) {
+    await deleteStoredImage(uploadedPhoto);
+    throw error;
+  }
 }));
-
 
 app.put('/api/perfil/visibilidade-foto', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const visibility = clean(req.body.visibilidade, 20);
-  if (!['conexoes', 'rede', 'usuarios', 'todos'].includes(visibility)) {
-    return res.status(400).json({ erro: 'Selecione uma opção de visibilidade válida.' });
+  if (!['usuarios', 'todos'].includes(visibility)) {
+    return res.status(409).json({ erro: 'As opções de conexões estarão disponíveis quando o sistema de conexões for implementado. Escolha Todos ou Todos os usuários.' });
   }
   await pool.query("UPDATE usuarios SET visibilidade_foto=$1 WHERE id=$2 AND tipo='candidato'", [visibility, req.session.user.id]);
   res.json({ sucesso: true, visibilidade: visibility });
@@ -515,13 +613,33 @@ app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => 
   if (image !== null && (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
     return res.status(400).json({ erro: 'A imagem não pôde ser processada ou ultrapassou o limite permitido.' });
   }
-  const query = field === 'foto_perfil'
-    ? 'UPDATE usuarios SET foto_perfil=$1 WHERE id=$2 AND tipo=\'candidato\' RETURNING foto_perfil'
-    : 'UPDATE usuarios SET banner_perfil=$1 WHERE id=$2 AND tipo=\'candidato\' RETURNING banner_perfil';
-  const result = await pool.query(query, [image, req.session.user.id]);
-  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
-  if (field === 'foto_perfil') req.session.user.fotoPerfil = result.rows[0].foto_perfil || null;
-  res.json({ sucesso: true });
+  const column = field;
+  const current = await pool.query("SELECT " + column + " FROM usuarios WHERE id=$1 AND tipo='candidato'", [req.session.user.id]);
+  if (!current.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  let newValue = null;
+  let uploadedValue = null;
+  if (image !== null) {
+    uploadedValue = await uploadProfileImage(req.session.user.id, field, image);
+    newValue = uploadedValue;
+  }
+  try {
+    const result = await pool.query(
+      "UPDATE usuarios SET " + column + "=$1 WHERE id=$2 AND tipo='candidato' RETURNING " + column,
+      [newValue, req.session.user.id]
+    );
+    if (!result.rowCount) {
+      await deleteStoredImage(uploadedValue);
+      return res.status(404).json({ erro: 'Perfil não encontrado.' });
+    }
+    await deleteStoredImage(current.rows[0][column]);
+    if (field === 'foto_perfil') {
+      req.session.user.fotoPerfil = imageReference(req.session.user.id, field, result.rows[0][column]);
+    }
+    res.json({ sucesso: true });
+  } catch (error) {
+    await deleteStoredImage(uploadedValue);
+    throw error;
+  }
 }));
 
 app.get('/api/vagas', asyncRoute(async (req, res) => {
