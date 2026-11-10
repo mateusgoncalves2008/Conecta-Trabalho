@@ -458,3 +458,16 @@ html[data-theme="dark"] .candidate-avatar-wrap,html[data-theme="dark"] .candidat
 html[data-theme="dark"] .candidate-tags span{background:#26364a;color:#dce5ef}
 @media(max-width:760px){.candidate-profile-layout{grid-template-columns:1fr}.candidate-profile-side{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.candidate-cover{height:110px}.candidate-identity{align-items:center;flex-wrap:wrap;gap:12px;padding:0 18px}.candidate-avatar-wrap{width:88px;height:88px;flex-basis:88px;margin-top:-34px}.candidate-identity-copy{padding:12px 0 0}.candidate-edit-button{margin:0 0 10px auto}.candidate-edit-button span{display:none}.candidate-contact-line{padding:12px 18px 18px;flex-direction:column;gap:7px}.candidate-profile-card{padding:19px}.candidate-profile-side{grid-template-columns:1fr}.candidate-edit-dialog{padding:20px 16px}.candidate-edit-grid{grid-template-columns:1fr}.candidate-edit-grid label.full{grid-column:auto}.candidate-edit-actions{flex-direction:column-reverse}.candidate-edit-actions button{width:100%}}
+
+
+/* Edição rápida da foto e do banner no próprio perfil */
+.candidate-cover{position:relative;background-position:center;background-size:cover}
+.candidate-cover.has-image{background-color:#26364a}
+.candidate-image-change{position:absolute;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,.75);background:rgba(20,43,73,.82);color:#fff;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
+.candidate-cover-change{right:18px;top:18px;padding:10px 14px;border-radius:8px;font-size:13px}
+.candidate-avatar-change{inset:0;flex-direction:column;border:0;border-radius:50%;background:rgba(20,43,73,.78);font-size:11px}
+.candidate-avatar-change i{font-size:19px}
+.candidate-cover:hover .candidate-cover-change,.candidate-cover-change:focus-visible,.candidate-avatar-wrap:hover .candidate-avatar-change,.candidate-avatar-change:focus-visible{opacity:1;visibility:visible}
+.candidate-image-change:disabled{opacity:.65;cursor:wait}
+@media(hover:none){.candidate-image-change{opacity:1;visibility:visible}.candidate-avatar-change{inset:auto 0 0;width:100%;height:34px;border-radius:0 0 50% 50%;font-size:9px}.candidate-avatar-change i{font-size:14px}.candidate-cover-change{top:10px;right:10px}}
+@media(prefers-reduced-motion:reduce){.candidate-image-change{transition:none}}
