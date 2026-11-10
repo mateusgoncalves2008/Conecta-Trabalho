@@ -1,8 +1,120 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Saiba como acessar o ConectaTrabalho no celular e adicionar um atalho à tela inicial do dispositivo."><meta name="theme-color" content="#142b49"><title>Baixe o aplicativo | ConectaTrabalho</title><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/aplicativo.css"><script src="../js/main.js" defer></script></head><body><header class="site-header"><a class="brand" href="../" aria-label="ConectaTrabalho - início"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a><button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button><nav class="main-nav" id="main-nav" aria-label="Navegação principal"><a href="../">Início</a><a href="vagas.html">Vagas</a><a href="como-funciona.html">Como funciona</a><a href="sobre.html">Sobre</a></nav><div class="header-actions"><a class="button button-outline button-small" href="login.html">Entrar</a><a class="button button-primary button-small" href="cadastro.html">Cadastrar</a></div></header><main class="app-page">
-<section class="app-hero"><div class="app-hero-inner"><div><span class="eyebrow">ACESSO EM QUALQUER TELA</span><h1>Leve suas oportunidades com você.</h1><p>O ConectaTrabalho pode ser acessado pelo navegador do celular, tablet ou computador. A página se adapta a diferentes tamanhos de tela.</p><div class="info-actions"><a class="button button-primary" href="../">Acessar ConectaTrabalho</a><a class="button button-outline" href="vagas.html">Ver oportunidades</a></div></div><img src="../img/institucional/mobile.svg" alt="Celular exibindo oportunidades de trabalho" width="640" height="460"></div></section>
-<section class="app-guide"><h2>Como criar um atalho no celular</h2><div class="app-platforms">
-<article class="app-platform"><h3>Android — Chrome</h3><ol><li>Abra o Chrome e acesse o endereço oficial do ConectaTrabalho.</li><li>Toque no menu do navegador, identificado pelos três pontos.</li><li>Procure “Adicionar à tela inicial” ou “Instalar app”, se disponível.</li><li>Confirme o nome e adicione o atalho.</li></ol></article>
-<article class="app-platform"><h3>iPhone — Safari</h3><ol><li>Abra o Safari e acesse o endereço oficial do ConectaTrabalho.</li><li>Toque no botão de compartilhar do navegador.</li><li>Escolha “Adicionar à Tela de Início”, quando disponível.</li><li>Confirme a inclusão do atalho.</li></ol></article>
-</div></section>
-<div class="app-warning"><strong>Importante:</strong> no momento, não há aplicativo nativo do ConectaTrabalho publicado oficialmente na Google Play ou na App Store. O atalho apenas abre o site pelo navegador; não é um aplicativo independente. Não instale arquivos APK ou aplicativos de fontes desconhecidas que utilizem o nome da plataforma.</div>
-<section class="app-cta"><div><h2>Pronto para continuar?</h2><p>Acesse a plataforma e consulte as oportunidades disponíveis.</p></div><a class="button button-primary" href="../">Abrir o site</a></section></main><footer class="site-footer site-footer-simple"><nav class="footer-simple-links" aria-label="Links institucionais"><a href="sobre.html" class="footer-simple-link">Sobre</a><a href="acessibilidade.html" class="footer-simple-link">Acessibilidade</a><a href="central-ajuda.html" class="footer-simple-link">Central de Ajuda</a><a href="termos-privacidade.html" class="footer-simple-link">Termos e Privacidade <span class="footer-link-caret" aria-hidden="true"></span></a><a href="publicidade.html" class="footer-simple-link">Publicidade</a><a href="solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas <span class="footer-link-caret" aria-hidden="true"></span></a><a href="aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a><a href="mais.html" class="footer-simple-link">Mais</a></nav><div class="footer-simple-copyright"><a class="footer-simple-brand" href="../" aria-label="ConectaTrabalho - início">ConectaTrabalho</a><span>ConectaTrabalho © <span class="current-year"></span></span></div></footer><div class="toast" id="toast" role="status" aria-live="polite"></div></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Instale o ConectaTrabalho como aplicativo no celular ou computador usando a tecnologia PWA.">
+  <meta name="theme-color" content="#142b49">
+  <title>Baixe o aplicativo | ConectaTrabalho</title>
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="icon" href="../img/pwa-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../img/pwa-192.svg">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/aplicativo.css">
+  <script src="../js/main.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="ConectaTrabalho - início"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+      <a href="../">Início</a><a href="vagas.html">Vagas</a><a href="como-funciona.html">Como funciona</a><a href="sobre.html">Sobre</a>
+    </nav>
+    <div class="header-actions">
+      <a class="button button-outline button-small" href="login.html">Entrar</a>
+      <a class="button button-primary button-small" href="cadastro.html">Cadastrar</a>
+    </div>
+  </header>
+
+  <main class="app-page">
+    <section class="app-hero">
+      <div class="app-hero-inner">
+        <div>
+          <span class="eyebrow">SEU APLICATIVO DE OPORTUNIDADES</span>
+          <h1>O ConectaTrabalho na tela inicial do seu dispositivo.</h1>
+          <p>Instale nossa plataforma como um Progressive Web App (PWA). Ela abre em uma janela própria, com ícone na tela inicial, sem precisar baixar um instalador de terceiros.</p>
+          <div class="info-actions">
+            <a class="button button-outline" href="../">Acessar ConectaTrabalho</a>
+            <a class="button button-outline" href="vagas.html">Ver oportunidades</a>
+          </div>
+        </div>
+        <img src="../img/institucional/mobile.svg" alt="Celular exibindo oportunidades de trabalho" width="640" height="460">
+      </div>
+    </section>
+
+    <section class="app-install" aria-labelledby="app-install-title">
+      <div class="app-install-copy">
+        <span class="eyebrow">INSTALAÇÃO DIRETA</span>
+        <h2 id="app-install-title">Instale em poucos passos</h2>
+        <p>Quando seu navegador oferecer suporte, toque no botão para instalar o ConectaTrabalho. A confirmação final é feita pelo próprio navegador.</p>
+        <button class="button button-primary app-install-button" id="install-pwa-button" type="button">Instalar ConectaTrabalho</button>
+        <p class="app-install-status" id="install-pwa-status" role="status" aria-live="polite">Verificando se a instalação está disponível neste dispositivo...</p>
+      </div>
+      <div class="app-install-mark" aria-hidden="true">
+        <img src="../img/pwa-192.svg" alt="" width="104" height="104">
+        <strong>ConectaTrabalho</strong>
+        <span>Aplicativo web instalável</span>
+      </div>
+    </section>
+
+    <section class="app-guide">
+      <h2>Como instalar manualmente</h2>
+      <div class="app-platforms">
+        <article class="app-platform">
+          <h3>Android — Chrome</h3>
+          <ol>
+            <li>Abra o ConectaTrabalho no Chrome.</li>
+            <li>Toque no menu de três pontos do navegador.</li>
+            <li>Escolha “Instalar app” ou “Adicionar à tela inicial”, se aparecer.</li>
+            <li>Confirme a instalação.</li>
+          </ol>
+        </article>
+        <article class="app-platform">
+          <h3>iPhone e iPad — Safari</h3>
+          <ol>
+            <li>Abra o ConectaTrabalho no Safari.</li>
+            <li>Toque no botão Compartilhar.</li>
+            <li>Selecione “Adicionar à Tela de Início”.</li>
+            <li>Confirme em “Adicionar”.</li>
+          </ol>
+        </article>
+        <article class="app-platform">
+          <h3>Computador — Chrome ou Edge</h3>
+          <ol>
+            <li>Abra o ConectaTrabalho no navegador.</li>
+            <li>Procure o ícone de instalação na barra de endereço ou no menu.</li>
+            <li>Selecione “Instalar” e confirme.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <div class="app-warning">
+      <strong>Sobre o funcionamento:</strong> o PWA é o próprio ConectaTrabalho instalado pelo navegador. Algumas partes públicas podem abrir quando não houver internet, mas login, cadastro, envio de candidaturas, atualização de perfil e demais recursos que consultam o servidor precisam de conexão. A instalação requer HTTPS no site publicado; em desenvolvimento, localhost também é aceito.
+    </div>
+
+    <section class="app-cta">
+      <div><h2>Suas oportunidades mais perto.</h2><p>Depois de instalar, abra o ConectaTrabalho pelo ícone criado no dispositivo.</p></div>
+      <a class="button button-primary" href="../">Abrir o site</a>
+    </section>
+  </main>
+
+  <footer class="site-footer site-footer-simple">
+    <nav class="footer-simple-links" aria-label="Links institucionais">
+      <a href="sobre.html" class="footer-simple-link">Sobre</a>
+      <a href="acessibilidade.html" class="footer-simple-link">Acessibilidade</a>
+      <a href="central-ajuda.html" class="footer-simple-link">Central de Ajuda</a>
+      <a href="termos-privacidade.html" class="footer-simple-link">Termos e Privacidade <span class="footer-link-caret" aria-hidden="true"></span></a>
+      <a href="publicidade.html" class="footer-simple-link">Publicidade</a>
+      <a href="solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas <span class="footer-link-caret" aria-hidden="true"></span></a>
+      <a href="aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a>
+      <a href="mais.html" class="footer-simple-link">Mais</a>
+    </nav>
+    <div class="footer-simple-copyright">
+      <a class="footer-simple-brand" href="../" aria-label="ConectaTrabalho - início">ConectaTrabalho</a>
+      <span>ConectaTrabalho © <span class="current-year"></span></span>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
