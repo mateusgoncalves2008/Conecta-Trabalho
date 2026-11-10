@@ -501,7 +501,7 @@ app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => 
   if (!['foto_perfil', 'banner_perfil'].includes(field)) {
     return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
   }
-  if (image !== null && (typeof image !== 'string' || !/^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
+  if (image !== null && (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
     return res.status(400).json({ erro: 'A imagem não pôde ser processada ou ultrapassou o limite permitido.' });
   }
   const query = field === 'foto_perfil'
