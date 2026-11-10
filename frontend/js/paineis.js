@@ -212,6 +212,10 @@
       visibilityPopover.hidden = !open;
       visibilityButton.setAttribute('aria-expanded', String(open));
       visibilityFeedback.textContent = '';
+      if (open) {
+        const checked = visibilityPopover.querySelector('input[name="candidate-photo-visibility-choice"]:checked');
+        if (checked) selectedPhotoVisibility = checked.value;
+      }
     };
     if (visibilityButton && visibilityPopover) {
       visibilityButton.addEventListener('click', () => setVisibilityPopover(visibilityPopover.hidden));
