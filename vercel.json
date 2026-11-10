@@ -20,8 +20,5 @@
       "source": "/pages/:path*",
       "destination": "/frontend/pages/:path*"
     }
-  ],
-  "git": {
-    "deploymentEnabled": false
-  }
+  ]
 }
