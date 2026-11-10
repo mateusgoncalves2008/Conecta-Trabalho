@@ -5,6 +5,18 @@
       "destination": "https://conecta-trabalho.onrender.com/api/:path*"
     },
     {
+      "source": "/manifest.webmanifest",
+      "destination": "/frontend/manifest.webmanifest"
+    },
+    {
+      "source": "/service-worker.js",
+      "destination": "/frontend/service-worker.js"
+    },
+    {
+      "source": "/offline.html",
+      "destination": "/frontend/offline.html"
+    },
+    {
       "source": "/img/:path*",
       "destination": "/frontend/img/:path*"
     },
