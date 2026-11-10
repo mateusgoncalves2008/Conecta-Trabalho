@@ -527,3 +527,12 @@ body.candidate-image-editor-open{overflow:hidden}
 @media(max-width:850px){.candidate-image-editor-dialog{height:min(calc(100vh - 16px),900px)}.candidate-image-editor-main{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}.candidate-image-editor-stage canvas{width:min(100%,45vh)}.candidate-image-crop-guide{width:min(45vh,90%)}.candidate-image-editor-tools{padding:14px 18px;gap:14px}.candidate-editor-panel{gap:14px}.candidate-editor-transform{gap:12px}}
 @media(max-width:520px){.candidate-image-editor-header{padding:0 16px}.candidate-image-editor-header h2{font-size:19px}.candidate-image-editor-footer{padding:0 14px}.candidate-image-editor-footer button{padding:10px 14px;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.candidate-image-editor{transition:none}}
+
+
+/* Ajustes manuais do editor de imagem */
+.candidate-image-adjustments{display:grid;gap:17px;margin-top:22px}
+.candidate-image-adjustments label{display:grid;gap:9px;color:var(--ink);font-size:12px;font-weight:650}
+.candidate-image-adjustments label>span{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.candidate-image-adjustments output{color:var(--muted);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.candidate-image-adjustments input[type=range]{width:100%;accent-color:var(--orange);cursor:pointer}
+@media(max-width:650px){.candidate-image-adjustments{gap:13px;margin-top:16px}}
