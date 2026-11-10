@@ -665,3 +665,40 @@ html[data-theme="dark"] .company-profile-fields input,html[data-theme="dark"] .c
 .company-cover-placeholder-mark{display:grid;place-items:center;width:58px;height:58px;border:1px solid #cbd5e1;border-radius:14px;background:#f5f7fa;color:#52647a;font-size:10px;font-weight:800;letter-spacing:1px}
 html[data-theme="dark"] .company-profile-preview-link{border-color:#40536a;color:#e7edf5}
 html[data-theme="dark"] .company-cover-placeholder-mark{background:#22364d;border-color:#40536a;color:#d6dfeb}
+
+/* Ajustes de leitura e espaçamento no perfil do candidato */
+.candidate-profile-card p.candidate-profile-text {
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.candidate-profile-card {
+  padding: 20px;
+}
+
+.candidate-profile-card .section-heading {
+  margin-bottom: 9px;
+}
+
+.candidate-profile-card h2 {
+  margin-bottom: 4px;
+}
+
+.candidate-profile-main-column,
+.candidate-profile-side {
+  gap: 12px;
+}
+
+.candidate-profile-layout {
+  gap: 16px;
+}
+
+.candidate-tags {
+  margin-top: 11px;
+}
+
+@media (max-width: 560px) {
+  .candidate-profile-card {
+    padding: 17px;
+  }
+}
