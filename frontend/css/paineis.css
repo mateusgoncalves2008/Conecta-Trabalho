@@ -624,3 +624,38 @@ body.candidate-camera-open{overflow:hidden}
 .candidate-visibility-feedback{min-height:0;margin:7px 0 0;color:#b74635;font-size:12px}
 .candidate-visibility-feedback:empty{display:none}
 @media(max-width:600px){.candidate-visibility-popover{left:-8px;padding:17px}}
+
+/* Perfil institucional da empresa */
+.company-profile-card{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(22,45,75,.035)}
+.company-cover{position:relative;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(120deg,#e8edf3,#dce5ef);background-position:center;background-size:cover}
+.company-cover.has-image .company-cover-placeholder{display:none}
+.company-cover-placeholder{display:flex;flex-direction:column;align-items:center;gap:9px;color:#738195;font-size:13px}
+.company-cover-placeholder i{font-size:30px}
+.company-image-edit{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border:1px solid rgba(255,255,255,.7);border-radius:7px;background:rgba(20,43,73,.82);color:#fff;font-size:12px;font-weight:650;cursor:pointer}
+.company-cover-edit{position:absolute;right:18px;bottom:16px}
+.company-profile-identity{display:flex;align-items:flex-end;gap:18px;padding:0 30px 22px;border-bottom:1px solid var(--line)}
+.company-logo-wrap{position:relative;width:116px;height:116px;flex:0 0 116px;margin-top:-48px;display:grid;place-items:center;overflow:visible;border:5px solid #fff;border-radius:18px;background:#edf2f7;color:var(--navy);font-size:26px;font-weight:800}
+.company-logo-wrap img{width:100%;height:100%;border-radius:13px;object-fit:cover}
+.company-logo-wrap>span{display:grid;place-items:center;width:100%;height:100%}
+.company-logo-edit{position:absolute;right:-8px;bottom:-8px;width:34px;height:34px;border:2px solid #fff;border-radius:50%;background:var(--orange);color:#fff;cursor:pointer}
+.company-profile-heading-copy{display:grid;gap:3px;padding:0 0 5px}
+.company-profile-heading-copy strong{color:var(--navy);font-size:22px;line-height:1.25}
+.company-profile-heading-copy span{color:var(--muted);font-size:13px}
+.company-profile-form{padding:26px 30px 22px}
+.company-profile-form-heading h3{margin:0;color:var(--navy);font-size:18px}
+.company-profile-form-heading p{margin:4px 0 20px;color:var(--muted);font-size:12px}
+.company-profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}
+.company-profile-fields .field{display:flex;flex-direction:column;gap:7px;margin:0 0 17px;color:#344255;font-size:13px;font-weight:650}
+.company-profile-fields input,.company-profile-fields select,.company-profile-fields textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid #d9e1e9;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:400}
+.company-profile-fields textarea{min-height:125px;resize:vertical}
+.company-profile-fields .field-wide{grid-column:1/-1}
+.company-profile-form-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-top:17px;border-top:1px solid #edf0f4}
+.company-profile-form-footer .form-feedback{margin:0;font-size:13px}
+.company-image-hint{margin:0;padding:0 30px 24px;color:var(--muted);font-size:12px}
+.company-profile-completion{color:var(--muted);font-size:12px}
+html[data-theme="dark"] .company-profile-card{background:#172538;border-color:#2c3c50}
+html[data-theme="dark"] .company-profile-identity{border-color:#34465a}
+html[data-theme="dark"] .company-logo-wrap{border-color:#172538;background:#263b53;color:#f4f7fb}
+html[data-theme="dark"] .company-profile-heading-copy strong,html[data-theme="dark"] .company-profile-form-heading h3{color:#f4f7fb}
+html[data-theme="dark"] .company-profile-fields input,html[data-theme="dark"] .company-profile-fields select,html[data-theme="dark"] .company-profile-fields textarea{background:#1e3046;border-color:#40536a;color:#e8eef5}
+@media(max-width:650px){.company-cover{height:155px}.company-profile-identity{padding:0 17px 18px;gap:13px}.company-logo-wrap{width:88px;height:88px;flex-basis:88px;margin-top:-35px;font-size:21px}.company-profile-heading-copy strong{font-size:18px}.company-profile-form{padding:22px 18px}.company-profile-fields{grid-template-columns:1fr}.company-profile-fields .field-wide{grid-column:auto}.company-profile-form-footer{align-items:stretch;flex-direction:column-reverse}.company-profile-form-footer .button{width:100%}.company-image-hint{padding:0 18px 20px}}
