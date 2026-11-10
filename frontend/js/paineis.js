@@ -259,7 +259,7 @@
       document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
       if (tab.dataset.editorTab === 'change') editorInput.click();
     }));
-    document.getElementById('candidate-image-editor-choose').addEventListener('click', () => editorInput.click());
+    document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
     editorInput.addEventListener('change', event => {
       const file = event.target.files[0];
       if (!file) return;
