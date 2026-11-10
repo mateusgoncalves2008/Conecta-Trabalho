@@ -21,7 +21,7 @@
       if (welcomeName) welcomeName.textContent = session.usuario.nomeEmpresa || session.usuario.nome.split(' ')[0];
       const userName = document.getElementById('user-name');
       if (userName) userName.textContent = session.usuario.nomeEmpresa || session.usuario.nome;
-      if (page === 'empresa') await loadCompany();
+      if (page === 'empresa') { await loadCompanyProfile(); await loadCompany(); }
       else await loadCandidate();
     } catch (error) {
       Conecta.toast(error.message);
@@ -646,6 +646,107 @@
       }
     });
   }
+  let companyProfileCache = {};
+  const companyInitials = name => String(name || 'EMP').trim().split(/\\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase() || 'EMP';
+
+  async function loadCompanyProfile() {
+    const data = await Conecta.api('/api/empresa/perfil');
+    companyProfileCache = data.perfil || {};
+    const profile = companyProfileCache;
+    const form = document.getElementById('company-profile-form');
+    ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
+      if (form.elements[key]) form.elements[key].value = profile[key] || '';
+    });
+    document.getElementById('company-profile-name').textContent = profile.nome_empresa || 'Sua empresa';
+    document.getElementById('company-profile-location').textContent = profile.cidade || 'Localização não informada';
+    document.getElementById('company-logo-initials').textContent = companyInitials(profile.nome_empresa);
+    const logo = document.getElementById('company-logo-preview');
+    if (profile.foto_perfil) { logo.src = profile.foto_perfil; logo.hidden = false; document.getElementById('company-logo-initials').hidden = true; }
+    else { logo.removeAttribute('src'); logo.hidden = true; document.getElementById('company-logo-initials').hidden = false; }
+    const cover = document.getElementById('company-cover');
+    cover.style.backgroundImage = profile.banner_perfil ? 'url("' + profile.banner_perfil + '")' : '';
+    cover.classList.toggle('has-image', Boolean(profile.banner_perfil));
+  }
+
+  async function prepareCompanyImage(file, width, height) {
+    if (!file || !file.type.startsWith('image/')) throw new Error('Selecione um arquivo de imagem válido.');
+    if (file.size > 5 * 1024 * 1024) throw new Error('Escolha uma imagem de até 5 MB.');
+    let image;
+    try { image = await createImageBitmap(file); }
+    catch {
+      image = await new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const element = new Image();
+        element.onload = () => { URL.revokeObjectURL(objectUrl); resolve(element); };
+        element.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Não foi possível abrir essa imagem.')); };
+        element.src = objectUrl;
+      });
+    }
+    const sourceWidth = image.width || image.naturalWidth;
+    const sourceHeight = image.height || image.naturalHeight;
+    const scale = Math.max(width / sourceWidth, height / sourceHeight);
+    const cropWidth = width / scale;
+    const cropHeight = height / scale;
+    const sx = (sourceWidth - cropWidth) / 2;
+    const sy = (sourceHeight - cropHeight) / 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#fff'; context.fillRect(0,0,width,height);
+    context.drawImage(image,sx,sy,cropWidth,cropHeight,0,0,width,height);
+    image.close?.();
+    let quality = .9;
+    let result = canvas.toDataURL('image/jpeg',quality);
+    while (result.length > 1400000 && quality > .45) { quality -= .1; result = canvas.toDataURL('image/jpeg',quality); }
+    if (result.length > 1400000) throw new Error('Não foi possível reduzir essa imagem ao tamanho permitido.');
+    return result;
+  }
+
+  function setupCompanyProfileEditor() {
+    const form = document.getElementById('company-profile-form');
+    if (!form) return;
+    const feedback = document.getElementById('company-profile-feedback');
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true; button.textContent = 'Salvando...'; feedback.textContent = '';
+      try {
+        const profile = await Conecta.api('/api/empresa/perfil', { method: 'PUT', body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+        companyProfileCache = { ...companyProfileCache, ...profile.perfil };
+        document.getElementById('company-profile-name').textContent = profile.perfil.nome_empresa;
+        document.getElementById('company-profile-location').textContent = profile.perfil.cidade;
+        document.getElementById('company-logo-initials').textContent = companyInitials(profile.perfil.nome_empresa);
+        const welcome = document.getElementById('welcome-name');
+        const user = document.getElementById('user-name');
+        if (welcome) welcome.textContent = profile.perfil.nome_empresa;
+        if (user) user.textContent = profile.perfil.nome_empresa;
+        feedback.textContent = 'Perfil atualizado com sucesso.';
+        feedback.classList.add('success');
+      } catch (error) { feedback.textContent = error.message; feedback.classList.remove('success'); }
+      finally { button.disabled = false; button.textContent = 'Salvar perfil'; }
+    });
+    const bindImage = (buttonId,inputId,field,width,height,label) => {
+      const button = document.getElementById(buttonId);
+      const input = document.getElementById(inputId);
+      button.addEventListener('click', () => input.click());
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        button.disabled = true;
+        try {
+          const image = await prepareCompanyImage(file,width,height);
+          await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:field,imagem:image})});
+          await loadCompanyProfile();
+          Conecta.toast(label + ' atualizada com sucesso.');
+        } catch (error) { Conecta.toast(error.message); }
+        finally { button.disabled = false; input.value = ''; }
+      });
+    };
+    bindImage('company-logo-edit','company-logo-input','foto_perfil',600,600,'Logotipo');
+    bindImage('company-cover-edit','company-cover-input','banner_perfil',1600,600,'Imagem de capa');
+  }
+
   async function loadCompany() {
     const data = await Conecta.api('/api/painel/empresa');
     const jobs = document.getElementById('company-jobs');
@@ -703,6 +804,7 @@
       fontButtons.forEach(button => button.addEventListener('click', () => applyFontSize(button.dataset.fontSize)));
     }
     setupCandidateProfileEditor();
+    setupCompanyProfileEditor();
     initPanel();
   });
 })();
