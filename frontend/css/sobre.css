@@ -1,0 +1,45 @@
+/* Página institucional Sobre o ConectaTrabalho */
+.about-main{overflow:hidden}
+.about-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);align-items:center;gap:54px;padding:76px max(7vw,24px);background:#f3f6fa}
+.about-hero-copy{max-width:680px}
+.about-brand-line{display:flex;align-items:center;gap:12px;margin-bottom:24px;color:var(--navy);font-size:15px;font-weight:750}
+.about-brand-line img{width:46px;height:46px;object-fit:contain}
+.about-hero h1{margin:0 0 18px;color:var(--navy);font-size:clamp(38px,5vw,58px);line-height:1.08;letter-spacing:-2px}
+.about-hero h1 span{color:var(--orange)}
+.about-hero-copy>p{max-width:620px;margin:0;color:var(--muted);font-size:16px;line-height:1.85}
+.about-hero-art{display:flex;align-items:center;justify-content:center;min-width:0}
+.about-hero-art img{display:block;width:100%;max-width:520px;height:auto;max-height:390px;object-fit:contain;object-position:center}
+.about-section{padding:76px max(7vw,24px)}
+.about-section-inner{width:min(1120px,100%);margin:0 auto}
+.about-section-heading{max-width:720px;margin:0 auto 38px;text-align:center}
+.about-section-heading h2{margin:9px 0 10px;color:var(--navy);font-size:clamp(27px,3.5vw,36px);line-height:1.2;letter-spacing:-.8px}
+.about-section-heading p{margin:0;color:var(--muted);font-size:14px;line-height:1.8}
+.about-mission{max-width:850px;margin:0 auto;text-align:center;color:var(--ink);font-size:16px;line-height:1.95}
+.about-mission strong{color:var(--navy)}
+.about-audiences{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.about-audience{min-width:0;padding:28px;border:1px solid var(--line);border-radius:15px;background:var(--surface)}
+.about-audience-image{display:flex;align-items:center;justify-content:center;min-height:190px;margin-bottom:22px;border-radius:11px;background:#f3f6fa}
+.about-audience-image img{display:block;width:min(100%,270px);height:180px;object-fit:contain;object-position:center}
+.about-audience h3{margin:0 0 8px;color:var(--navy);font-size:19px}
+.about-audience p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.about-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.about-value{padding:23px;border:1px solid var(--line);border-radius:13px;background:var(--surface)}
+.about-value-mark{display:grid;place-items:center;width:38px;height:38px;margin-bottom:16px;border-radius:10px;background:#fff0e9;color:var(--orange-dark);font-size:17px;font-weight:800}
+.about-value h3{margin:0 0 7px;color:var(--navy);font-size:15px}
+.about-value p{margin:0;color:var(--muted);font-size:12px;line-height:1.75}
+.about-final{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:42px max(7vw,24px);background:#10243d;color:#fff}
+.about-final-copy{max-width:720px}
+.about-final h2{margin:8px 0;color:#fff;font-size:clamp(23px,3vw,32px);line-height:1.2}
+.about-final p{margin:0;color:rgba(255,255,255,.72);font-size:13px;line-height:1.7}
+.about-final .eyebrow{color:#f09a70}
+.about-final .button{flex:0 0 auto}
+html[data-theme="dark"] .about-hero,html[data-theme="dark"] .about-audience-image{background:#151e2b}
+html[data-theme="dark"] .about-hero h1,html[data-theme="dark"] .about-brand-line,html[data-theme="dark"] .about-section-heading h2,html[data-theme="dark"] .about-audience h3,html[data-theme="dark"] .about-value h3{color:#f3f7fb}
+html[data-theme="dark"] .about-audience,html[data-theme="dark"] .about-value{background:#172538;border-color:#2c3c50}
+html[data-theme="dark"] .about-mission{color:#d6dfeb}
+html[data-theme="dark"] .about-mission strong{color:#f3f7fb}
+html[data-theme="dark"] .about-value-mark{background:#493126;color:#ffb18a}
+html[data-theme="dark"] .about-final{background:#0b1320}
+@media(max-width:850px){.about-hero{grid-template-columns:1fr;gap:28px;padding-top:58px;padding-bottom:58px}.about-hero-art img{max-height:310px}.about-values{grid-template-columns:1fr}.about-final{align-items:flex-start;flex-direction:column}.about-final .button{width:100%}}
+@media(max-width:620px){.about-hero{padding:46px 22px 52px;gap:20px}.about-hero h1{font-size:42px;letter-spacing:-1.5px}.about-hero-copy>p{font-size:14px}.about-hero-art img{max-height:245px}.about-section{padding:58px 22px}.about-audiences{grid-template-columns:1fr}.about-audience{padding:21px}.about-audience-image{min-height:160px}.about-audience-image img{height:150px}.about-section-heading{margin-bottom:28px}.about-final{padding:36px 22px}}
+@media(prefers-reduced-motion:reduce){.about-main *{scroll-behavior:auto}}
