@@ -5,6 +5,7 @@ const APP_SHELL = [
   '/manifest.webmanifest',
   '/css/global.css',
   '/css/aplicativo.css',
+  '/css/offline.css',
   '/js/main.js',
   '/img/logo-conectatrabalho.svg',
   '/img/institucional/mobile.svg',
