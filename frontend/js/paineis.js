@@ -282,13 +282,16 @@
       editorContext.translate(size / 2, size / 2);
       editorContext.rotate(radians);
       editorContext.scale(editorState.flipX * scale, editorState.flipY * scale);
-      editorContext.filter = `brightness(${editorState.brightness}%) contrast(${editorState.contrast}%) saturate(${editorState.saturation}%) ${editorState.filter}`;
+      const brightnessEffect = Math.max(0, 100 + (editorState.brightness - 100) * 1.8);
+      const contrastEffect = Math.max(0, 100 + (editorState.contrast - 100) * 1.8);
+      const saturationEffect = Math.max(0, 100 + (editorState.saturation - 100) * 1.8);
+      editorContext.filter = `brightness(${brightnessEffect}%) contrast(${contrastEffect}%) saturate(${saturationEffect}%) ${editorState.filter}`;
       editorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
       editorContext.restore();
       if (editorState.vignette > 0) {
         const gradient = editorContext.createRadialGradient(size / 2, size / 2, size * 0.18, size / 2, size / 2, size * 0.72);
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
-        gradient.addColorStop(1, `rgba(0,0,0,${editorState.vignette / 100})`);
+        gradient.addColorStop(1, `rgba(0,0,0,${Math.min(0.95, editorState.vignette / 100 * 1.25)})`);
         editorContext.save(); editorContext.fillStyle = gradient; editorContext.fillRect(0, 0, size, size); editorContext.restore();
       }
     }
