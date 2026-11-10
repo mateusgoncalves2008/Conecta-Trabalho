@@ -507,9 +507,6 @@
       editorInput.removeAttribute('capture');
       editorInput.click();
     });
-    document.getElementById('candidate-photo-seals').addEventListener('click', () => {
-      Conecta.toast('O recurso de selos ainda será disponibilizado.');
-    });
     document.getElementById('candidate-photo-delete').addEventListener('click', async () => {
       if (!window.confirm('Tem certeza de que deseja excluir sua foto de perfil?')) return;
       const button = document.getElementById('candidate-photo-delete');
