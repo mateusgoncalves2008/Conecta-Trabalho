@@ -260,11 +260,9 @@
       if (tab.dataset.editorTab === 'change') editorInput.click();
     }));
     document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
-    editorInput.addEventListener('change', event => {
-      editorInput.removeAttribute('capture');
-      const file = event.target.files[0];
+    const loadImageIntoEditor = file => {
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); event.target.value = ''; return; }
+      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); return; }
       const image = new Image();
       const url = URL.createObjectURL(file);
       image.onload = () => {
@@ -279,10 +277,14 @@
         document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
         renderImageEditor();
         imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
-        event.target.value = '';
       };
       image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Este formato de imagem não é compatível com o navegador.'); };
       image.src = url;
+    };
+    editorInput.addEventListener('change', event => {
+      editorInput.removeAttribute('capture');
+      loadImageIntoEditor(event.target.files[0]);
+      event.target.value = '';
     });
     document.getElementById('candidate-image-rotate-left').addEventListener('click', () => { editorState.angle = ((editorState.angle - 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
     document.getElementById('candidate-image-rotate-right').addEventListener('click', () => { editorState.angle = ((editorState.angle + 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
@@ -339,10 +341,75 @@
     });
     document.getElementById('candidate-photo-update-close').addEventListener('click', closePhotoUpdateModal);
     photoUpdateModal.addEventListener('click', event => { if (event.target === photoUpdateModal) closePhotoUpdateModal(); });
-    document.getElementById('candidate-photo-use-camera').addEventListener('click', () => {
-      closePhotoUpdateModal();
-      editorInput.setAttribute('capture', 'user');
-      editorInput.click();
+    const cameraModal = document.getElementById('candidate-camera-modal');
+    const cameraVideo = document.getElementById('candidate-camera-video');
+    const cameraFeedback = document.getElementById('candidate-camera-feedback');
+    let cameraStream = null;
+    const stopCandidateCamera = () => {
+      if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+      cameraVideo.srcObject = null;
+    };
+    const closeCandidateCamera = () => {
+      stopCandidateCamera();
+      cameraModal.classList.remove('is-open');
+      cameraModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-camera-open');
+    };
+    document.getElementById('candidate-photo-use-camera').addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        Conecta.toast('Seu navegador não permite acessar a câmera aqui. Acesse pelo HTTPS ou localhost e tente novamente.');
+        return;
+      }
+      const cameraButton = document.getElementById('candidate-photo-use-camera');
+      cameraButton.disabled = true;
+      try {
+        cameraFeedback.textContent = 'Aguardando autorização para acessar a câmera...';
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: 'user' }, width: { ideal: 1280 }, height: { ideal: 960 } }
+        });
+        cameraVideo.srcObject = cameraStream;
+        await cameraVideo.play();
+        closePhotoUpdateModal();
+        cameraModal.classList.add('is-open');
+        cameraModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('candidate-camera-open');
+        cameraFeedback.textContent = 'Posicione seu rosto dentro da área da câmera.';
+      } catch (error) {
+        stopCandidateCamera();
+        const message = error && error.name === 'NotAllowedError'
+          ? 'Permita o acesso à câmera nas configurações do navegador e tente novamente.'
+          : error && error.name === 'NotFoundError'
+            ? 'Nenhuma câmera foi encontrada neste dispositivo.'
+            : 'Não foi possível iniciar a câmera. Verifique se ela está disponível e tente novamente.';
+        Conecta.toast(message);
+      } finally {
+        cameraButton.disabled = false;
+      }
+    });
+    document.getElementById('candidate-camera-close').addEventListener('click', closeCandidateCamera);
+    cameraModal.addEventListener('click', event => { if (event.target === cameraModal) closeCandidateCamera(); });
+    document.getElementById('candidate-camera-capture').addEventListener('click', () => {
+      if (!cameraStream || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
+        cameraFeedback.textContent = 'A câmera ainda está iniciando. Aguarde um instante.';
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(cameraVideo.videoWidth, cameraVideo.videoHeight));
+      canvas.width = Math.round(cameraVideo.videoWidth * scale);
+      canvas.height = Math.round(cameraVideo.videoHeight * scale);
+      canvas.getContext('2d').drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        if (!blob) {
+          cameraFeedback.textContent = 'Não foi possível capturar a foto. Tente novamente.';
+          return;
+        }
+        const photoFile = new File([blob], 'foto-perfil-camera.jpg', { type: 'image/jpeg' });
+        closeCandidateCamera();
+        loadImageIntoEditor(photoFile);
+      }, 'image/jpeg', 0.92);
     });
     document.getElementById('candidate-photo-upload').addEventListener('click', () => {
       closePhotoUpdateModal();
