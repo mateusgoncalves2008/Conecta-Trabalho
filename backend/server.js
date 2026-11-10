@@ -32,7 +32,7 @@ app.set('trust proxy', 1);
 const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
 delete directives['upgrade-insecure-requests'];
 app.use(helmet({ contentSecurityPolicy: { directives }, crossOriginEmbedderPolicy: false }));
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json({ limit: '3mb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 app.use(session({
   store: new pgSession({ pool, tableName: 'sessoes', createTableIfMissing: true }),
@@ -70,8 +70,22 @@ const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const publicUser = user => ({
   id: user.id, nome: user.nome, email: user.email, tipo: user.tipo,
   telefone: user.telefone, cidade: user.cidade, nomeEmpresa: user.nome_empresa,
+  fotoPerfil: user.foto_perfil || null,
   emailVerificado: user.email_verificado === true
 });
+
+const profileSchemaReady = pool.query(`
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_oportunidade VARCHAR(80);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS modalidade_preferida VARCHAR(40);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS experiencias TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS formacao TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS competencias TEXT;
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS curriculo_url VARCHAR(500);
+`);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
   if (!req.session.user) return res.status(401).json({ erro: 'Faça login para continuar.' });
@@ -421,6 +435,63 @@ app.post('/api/logout', (req, res) => {
   });
 });
 app.get('/api/me', (req, res) => res.json({ usuario: req.session.user || null }));
+app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    `SELECT nome,email,telefone,cidade,foto_perfil,titulo_profissional,resumo_profissional,
+      objetivo_profissional,tipo_oportunidade,modalidade_preferida,experiencias,formacao,
+      competencias,curriculo_url FROM usuarios WHERE id=$1 AND tipo='candidato'`,
+    [req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  const profile = result.rows[0];
+  req.session.user.fotoPerfil = profile.foto_perfil || null;
+  res.json({ perfil: profile });
+}));
+
+app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const fields = {
+    telefone: clean(req.body.telefone, 30),
+    cidade: clean(req.body.cidade, 100) || 'Capelinha',
+    foto: req.body.foto_perfil,
+    titulo: clean(req.body.titulo_profissional, 120),
+    resumo: clean(req.body.resumo_profissional, 3000),
+    objetivo: clean(req.body.objetivo_profissional, 2000),
+    tipo: clean(req.body.tipo_oportunidade, 80),
+    modalidade: clean(req.body.modalidade_preferida, 40),
+    experiencias: clean(req.body.experiencias, 5000),
+    formacao: clean(req.body.formacao, 4000),
+    competencias: clean(req.body.competencias, 2000),
+    curriculo: clean(req.body.curriculo_url, 500)
+  };
+  if (fields.foto !== undefined && fields.foto !== null && fields.foto !== '') {
+    if (typeof fields.foto !== 'string' || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(fields.foto) || fields.foto.length > 2100000) {
+      return res.status(400).json({ erro: 'A foto deve ser JPG, PNG ou WebP e ter no máximo 1,5 MB.' });
+    }
+  }
+  if (fields.curriculo && !/^https:\/\//i.test(fields.curriculo)) {
+    return res.status(400).json({ erro: 'Informe um link HTTPS válido para o currículo.' });
+  }
+  const result = await pool.query(
+    `UPDATE usuarios SET telefone=$1,cidade=$2,
+      foto_perfil=CASE WHEN $3::text IS NULL THEN foto_perfil ELSE $3 END,
+      titulo_profissional=$4,resumo_profissional=$5,objetivo_profissional=$6,
+      tipo_oportunidade=$7,modalidade_preferida=$8,experiencias=$9,formacao=$10,
+      competencias=$11,curriculo_url=$12
+     WHERE id=$13 AND tipo='candidato'
+     RETURNING foto_perfil`,
+    [fields.telefone || null,fields.cidade,fields.foto === undefined ? null : (fields.foto || null),
+      fields.titulo,fields.resumo,fields.objetivo,fields.tipo,fields.modalidade,
+      fields.experiencias,fields.formacao,fields.competencias,fields.curriculo,req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  req.session.user.telefone = fields.telefone || null;
+  req.session.user.cidade = fields.cidade;
+  req.session.user.fotoPerfil = result.rows[0].foto_perfil || null;
+  res.json({ sucesso: true, fotoPerfil: req.session.user.fotoPerfil });
+}));
+
 
 app.get('/api/vagas', asyncRoute(async (req, res) => {
   const busca = clean(req.query.busca, 100);
