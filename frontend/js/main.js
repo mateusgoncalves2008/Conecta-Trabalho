@@ -354,6 +354,30 @@
         } catch (error) { toast(error.message); }
       });
     });
+
+    // Atalho do perfil do candidato nas páginas públicas, somente com sessão ativa.
+    const publicHeaderActions = document.querySelector('.site-header .header-actions');
+    if (publicHeaderActions && window.location.pathname !== '/pages/candidato.html') {
+      api('/api/me').then(session => {
+        const user = session.usuario;
+        if (!user || user.tipo !== 'candidato') return;
+        const link = document.createElement('a');
+        link.className = 'candidate-header-profile-link';
+        link.href = '/pages/candidato.html#meu-perfil';
+        link.setAttribute('aria-label', 'Abrir meu perfil');
+        link.title = 'Meu perfil';
+        if (user.fotoPerfil) {
+          const photo = document.createElement('img');
+          photo.src = user.fotoPerfil;
+          photo.alt = '';
+          link.appendChild(photo);
+        } else {
+          const initials = String(user.nome || 'CT').trim().split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          link.textContent = initials;
+        }
+        publicHeaderActions.replaceChildren(link);
+      }).catch(() => {});
+    }
   });
 
   window.Conecta = { api, toast, redirectByUser };
