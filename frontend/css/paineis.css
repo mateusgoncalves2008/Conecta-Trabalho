@@ -471,3 +471,25 @@ html[data-theme="dark"] .candidate-tags span{background:#26364a;color:#dce5ef}
 .candidate-image-change:disabled{opacity:.65;cursor:wait}
 @media(hover:none){.candidate-image-change{opacity:1;visibility:visible}.candidate-avatar-change{inset:auto 0 0;width:100%;height:34px;border-radius:0 0 50% 50%;font-size:9px}.candidate-avatar-change i{font-size:14px}.candidate-cover-change{top:10px;right:10px}}
 @media(prefers-reduced-motion:reduce){.candidate-image-change{transition:none}}
+
+
+/* Visualizador central da foto de perfil */
+.candidate-photo-viewer{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.72);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+.candidate-photo-viewer.is-open{opacity:1;visibility:visible}
+.candidate-photo-dialog{width:min(100%,1000px);max-height:min(88vh,760px);display:flex;flex-direction:column;overflow:hidden;border-radius:12px;background:#1c2024;color:#f4f4f4;box-shadow:0 18px 60px rgba(0,0,0,.35)}
+.candidate-photo-dialog-header{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(255,255,255,.12)}
+.candidate-photo-dialog-header h2{margin:0;font-size:21px;font-weight:600}
+.candidate-photo-dialog-header button{width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:#c9cdd1;font-size:23px;cursor:pointer}
+.candidate-photo-dialog-header button:hover{background:rgba(255,255,255,.1)}
+.candidate-photo-dialog-body{display:flex;flex-direction:column;align-items:center;gap:22px;overflow:auto;padding:34px 20px 24px}
+.candidate-photo-dialog-body>img{width:min( min(38vw,360px), 48vh);height:min( min(38vw,360px), 48vh);min-width:180px;min-height:180px;object-fit:cover;border-radius:50%;background:#111}
+.candidate-photo-visibility{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid #aeb4ba;border-radius:22px;color:#e0e3e6;font-size:14px}
+.candidate-photo-actions{width:100%;display:flex;align-items:center;gap:22px}
+.candidate-photo-actions button{min-width:72px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:#f0f1f2;font-size:14px;cursor:pointer}
+.candidate-photo-actions button:hover{background:rgba(255,255,255,.1)}
+.candidate-photo-actions button i{font-size:21px;color:#c8cdd1}
+.candidate-photo-actions #candidate-photo-delete{margin-left:auto}
+.candidate-photo-actions button:disabled{opacity:.5;cursor:wait}
+body.candidate-photo-viewer-open{overflow:hidden}
+@media(max-width:600px){.candidate-photo-viewer{padding:8px}.candidate-photo-dialog{max-height:92vh}.candidate-photo-dialog-body{padding:28px 14px 18px}.candidate-photo-dialog-body>img{width:min(70vw,300px);height:min(70vw,300px);min-width:150px;min-height:150px}.candidate-photo-actions{justify-content:space-between;gap:4px}.candidate-photo-actions button{min-width:0;padding:8px 6px;font-size:12px}.candidate-photo-actions button i{font-size:19px}.candidate-photo-actions #candidate-photo-delete{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.candidate-photo-viewer{transition:none}}
