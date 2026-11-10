@@ -261,6 +261,7 @@
     }));
     document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
     editorInput.addEventListener('change', event => {
+      editorInput.removeAttribute('capture');
       const file = event.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); event.target.value = ''; return; }
@@ -320,9 +321,33 @@
         feedback.textContent = error.message || 'Não foi possível salvar a imagem.';
       } finally { button.disabled = false; }
     });
+    const photoUpdateModal = document.getElementById('candidate-photo-update-modal');
+    const photoUpdatePreview = document.getElementById('candidate-photo-update-preview');
+    const closePhotoUpdateModal = () => {
+      photoUpdateModal.classList.remove('is-open');
+      photoUpdateModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-photo-update-open');
+    };
     document.getElementById('candidate-photo-update').addEventListener('click', () => {
+      photoUpdatePreview.src = candidateProfileCache.foto_perfil || '';
+      document.getElementById('candidate-photo-update-greeting').textContent =
+        candidateProfileCache.nome ? candidateProfileCache.nome.split(/\\s+/)[0] + '_, ajude outras pessoas a reconhecer você.' : 'Ajude outras pessoas a reconhecer você.';
       closePhotoViewer();
-      quickPhotoInput.click();
+      photoUpdateModal.classList.add('is-open');
+      photoUpdateModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('candidate-photo-update-open');
+    });
+    document.getElementById('candidate-photo-update-close').addEventListener('click', closePhotoUpdateModal);
+    photoUpdateModal.addEventListener('click', event => { if (event.target === photoUpdateModal) closePhotoUpdateModal(); });
+    document.getElementById('candidate-photo-use-camera').addEventListener('click', () => {
+      closePhotoUpdateModal();
+      editorInput.setAttribute('capture', 'user');
+      editorInput.click();
+    });
+    document.getElementById('candidate-photo-upload').addEventListener('click', () => {
+      closePhotoUpdateModal();
+      editorInput.removeAttribute('capture');
+      editorInput.click();
     });
     document.getElementById('candidate-photo-seals').addEventListener('click', () => {
       Conecta.toast('O recurso de selos ainda será disponibilizado.');
