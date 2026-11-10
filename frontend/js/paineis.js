@@ -269,8 +269,8 @@
       image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Este formato de imagem não é compatível com o navegador.'); };
       image.src = url;
     });
-    document.getElementById('candidate-image-rotate-left').addEventListener('click', () => { editorState.angle -= 90; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
-    document.getElementById('candidate-image-rotate-right').addEventListener('click', () => { editorState.angle += 90; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('candidate-image-rotate-left').addEventListener('click', () => { editorState.angle = ((editorState.angle - 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('candidate-image-rotate-right').addEventListener('click', () => { editorState.angle = ((editorState.angle + 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
     document.getElementById('candidate-image-flip-horizontal').addEventListener('click', () => { editorState.flipX *= -1; renderImageEditor(); });
     document.getElementById('candidate-image-flip-vertical').addEventListener('click', () => { editorState.flipY *= -1; renderImageEditor(); });
     document.getElementById('candidate-image-zoom').addEventListener('input', event => { editorState.zoom = Number(event.target.value); renderImageEditor(); });
@@ -285,7 +285,13 @@
       const feedback = document.getElementById('candidate-image-editor-feedback');
       button.disabled = true; feedback.textContent = 'Salvando...';
       try {
-        const imageData = editorCanvas.toDataURL('image/jpeg', 0.9);
+        let quality = 0.9;
+        let imageData = editorCanvas.toDataURL('image/jpeg', quality);
+        while (imageData.length > 1400000 && quality > 0.45) {
+          quality -= 0.1;
+          imageData = editorCanvas.toDataURL('image/jpeg', quality);
+        }
+        if (imageData.length > 1400000) throw new Error('Não foi possível reduzir a imagem para o tamanho permitido.');
         await saveCandidateImage('foto_perfil', imageData);
         closeImageEditor();
         closePhotoViewer();
