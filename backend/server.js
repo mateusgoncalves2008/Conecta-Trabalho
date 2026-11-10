@@ -33,6 +33,10 @@ app.set('trust proxy', 1);
 const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
 delete directives['upgrade-insecure-requests'];
 app.use(helmet({ contentSecurityPolicy: { directives }, crossOriginEmbedderPolicy: false }));
+// Entrega arquivos estáticos antes de abrir sessão no PostgreSQL.
+ // CSS, JavaScript, imagens e demais arquivos existentes não precisam consultar o banco.
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
 app.use(express.json({ limit: '3mb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 app.use(session({
@@ -43,7 +47,6 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, secure: production, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'index.html')));
 
 const limitLogin = rateLimit({
