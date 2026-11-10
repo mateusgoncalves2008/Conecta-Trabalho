@@ -927,3 +927,34 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
 .candidate-header-profile-link{width:42px;height:42px;min-width:42px;display:grid;place-items:center;overflow:hidden;border:2px solid var(--line);border-radius:50%;background:var(--soft);color:var(--navy);font-size:13px;font-weight:700;letter-spacing:.02em}
 .candidate-header-profile-link img{display:block;width:100%;height:100%;object-fit:cover}
 html[data-theme="dark"] .candidate-header-profile-link{background:#26364a;color:#f3f6fa;border-color:#40536a}
+
+
+/* Navegação direta: sem cortina, overlay ou animação de entrada de página. */
+.page-transition-overlay,
+body::after {
+  display: none !important;
+  animation: none !important;
+}
+
+body.page-entry main > *,
+body.page-entry .auth-intro,
+body.page-entry .auth-card,
+body.page-entry .dashboard-header,
+body.page-entry .dashboard-welcome,
+body.page-entry .dashboard-section,
+body.page-entry .listing-main > *,
+body.page-entry .step-card,
+body.page-entry .job-card,
+body.page-enter main,
+body.page-enter .auth-layout,
+body.page-enter .dashboard-main,
+body.page-enter .listing-main,
+body.page-leaving main,
+body.page-leaving .auth-layout,
+body.page-leaving .dashboard-main,
+body.page-leaving .listing-main {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
