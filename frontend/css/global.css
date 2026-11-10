@@ -49,13 +49,10 @@
   opacity: 1;
 }
 
+/* Os links do menu mantêm a mesma cor no hover, ao clicar e durante a atração magnética. */
 .site-header .main-nav a:hover,
+.site-header .main-nav a.active,
 .site-header .main-nav a.is-magnetic {
-  color: var(--orange-dark);
-}
-
-/* O item ativo não mantém a cor de destaque após o clique. */
-.site-header .main-nav a.active {
   color: #586575;
 }
 
