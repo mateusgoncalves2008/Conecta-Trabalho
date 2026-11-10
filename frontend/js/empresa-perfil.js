@@ -3,7 +3,7 @@
  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  const initials=value=>String(value||'EMP').trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase()||'EMP';
  const dateLabel=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(d)};
- const jobCard=job=>`<a class="company-public-job" href="/pages/vaga-detalhes.html?id=${encodeURIComponent(job.id)}"><div><h3>${esc(job.titulo)}</h3><p>${esc(job.cidade)} · ${esc(job.modalidade)} · ${esc(job.tipo_contrato)}</p></div><span class="company-public-job-arrow">Ver vaga <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></span><strong>${esc(job.salario||'A combinar')}</strong></a>`;
+ const jobCard=job=>`<a class="company-public-job" href="/pages/vaga-detalhes.html?id=${encodeURIComponent(job.id)}"><div><h3>${esc(job.titulo)}</h3><p>${esc(job.cidade)} · ${esc(job.modalidade)} · ${esc(job.tipo_contrato)}</p></div><span class="company-public-job-arrow">Ver vaga →</span><strong>${esc(job.salario||'A combinar')}</strong></a>`;
  async function load(){
   const id=new URLSearchParams(location.search).get('id');
   if(!id||!/^\d+$/.test(id)){root.textContent='Identificador da empresa inválido.';return}
