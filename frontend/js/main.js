@@ -288,6 +288,9 @@
         const user = session.usuario;
         if (!user) return;
 
+        // A chamada para criar conta é exclusiva de visitantes não autenticados.
+        document.getElementById('footer-signup-cta')?.remove();
+
         // Usuário autenticado não precisa ver opções de entrar ou cadastrar.
         document.querySelectorAll('.site-header a[href*="login.html"], .site-header a[href*="cadastro.html"]').forEach(item => item.remove());
 
