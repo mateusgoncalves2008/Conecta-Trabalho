@@ -692,7 +692,7 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
 app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const result = await pool.query(
-    `SELECT nome_empresa,nome_fantasia,razao_social,telefone,cidade,descricao,empresa_site,empresa_setor,empresa_porte,
+    `SELECT id,nome_empresa,nome_fantasia,razao_social,telefone,cidade,descricao,empresa_site,empresa_setor,empresa_porte,
       foto_perfil,banner_perfil FROM usuarios WHERE id=$1 AND tipo='empresa'`,
     [req.session.user.id]
   );
