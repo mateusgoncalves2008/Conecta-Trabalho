@@ -260,6 +260,18 @@
       if (tab.dataset.editorTab === 'change') editorInput.click();
     }));
     document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
+    const openImageInEditor = image => {
+      editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+      editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; document.getElementById(`candidate-image-${key}-value`).textContent = '100%'; });
+      document.getElementById('candidate-image-vignette').value = '0';
+      document.getElementById('candidate-image-vignette-value').textContent = '0%';
+      document.getElementById('candidate-image-zoom').value = '1';
+      document.getElementById('candidate-image-angle').value = '0';
+      document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+      renderImageEditor();
+      imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
+    };
     const loadImageIntoEditor = file => {
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); return; }
@@ -267,18 +279,9 @@
       const url = URL.createObjectURL(file);
       image.onload = () => {
         URL.revokeObjectURL(url);
-        editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
-        editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
-        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; document.getElementById(`candidate-image-${key}-value`).textContent = '100%'; });
-        document.getElementById('candidate-image-vignette').value = '0';
-        document.getElementById('candidate-image-vignette-value').textContent = '0%';
-        document.getElementById('candidate-image-zoom').value = '1';
-        document.getElementById('candidate-image-angle').value = '0';
-        document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
-        renderImageEditor();
-        imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
+        openImageInEditor(image);
       };
-      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Este formato de imagem não é compatível com o navegador.'); };
+      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Não foi possível abrir essa imagem. Tente selecionar outro arquivo.'); };
       image.src = url;
     };
     editorInput.addEventListener('change', event => {
@@ -401,15 +404,14 @@
       canvas.width = Math.round(cameraVideo.videoWidth * scale);
       canvas.height = Math.round(cameraVideo.videoHeight * scale);
       canvas.getContext('2d').drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => {
-        if (!blob) {
-          cameraFeedback.textContent = 'Não foi possível capturar a foto. Tente novamente.';
-          return;
-        }
-        const photoFile = new File([blob], 'foto-perfil-camera.jpg', { type: 'image/jpeg' });
-        closeCandidateCamera();
-        loadImageIntoEditor(photoFile);
-      }, 'image/jpeg', 0.92);
+      const context = canvas.getContext('2d');
+      if (!context) {
+        cameraFeedback.textContent = 'Não foi possível preparar a foto. Tente novamente.';
+        return;
+      }
+      context.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+      closeCandidateCamera();
+      openImageInEditor(canvas);
     });
     document.getElementById('candidate-photo-upload').addEventListener('click', () => {
       closePhotoUpdateModal();
