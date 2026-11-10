@@ -93,7 +93,23 @@
         </header>
         <div class="candidate-photo-dialog-body">
           <img id="candidate-photo-viewer-image" alt="Foto de perfil ampliada">
-          <div class="candidate-photo-visibility"><i class="fa-regular fa-eye"></i><span>Todos</span></div>
+          <div class="candidate-photo-visibility-wrap">
+            <button type="button" class="candidate-photo-visibility" id="candidate-photo-visibility" aria-expanded="false" aria-controls="candidate-photo-visibility-popover">
+              <i class="fa-regular fa-eye"></i><span id="candidate-photo-visibility-label">Todos</span><i class="fa-solid fa-chevron-down candidate-visibility-chevron"></i>
+            </button>
+            <section class="candidate-visibility-popover" id="candidate-photo-visibility-popover" aria-labelledby="candidate-visibility-title" hidden>
+              <h3 id="candidate-visibility-title">Visibilidade</h3>
+              <p>Selecione quem pode ver sua foto do perfil</p>
+              <div class="candidate-visibility-options">
+                <label><input type="radio" name="candidate-photo-visibility-choice" value="conexoes"><span><strong>Somente conexões de 1° grau</strong><small>Usuários do ConectaTrabalho com conexão direta a você.</small></span></label>
+                <label><input type="radio" name="candidate-photo-visibility-choice" value="rede"><span><strong>Sua rede</strong><small>Somente as pessoas conectadas até três graus de distância de você poderão ver isso.</small></span></label>
+                <label><input type="radio" name="candidate-photo-visibility-choice" value="usuarios"><span><strong>Todos os usuários do ConectaTrabalho</strong><small>Usuários que entraram no ConectaTrabalho, inclusive todos da sua rede.</small></span></label>
+                <label><input type="radio" name="candidate-photo-visibility-choice" value="todos"><span><strong>Todos</strong><small>Qualquer pessoa, dentro ou fora do ConectaTrabalho.</small></span></label>
+              </div>
+              <div class="candidate-visibility-footer"><button type="button" id="candidate-photo-visibility-save">Salvar</button></div>
+              <p class="candidate-visibility-feedback" id="candidate-photo-visibility-feedback" role="status"></p>
+            </section>
+          </div>
           <div class="candidate-photo-actions">
             <button type="button" id="candidate-photo-edit"><i class="fa-solid fa-pen"></i><span>Editar</span></button>
             <button type="button" id="candidate-photo-update"><i class="fa-solid fa-camera"></i><span>Atualizar</span></button>
