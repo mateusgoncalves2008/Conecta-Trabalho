@@ -13,3 +13,395 @@
 html[data-theme=dark] .app-install{background:#172538;border-color:#2c3c50}
 html[data-theme=dark] .app-install h2,html[data-theme=dark] .app-install-mark{color:#f3f7fb}
 @media(max-width:760px){.app-install{align-items:flex-start;flex-direction:column-reverse}.app-install-mark{align-self:center}.app-platforms{grid-template-columns:1fr}}
+
+
+/* Responsividade detalhada da página de instalação PWA */
+.app-page,
+.app-page * {
+  min-width: 0;
+}
+
+.app-hero {
+  padding: clamp(28px, 5vw, 58px) clamp(16px, 5vw, 64px);
+}
+
+.app-hero-inner {
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, .85fr);
+  gap: clamp(22px, 4vw, 48px);
+}
+
+.app-hero-inner > div,
+.app-install-copy,
+.app-cta > div {
+  min-width: 0;
+}
+
+.app-hero h1 {
+  max-width: 760px;
+  font-size: clamp(30px, 4.5vw, 56px);
+  overflow-wrap: anywhere;
+}
+
+.app-hero p,
+.app-install-copy > p,
+.app-cta p,
+.app-warning {
+  overflow-wrap: anywhere;
+}
+
+.app-hero img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  justify-self: center;
+}
+
+.app-hero .info-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.app-hero .info-actions .button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.app-install {
+  width: min(1050px, calc(100% - 2 * clamp(16px, 4vw, 24px)));
+  padding: clamp(18px, 3.5vw, 30px);
+}
+
+.app-install-copy {
+  flex: 1 1 420px;
+}
+
+.app-install h2,
+.app-guide h2 {
+  font-size: clamp(23px, 3vw, 29px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.app-install-button {
+  max-width: 100%;
+  min-height: 46px;
+  white-space: normal;
+  text-align: center;
+}
+
+.app-install-mark {
+  flex: 0 1 190px;
+}
+
+.app-guide,
+.app-warning,
+.app-cta {
+  width: min(1050px, calc(100% - 2 * clamp(16px, 4vw, 24px)));
+}
+
+.app-platforms {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 18px);
+}
+
+.app-platform {
+  padding: clamp(16px, 2.5vw, 24px);
+  overflow-wrap: anywhere;
+}
+
+.app-platform h3 {
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.35;
+}
+
+.app-platform ol {
+  padding-left: 19px;
+  overflow-wrap: anywhere;
+}
+
+.app-platform li + li {
+  margin-top: 5px;
+}
+
+.app-warning {
+  padding: clamp(16px, 3vw, 22px);
+}
+
+.app-cta {
+  flex-wrap: wrap;
+}
+
+.app-cta > div {
+  flex: 1 1 300px;
+}
+
+.app-cta > .button {
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+@media (min-width: 761px) and (max-width: 1050px) {
+  .app-hero-inner {
+    grid-template-columns: minmax(0, 1fr) minmax(210px, .75fr);
+  }
+
+  .app-platforms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .app-hero {
+    padding: 32px 22px;
+  }
+
+  .app-hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .app-hero-inner > div {
+    width: 100%;
+  }
+
+  .app-hero h1 {
+    max-width: 100%;
+    font-size: clamp(30px, 7vw, 42px);
+    line-height: 1.12;
+  }
+
+  .app-hero img {
+    width: min(100%, 390px);
+    max-height: 230px;
+  }
+
+  .app-install {
+    margin-top: 28px;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .app-install-mark {
+    align-self: center;
+    flex: 0 1 auto;
+  }
+
+  .app-install-copy {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .app-install-button {
+    width: 100%;
+  }
+
+  .app-platforms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-guide {
+    margin-top: 38px;
+    margin-bottom: 34px;
+  }
+
+  .app-cta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-cta > .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-hero {
+    padding: 27px 17px;
+  }
+
+  .app-hero h1 {
+    font-size: clamp(28px, 8vw, 35px);
+  }
+
+  .app-hero p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .app-hero .info-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-hero .info-actions .button {
+    width: 100%;
+  }
+
+  .app-install,
+  .app-guide,
+  .app-warning,
+  .app-cta {
+    width: calc(100% - 32px);
+  }
+
+  .app-install {
+    padding: 17px;
+    margin-top: 22px;
+  }
+
+  .app-install h2,
+  .app-guide h2 {
+    font-size: 23px;
+  }
+
+  .app-install-copy > p {
+    font-size: 14px;
+  }
+
+  .app-install-mark img {
+    width: 84px;
+    height: 84px;
+  }
+
+  .app-platform {
+    padding: 17px;
+    border-radius: 11px;
+  }
+
+  .app-platform ol {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .app-warning {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .app-cta {
+    gap: 14px;
+  }
+
+  .app-cta h2 {
+    font-size: 22px;
+  }
+}
+
+/* Cabeçalho em duas linhas nos aparelhos muito estreitos para evitar cortes. */
+@media (max-width: 390px) {
+  .site-header {
+    height: auto;
+    min-height: 64px;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  .site-header .brand {
+    max-width: calc(100% - 46px);
+    font-size: 16px;
+    gap: 7px;
+  }
+
+  .site-header .brand-mark-image {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+  }
+
+  .site-header .menu-toggle {
+    flex: 0 0 38px;
+    margin-left: auto;
+    padding: 6px;
+  }
+
+  .site-header .header-actions {
+    order: 3;
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 3px;
+  }
+
+  .site-header .header-actions .button {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+
+  .site-header .main-nav {
+    top: calc(100% + 7px);
+    max-height: min(65vh, 420px);
+    overflow-y: auto;
+    padding: 15px;
+  }
+
+  .footer-simple-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .footer-simple-copyright {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 340px) {
+  .app-hero h1 {
+    font-size: 27px;
+  }
+
+  .app-install,
+  .app-guide,
+  .app-warning,
+  .app-cta {
+    width: calc(100% - 24px);
+  }
+
+  .app-install {
+    padding: 14px;
+  }
+
+  .app-platform {
+    padding: 14px;
+  }
+
+  .site-header .brand {
+    font-size: 15px;
+  }
+
+  .site-header .header-actions .button {
+    padding-inline: 9px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 900px) {
+  .app-hero-inner {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, .7fr);
+  }
+
+  .app-hero img {
+    max-height: 190px;
+  }
+
+  .site-header .main-nav {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-page *,
+  .app-page *::before,
+  .app-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
