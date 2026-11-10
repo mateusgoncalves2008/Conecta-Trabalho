@@ -111,17 +111,30 @@
       const file = event.target.files[0];
       if (!file) return;
       const maxOriginalSize = 5 * 1024 * 1024;
-      if (!file.type.startsWith('image/') || file.size > maxOriginalSize) {
+      if (file.size > maxOriginalSize) {
         Conecta.toast('Escolha uma imagem de até 5 MB.');
         event.target.value = '';
         return;
       }
       try {
-        const bitmap = await createImageBitmap(file);
-        const scale = Math.min(1, 600 / Math.max(bitmap.width, bitmap.height));
+        let bitmap;
+        try {
+          bitmap = await createImageBitmap(file);
+        } catch {
+          bitmap = await new Promise((resolve, reject) => {
+            const image = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            image.onload = () => { URL.revokeObjectURL(objectUrl); resolve(image); };
+            image.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Este formato de imagem não é compatível com o navegador.')); };
+            image.src = objectUrl;
+          });
+        }
+        const imageWidth = bitmap.width || bitmap.naturalWidth;
+        const imageHeight = bitmap.height || bitmap.naturalHeight;
+        const scale = Math.min(1, 600 / Math.max(imageWidth, imageHeight));
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        canvas.width = Math.max(1, Math.round(imageWidth * scale));
+        canvas.height = Math.max(1, Math.round(imageHeight * scale));
         const context = canvas.getContext('2d');
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, canvas.width, canvas.height);
