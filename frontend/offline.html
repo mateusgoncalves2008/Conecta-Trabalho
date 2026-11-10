@@ -6,16 +6,14 @@
   <meta name="theme-color" content="#142b49">
   <title>Você está offline | ConectaTrabalho</title>
   <link rel="icon" href="/img/pwa-192.svg" type="image/svg+xml">
-  <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f4f6f9;color:#24364b;font-family:Arial,Helvetica,sans-serif;text-align:center}.offline{width:min(480px,100%);padding:38px 28px;background:#fff;border:1px solid #e1e7ef;border-radius:18px}.offline img{width:76px;height:76px}.offline h1{margin:22px 0 10px;color:#142b49;font-size:28px}.offline p{color:#667386;line-height:1.7}.offline button{margin-top:12px;padding:13px 22px;border:0;border-radius:8px;background:#e96f35;color:#fff;font-size:15px;font-weight:700;cursor:pointer}@media(prefers-color-scheme:dark){body{background:#101a28;color:#f3f6fa}.offline{background:#172538;border-color:#2c3c50}.offline h1{color:#f3f6fa}.offline p{color:#c0cad6}}
-  </style>
+  <link rel="stylesheet" href="/css/offline.css">
 </head>
 <body>
   <main class="offline">
     <img src="/img/pwa-192.svg" alt="">
     <h1>Você está sem conexão</h1>
     <p>Não foi possível carregar esta página agora. Verifique sua internet e tente novamente. Algumas partes do ConectaTrabalho podem continuar indisponíveis enquanto estiver offline.</p>
-    <button type="button" onclick="location.reload()">Tentar novamente</button>
+    <a href="/">Tentar novamente</a>
   </main>
 </body>
 </html>
