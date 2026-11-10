@@ -191,9 +191,107 @@
     document.getElementById('candidate-profile-initials').addEventListener('click', openPhotoViewer);
     document.getElementById('candidate-photo-viewer-close').addEventListener('click', closePhotoViewer);
     photoViewer.addEventListener('click', event => { if (event.target === photoViewer) closePhotoViewer(); });
+    const imageEditor = document.getElementById('candidate-image-editor');
+    const editorCanvas = document.getElementById('candidate-image-editor-canvas');
+    const editorContext = editorCanvas.getContext('2d');
+    const editorInput = document.getElementById('candidate-image-editor-input');
+    const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none' };
+    function renderImageEditor() {
+      const image = editorState.image;
+      if (!image) return;
+      const size = editorCanvas.width;
+      const radians = editorState.angle * Math.PI / 180;
+      const cos = Math.abs(Math.cos(radians));
+      const sin = Math.abs(Math.sin(radians));
+      const rotatedWidth = image.width * cos + image.height * sin;
+      const rotatedHeight = image.width * sin + image.height * cos;
+      const scale = Math.max(size / rotatedWidth, size / rotatedHeight) * editorState.zoom;
+      editorContext.clearRect(0, 0, size, size);
+      editorContext.save();
+      editorContext.translate(size / 2, size / 2);
+      editorContext.rotate(radians);
+      editorContext.scale(editorState.flipX * scale, editorState.flipY * scale);
+      editorContext.filter = editorState.filter;
+      editorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
+      editorContext.restore();
+    }
+    function openImageEditor() {
+      const current = candidateProfileCache.foto_perfil;
+      if (!current) return editorInput.click();
+      const image = new Image();
+      image.onload = () => {
+        editorState.image = image;
+        editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+        document.getElementById('candidate-image-zoom').value = '1';
+        document.getElementById('candidate-image-angle').value = '0';
+        document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+        renderImageEditor();
+        imageEditor.classList.add('is-open');
+        imageEditor.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('candidate-image-editor-open');
+      };
+      image.onerror = () => Conecta.toast('Não foi possível abrir esta foto para edição.');
+      image.src = current;
+    }
+    function closeImageEditor() {
+      imageEditor.classList.remove('is-open');
+      imageEditor.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-image-editor-open');
+    }
     document.getElementById('candidate-photo-edit').addEventListener('click', () => {
       closePhotoViewer();
-      document.getElementById('candidate-edit-profile').click();
+      openImageEditor();
+    });
+    document.getElementById('candidate-image-editor-close').addEventListener('click', closeImageEditor);
+    imageEditor.addEventListener('click', event => { if (event.target === imageEditor) closeImageEditor(); });
+    document.querySelectorAll('[data-editor-tab]').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-editor-tab]').forEach(item => item.classList.toggle('active', item === tab));
+      document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
+      if (tab.dataset.editorTab === 'change') editorInput.click();
+    }));
+    document.getElementById('candidate-image-editor-choose').addEventListener('click', () => editorInput.click());
+    editorInput.addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); event.target.value = ''; return; }
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+        document.getElementById('candidate-image-zoom').value = '1';
+        document.getElementById('candidate-image-angle').value = '0';
+        document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+        renderImageEditor();
+        imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
+        event.target.value = '';
+      };
+      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Este formato de imagem não é compatível com o navegador.'); };
+      image.src = url;
+    });
+    document.getElementById('candidate-image-rotate-left').addEventListener('click', () => { editorState.angle -= 90; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('candidate-image-rotate-right').addEventListener('click', () => { editorState.angle += 90; document.getElementById('candidate-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('candidate-image-flip-horizontal').addEventListener('click', () => { editorState.flipX *= -1; renderImageEditor(); });
+    document.getElementById('candidate-image-flip-vertical').addEventListener('click', () => { editorState.flipY *= -1; renderImageEditor(); });
+    document.getElementById('candidate-image-zoom').addEventListener('input', event => { editorState.zoom = Number(event.target.value); renderImageEditor(); });
+    document.getElementById('candidate-image-angle').addEventListener('input', event => { editorState.angle = Number(event.target.value); renderImageEditor(); });
+    document.querySelectorAll('[data-image-filter]').forEach(button => button.addEventListener('click', () => {
+      editorState.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
+      document.querySelectorAll('[data-image-filter]').forEach(item => item.classList.toggle('active', item === button));
+      renderImageEditor();
+    }));
+    document.getElementById('candidate-image-editor-save').addEventListener('click', async () => {
+      const button = document.getElementById('candidate-image-editor-save');
+      const feedback = document.getElementById('candidate-image-editor-feedback');
+      button.disabled = true; feedback.textContent = 'Salvando...';
+      try {
+        const imageData = editorCanvas.toDataURL('image/jpeg', 0.9);
+        await saveCandidateImage('foto_perfil', imageData);
+        closeImageEditor();
+        closePhotoViewer();
+      } catch (error) {
+        feedback.textContent = error.message || 'Não foi possível salvar a imagem.';
+      } finally { button.disabled = false; }
     });
     document.getElementById('candidate-photo-update').addEventListener('click', () => {
       closePhotoViewer();
