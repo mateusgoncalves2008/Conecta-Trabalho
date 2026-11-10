@@ -1,5 +1,6 @@
-const CACHE_NAME = 'conectatrabalho-pwa-v2';
+const CACHE_NAME = 'conectatrabalho-pwa-v3';
 const APP_SHELL = [
+  '/',
   '/pages/aplicativo.html',
   '/offline.html',
   '/manifest.webmanifest',
@@ -8,6 +9,8 @@ const APP_SHELL = [
   '/css/offline.css',
   '/js/main.js',
   '/img/logo-conectatrabalho.svg',
+  '/img/pwa-192.svg',
+  '/img/pwa-512.svg',
   '/img/institucional/mobile.svg'
 ];
 
