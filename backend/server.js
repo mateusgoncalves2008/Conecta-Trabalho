@@ -466,8 +466,8 @@ app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
     curriculo: clean(req.body.curriculo_url, 500)
   };
   if (fields.foto !== undefined && fields.foto !== null && fields.foto !== '') {
-    if (typeof fields.foto !== 'string' || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(fields.foto) || fields.foto.length > 2100000) {
-      return res.status(400).json({ erro: 'A foto deve ser JPG, PNG ou WebP e ter no máximo 1,5 MB.' });
+    if (typeof fields.foto !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(fields.foto) || fields.foto.length > 1400000) {
+      return res.status(400).json({ erro: 'A foto não pôde ser processada ou ultrapassou o limite permitido.' });
     }
   }
   if (fields.curriculo && !/^https:\/\//i.test(fields.curriculo)) {
