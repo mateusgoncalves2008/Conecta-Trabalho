@@ -26,6 +26,40 @@
       <div class="welcome-detail"><span class="welcome-detail-mark" aria-hidden="true"></span><span>Gerencie suas vagas e acompanhe as candidaturas em um só lugar.</span></div>
     </section>
 
+    <section class="dashboard-section company-profile-section" aria-labelledby="company-profile-heading">
+      <div class="section-heading"><div><h2 id="company-profile-heading">Perfil da empresa</h2><p>Apresente sua empresa para quem está conhecendo suas oportunidades.</p></div><span class="company-profile-completion" id="company-profile-completion">Perfil empresarial</span></div>
+      <div class="company-profile-card">
+        <div class="company-cover" id="company-cover">
+          <div class="company-cover-placeholder"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Imagem de capa da empresa</span></div>
+          <button class="company-image-edit company-cover-edit" type="button" id="company-cover-edit"><i class="fa-solid fa-camera" aria-hidden="true"></i> Alterar capa</button>
+          <input type="file" id="company-cover-input" accept="image/*" hidden>
+        </div>
+        <div class="company-profile-identity">
+          <div class="company-logo-wrap">
+            <img id="company-logo-preview" alt="Logotipo da empresa" hidden>
+            <span id="company-logo-initials" aria-hidden="true">EMP</span>
+            <button type="button" id="company-logo-edit" class="company-logo-edit" aria-label="Alterar logotipo"><i class="fa-solid fa-camera" aria-hidden="true"></i></button>
+            <input type="file" id="company-logo-input" accept="image/*" hidden>
+          </div>
+          <div class="company-profile-heading-copy"><strong id="company-profile-name">Sua empresa</strong><span id="company-profile-location">Localização não informada</span></div>
+        </div>
+        <form id="company-profile-form" class="company-profile-form" novalidate>
+          <div class="company-profile-form-heading"><div><h3>Informações institucionais</h3><p>Esses dados poderão ser vistos por pessoas interessadas nas vagas.</p></div></div>
+          <div class="company-profile-fields">
+            <label class="field">Nome público da empresa<input name="nome_empresa" required maxlength="160" placeholder="Nome pelo qual sua empresa é conhecida"></label>
+            <label class="field">Cidade<input name="cidade" required maxlength="100" placeholder="Cidade e estado"></label>
+            <label class="field">Setor de atuação<input name="empresa_setor" maxlength="100" placeholder="Ex.: Comércio, Tecnologia, Saúde"></label>
+            <label class="field">Porte da empresa<select name="empresa_porte"><option value="">Selecione (opcional)</option><option>MEI</option><option>Microempresa</option><option>Pequena empresa</option><option>Média empresa</option><option>Grande empresa</option></select></label>
+            <label class="field">Telefone comercial<input name="telefone" maxlength="30" placeholder="Telefone para contato"></label>
+            <label class="field">Site oficial <span class="field-optional">(opcional)</span><input name="empresa_site" type="url" maxlength="300" placeholder="https://www.suaempresa.com.br"></label>
+            <label class="field field-wide">Sobre a empresa<textarea name="descricao" maxlength="4000" rows="5" placeholder="Conte a história da empresa, o que ela faz, seus valores e o que oferece à comunidade."></textarea></label>
+          </div>
+          <div class="company-profile-form-footer"><p id="company-profile-feedback" class="form-feedback" aria-live="polite"></p><button class="button button-primary" type="submit">Salvar perfil</button></div>
+        </form>
+        <p class="company-image-hint">Dica: use o logotipo quadrado e uma imagem de capa horizontal. As imagens serão ajustadas automaticamente.</p>
+      </div>
+    </section>
+
     <section class="dashboard-section company-publish-section">
       <div class="section-heading">
         <div><h2>Publicar uma vaga</h2><p>Conte os detalhes da oportunidade para atrair os candidatos certos.</p></div>
