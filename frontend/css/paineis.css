@@ -665,3 +665,14 @@ html[data-theme="dark"] .company-profile-fields input,html[data-theme="dark"] .c
 .company-cover-placeholder-mark{display:grid;place-items:center;width:58px;height:58px;border:1px solid #cbd5e1;border-radius:14px;background:#f5f7fa;color:#52647a;font-size:10px;font-weight:800;letter-spacing:1px}
 html[data-theme="dark"] .company-profile-preview-link{border-color:#40536a;color:#e7edf5}
 html[data-theme="dark"] .company-cover-placeholder-mark{background:#22364d;border-color:#40536a;color:#d6dfeb}
+
+
+/* Ações da conta posicionadas ao lado da foto ou logotipo do perfil */
+.profile-account-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex:0 0 auto;margin:0 0 8px auto}
+.profile-account-actions [data-logout]{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.profile-account-actions [data-logout] i{font-size:12px}
+.candidate-identity>.profile-account-actions{margin-left:auto}
+.company-profile-identity>.profile-account-actions{margin-left:auto}
+html[data-theme="dark"] .profile-account-actions [data-logout]{background:#263448;border-color:#526176;color:#edf3fa}
+@media(max-width:760px){.candidate-identity>.profile-account-actions,.company-profile-identity>.profile-account-actions{flex-wrap:wrap}}
+@media(max-width:560px){.candidate-identity>.profile-account-actions{width:100%;justify-content:flex-end;margin:0 0 12px}.company-profile-identity>.profile-account-actions{width:100%;justify-content:flex-end;margin:0}}
