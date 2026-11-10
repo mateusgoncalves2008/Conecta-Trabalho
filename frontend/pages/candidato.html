@@ -131,13 +131,19 @@
               <label>Girar<input id="candidate-image-angle" type="range" min="-180" max="180" step="1" value="0"></label>
             </div>
             <div class="candidate-editor-panel" data-editor-panel="filter">
-              <p>Escolha um filtro para sua foto.</p>
+              <p>Escolha um filtro e ajuste a aparência da imagem.</p>
               <div class="candidate-editor-filters">
                 <button type="button" data-image-filter="none" class="active">Original</button>
                 <button type="button" data-image-filter="grayscale(1)">Preto e branco</button>
                 <button type="button" data-image-filter="sepia(.75)">Sépia</button>
                 <button type="button" data-image-filter="brightness(1.15) contrast(1.05)">Claro</button>
                 <button type="button" data-image-filter="contrast(1.2) saturate(1.2)">Vívido</button>
+              </div>
+              <div class="candidate-image-adjustments">
+                <label for="candidate-image-brightness"><span>Brilho <output id="candidate-image-brightness-value">100%</output></span><input id="candidate-image-brightness" type="range" min="50" max="150" value="100"></label>
+                <label for="candidate-image-contrast"><span>Contraste <output id="candidate-image-contrast-value">100%</output></span><input id="candidate-image-contrast" type="range" min="50" max="150" value="100"></label>
+                <label for="candidate-image-saturation"><span>Saturação <output id="candidate-image-saturation-value">100%</output></span><input id="candidate-image-saturation" type="range" min="0" max="200" value="100"></label>
+                <label for="candidate-image-vignette"><span>Vinheta <output id="candidate-image-vignette-value">0%</output></span><input id="candidate-image-vignette" type="range" min="0" max="80" value="0"></label>
               </div>
             </div>
             <div class="candidate-editor-panel" data-editor-panel="change">
