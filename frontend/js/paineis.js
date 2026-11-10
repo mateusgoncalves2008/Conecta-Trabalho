@@ -229,8 +229,9 @@
         editorState.image = image;
         editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
         editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
-        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; });
+        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; document.getElementById(`candidate-image-${key}-value`).textContent = '100%'; });
         document.getElementById('candidate-image-vignette').value = '0';
+        document.getElementById('candidate-image-vignette-value').textContent = '0%';
         document.getElementById('candidate-image-zoom').value = '1';
         document.getElementById('candidate-image-angle').value = '0';
         document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
@@ -269,8 +270,9 @@
         URL.revokeObjectURL(url);
         editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
         editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
-        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; });
+        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; document.getElementById(`candidate-image-${key}-value`).textContent = '100%'; });
         document.getElementById('candidate-image-vignette').value = '0';
+        document.getElementById('candidate-image-vignette-value').textContent = '0%';
         document.getElementById('candidate-image-zoom').value = '1';
         document.getElementById('candidate-image-angle').value = '0';
         document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
