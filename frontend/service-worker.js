@@ -1,4 +1,4 @@
-const CACHE_NAME = 'conectatrabalho-pwa-v1';
+const CACHE_NAME = 'conectatrabalho-pwa-v2';
 const APP_SHELL = [
   '/pages/aplicativo.html',
   '/offline.html',
@@ -8,9 +8,7 @@ const APP_SHELL = [
   '/css/offline.css',
   '/js/main.js',
   '/img/logo-conectatrabalho.svg',
-  '/img/institucional/mobile.svg',
-  '/img/pwa-192.svg',
-  '/img/pwa-512.svg'
+  '/img/institucional/mobile.svg'
 ];
 
 self.addEventListener('install', event => {
