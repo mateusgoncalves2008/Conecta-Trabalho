@@ -307,7 +307,7 @@
           const logout = document.createElement('button');
           logout.type = 'button';
           logout.className = 'button button-outline button-small menu-logout';
-          logout.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sair da conta';
+          logout.textContent = 'Sair da conta';
           logout.addEventListener('click', async () => {
             try {
               await api('/api/logout', { method: 'POST' });
