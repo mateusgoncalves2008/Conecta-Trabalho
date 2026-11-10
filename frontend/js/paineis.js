@@ -328,7 +328,6 @@
     document.querySelectorAll('[data-editor-tab]').forEach(tab => tab.addEventListener('click', () => {
       document.querySelectorAll('[data-editor-tab]').forEach(item => item.classList.toggle('active', item === tab));
       document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
-      if (tab.dataset.editorTab === 'change') editorInput.click();
     }));
     document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
     const openImageInEditor = image => {
