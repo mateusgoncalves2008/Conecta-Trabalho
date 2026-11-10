@@ -598,3 +598,26 @@ body.candidate-camera-open{overflow:hidden}
 .candidate-camera-preview-actions[hidden],.candidate-camera-actions button[hidden]{display:none!important}
 .candidate-camera-actions button:disabled{opacity:.55;cursor:wait}
 @media(max-width:520px){.candidate-camera-actions{gap:8px}.candidate-camera-actions button{padding:10px 13px;font-size:13px}.candidate-camera-preview-actions{gap:7px}}
+
+
+/* Seletor de visibilidade da foto de perfil */
+.candidate-photo-visibility-wrap{position:relative;align-self:flex-start}
+.candidate-photo-visibility{display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--soft);color:var(--navy);font:inherit;font-size:14px;cursor:pointer}
+.candidate-photo-visibility>i:first-child{color:var(--orange)}
+.candidate-photo-visibility .candidate-visibility-chevron{margin-left:3px;color:var(--muted);font-size:11px}
+.candidate-visibility-popover{position:absolute;z-index:5;top:calc(100% + 9px);left:0;width:min(390px,calc(100vw - 44px));padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 12px 34px rgba(20,43,73,.18);text-align:left}
+.candidate-visibility-popover[hidden]{display:none}
+.candidate-visibility-popover h3{margin:0 0 6px;color:var(--ink);font-size:18px}
+.candidate-visibility-popover>p:not(.candidate-visibility-feedback){margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.5}
+.candidate-visibility-options{display:grid;gap:0}
+.candidate-visibility-options label{display:flex;align-items:flex-start;gap:11px;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.candidate-visibility-options input{width:17px;height:17px;flex:0 0 17px;margin:3px 0 0;accent-color:var(--orange)}
+.candidate-visibility-options label span{display:grid;gap:4px}
+.candidate-visibility-options strong{color:var(--ink);font-size:13px;font-weight:650;line-height:1.4}
+.candidate-visibility-options small{color:var(--muted);font-size:12px;line-height:1.5}
+.candidate-visibility-footer{display:flex;justify-content:flex-end;padding-top:15px}
+.candidate-visibility-footer button{min-width:90px;padding:9px 18px;border:1px solid var(--orange);border-radius:6px;background:var(--orange);color:#fff;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.candidate-visibility-footer button:disabled{opacity:.6;cursor:wait}
+.candidate-visibility-feedback{min-height:0;margin:7px 0 0;color:#b74635;font-size:12px}
+.candidate-visibility-feedback:empty{display:none}
+@media(max-width:600px){.candidate-visibility-popover{left:-8px;padding:17px}}
