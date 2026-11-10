@@ -50,7 +50,7 @@
 
   let candidatePhotoData = null;
   let candidateProfileCache = {};
-  const candidateInitials = name => String(name || 'CT').trim().split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+  const candidateInitials = name => String(name || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
   const setCandidateImage = (image, initials, photo, name) => {
     initials.textContent = candidateInitials(name);
     if (photo) { image.src = photo; image.hidden = false; initials.hidden = true; }
