@@ -41,6 +41,11 @@
     document.getElementById('candidate-active').textContent = active;
     document.getElementById('candidate-interviews').textContent = interviews;
     renderCandidateProfile(profileData.perfil || {});
+    const photoVisibility = profileData.perfil?.visibilidade_foto || 'todos';
+    const visibilityLabel = document.getElementById('candidate-photo-visibility-label');
+    const visibilityNames = { conexoes: 'Conexões', rede: 'Sua rede', usuarios: 'Todos os usuários', todos: 'Todos' };
+    if (visibilityLabel) visibilityLabel.textContent = visibilityNames[photoVisibility] || 'Todos';
+    document.querySelectorAll('input[name="candidate-photo-visibility-choice"]').forEach(input => { input.checked = input.value === photoVisibility; });
     if (!applications.length) {
       container.innerHTML = '<div class="dashboard-empty">Você ainda não se candidatou a nenhuma vaga. <a class="text-link" href="vagas.html">Explore as oportunidades disponíveis.</a></div>';
     } else {
@@ -190,6 +195,54 @@
     document.getElementById('candidate-profile-avatar').addEventListener('click', openPhotoViewer);
     document.getElementById('candidate-profile-initials').addEventListener('click', openPhotoViewer);
     document.getElementById('candidate-photo-viewer-close').addEventListener('click', closePhotoViewer);
+    const visibilityButton = document.getElementById('candidate-photo-visibility');
+    const visibilityPopover = document.getElementById('candidate-photo-visibility-popover');
+    const visibilityLabel = document.getElementById('candidate-photo-visibility-label');
+    const visibilityFeedback = document.getElementById('candidate-photo-visibility-feedback');
+    const visibilitySave = document.getElementById('candidate-photo-visibility-save');
+    const visibilityNames = {
+      conexoes: 'Somente conexões de 1° grau',
+      rede: 'Sua rede',
+      usuarios: 'Todos os usuários',
+      todos: 'Todos'
+    };
+    let savedPhotoVisibility = 'todos';
+    let selectedPhotoVisibility = 'todos';
+    const setVisibilityPopover = open => {
+      visibilityPopover.hidden = !open;
+      visibilityButton.setAttribute('aria-expanded', String(open));
+      visibilityFeedback.textContent = '';
+    };
+    if (visibilityButton && visibilityPopover) {
+      visibilityButton.addEventListener('click', () => setVisibilityPopover(visibilityPopover.hidden));
+      visibilityPopover.querySelectorAll('input[name="candidate-photo-visibility-choice"]').forEach(input => {
+        input.addEventListener('change', () => { selectedPhotoVisibility = input.value; });
+      });
+      document.addEventListener('click', event => {
+        if (!visibilityPopover.hidden && !event.target.closest('.candidate-photo-visibility-wrap')) setVisibilityPopover(false);
+      });
+      visibilitySave.addEventListener('click', async () => {
+        visibilitySave.disabled = true;
+        visibilityFeedback.textContent = '';
+        try {
+          await Conecta.api('/api/perfil/visibilidade-foto', {
+            method: 'PUT',
+            body: JSON.stringify({ visibilidade: selectedPhotoVisibility })
+          });
+          savedPhotoVisibility = selectedPhotoVisibility;
+          visibilityLabel.textContent = visibilityNames[savedPhotoVisibility] === 'Somente conexões de 1° grau' ? 'Conexões' : visibilityNames[savedPhotoVisibility];
+          setVisibilityPopover(false);
+        } catch (error) {
+          visibilityFeedback.textContent = error.message || 'Não foi possível salvar a visibilidade.';
+          selectedPhotoVisibility = savedPhotoVisibility;
+          const selected = visibilityPopover.querySelector('input[value="' + savedPhotoVisibility + '"]');
+          if (selected) selected.checked = true;
+        } finally {
+          visibilitySave.disabled = false;
+        }
+      });
+    }
+
     photoViewer.addEventListener('click', event => { if (event.target === photoViewer) closePhotoViewer(); });
     const imageEditor = document.getElementById('candidate-image-editor');
     const editorCanvas = document.getElementById('candidate-image-editor-canvas');
