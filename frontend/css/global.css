@@ -885,3 +885,11 @@ button:not(.theme-toggle):not(.accessibility-launcher):not(:disabled):hover,
   from { clip-path: ellipse(160% 100% at 50% 50%); }
   to { clip-path: ellipse(160% 100% at 50% 250%); }
 }
+
+
+/* Mantém a largura dos links estável ao passar o mouse, sem afastar os vizinhos. */
+.site-header .main-nav a,
+.site-header .main-nav a:hover,
+.site-header .main-nav a.active {
+  font-weight: 500;
+}
