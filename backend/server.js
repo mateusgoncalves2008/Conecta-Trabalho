@@ -663,6 +663,21 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
   res.json({ vagas: result.rows });
 }));
 
+app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
+  const vagaId = Number(req.params.id);
+  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const result = await pool.query(
+    `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,
+      u.nome_empresa,u.cidade AS empresa_cidade,u.descricao AS empresa_descricao,
+      (SELECT COUNT(*)::int FROM candidaturas c WHERE c.vaga_id=v.id) AS total_candidaturas
+     FROM vagas v JOIN usuarios u ON u.id=v.empresa_id
+     WHERE v.id=$1 AND v.status='aberta' AND u.tipo='empresa'`,
+    [vagaId]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Esta vaga não foi encontrada ou não está mais disponível.' });
+  res.json({ vaga: result.rows[0] });
+}));
+
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
   const titulo = clean(req.body.titulo, 120);
   const descricao = clean(req.body.descricao, 5000);
