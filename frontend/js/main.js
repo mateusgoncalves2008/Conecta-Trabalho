@@ -287,6 +287,10 @@
       api('/api/me').then(session => {
         const user = session.usuario;
         if (!user) return;
+
+        // Usuário autenticado não precisa ver opções de entrar ou cadastrar.
+        document.querySelectorAll('.site-header a[href*="login.html"], .site-header a[href*="cadastro.html"]').forEach(item => item.remove());
+
         const link = document.createElement('a');
         link.className = 'candidate-header-profile-link';
         link.href = user.tipo === 'empresa' ? '/pages/empresa.html#company-profile-heading' : '/pages/candidato.html#meu-perfil';
