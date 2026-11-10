@@ -93,7 +93,7 @@ const uploadProfileImage = async (userId, field, dataUrl) => {
     error.statusCode = 503;
     throw error;
   }
-  if (typeof dataUrl !== 'string' || !/^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(dataUrl) || dataUrl.length > 1400000) {
+  if (typeof dataUrl !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(dataUrl) || dataUrl.length > 1400000) {
     const error = new Error('A imagem não pôde ser processada ou ultrapassou o limite permitido.');
     error.statusCode = 400;
     throw error;
