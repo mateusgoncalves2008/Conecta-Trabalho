@@ -18,10 +18,10 @@
   </header>
 
   <main class="dashboard-main candidate-profile-page">
-    <section class="candidate-profile-hero" id="meu-perfil">
-      <div class="candidate-cover" aria-hidden="true"></div>
+    <section class="candidate-profile-hero" id="meu-perfil"><input type="file" id="candidate-quick-photo-input" accept="image/*" hidden><input type="file" id="candidate-quick-cover-input" accept="image/*" hidden>
+      <div class="candidate-cover" id="candidate-cover"><button type="button" class="candidate-image-change candidate-cover-change" id="candidate-change-cover" aria-label="Alterar banner"><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Alterar banner</span></button></div>
       <div class="candidate-identity">
-        <div class="candidate-avatar-wrap"><img id="candidate-profile-avatar" alt="Foto de perfil" hidden><span id="candidate-profile-initials">CT</span></div>
+        <div class="candidate-avatar-wrap" id="candidate-avatar-wrap"><img id="candidate-profile-avatar" alt="Foto de perfil" hidden><span id="candidate-profile-initials">CT</span><button type="button" class="candidate-image-change candidate-avatar-change" id="candidate-change-photo" aria-label="Alterar foto de perfil"><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Alterar foto</span></button></div>
         <div class="candidate-identity-copy">
           <span class="eyebrow">PERFIL PROFISSIONAL</span>
           <h1 id="candidate-profile-name">Seu nome</h1>
