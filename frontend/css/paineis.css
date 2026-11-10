@@ -498,14 +498,14 @@ body.candidate-photo-viewer-open{overflow:hidden}
 /* Editor de imagem com recorte, filtros e transformações */
 .candidate-image-editor{position:fixed;inset:0;z-index:1300;display:flex;align-items:center;justify-content:center;padding:10px;background:rgba(0,0,0,.68);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
 .candidate-image-editor.is-open{opacity:1;visibility:visible}
-.candidate-image-editor-dialog{width:min(100%,1500px);height:min( min( calc(100vh - 20px), 760px), 100%);display:flex;flex-direction:column;overflow:hidden;border-radius:10px;background:#fff;color:#222;box-shadow:0 15px 50px rgba(0,0,0,.3)}
+.candidate-image-editor-dialog{width:min(100%,1120px);height:min(calc(100vh - 48px),650px);display:flex;flex-direction:column;overflow:hidden;border-radius:10px;background:#fff;color:#222;box-shadow:0 15px 50px rgba(0,0,0,.3)}
 .candidate-image-editor-header{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid #e5e5e5}
 .candidate-image-editor-header h2{margin:0;font-size:23px;font-weight:600}
 .candidate-image-editor-header button{border:0;background:transparent;color:#444;font-size:25px;cursor:pointer}
-.candidate-image-editor-main{min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 390px}
+.candidate-image-editor-main{min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 340px}
 .candidate-image-editor-stage{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;background:#999}
-.candidate-image-editor-stage canvas{width:min(100%, min(70vh,600px));height:auto;max-height:100%;aspect-ratio:1;object-fit:contain}
-.candidate-image-crop-guide{position:absolute;width:min( min(70vh,600px), 90%);aspect-ratio:1;border:2px solid rgba(255,255,255,.9);border-radius:50%;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.12)}
+.candidate-image-editor-stage canvas{width:min(100%, min(58vh,500px));height:auto;max-height:100%;aspect-ratio:1;object-fit:contain}
+.candidate-image-crop-guide{position:absolute;width:min( min(58vh,500px), 90%);aspect-ratio:1;border:2px solid rgba(255,255,255,.9);border-radius:50%;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.12)}
 .candidate-image-editor-tools{display:flex;flex-direction:column;gap:26px;padding:26px 20px;overflow:auto;background:#fff}
 .candidate-image-editor-tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #ddd}
 .candidate-image-editor-tabs button{padding:0 8px 16px;border:0;border-bottom:2px solid transparent;background:transparent;color:#444;font-size:15px;font-weight:600;cursor:pointer}
@@ -524,7 +524,7 @@ body.candidate-photo-viewer-open{overflow:hidden}
 .candidate-image-editor-footer button{padding:11px 18px;border:0;border-radius:24px;background:#0866c5;color:#fff;font-weight:600;cursor:pointer}
 .candidate-image-editor-footer button:disabled{opacity:.6;cursor:wait}
 body.candidate-image-editor-open{overflow:hidden}
-@media(max-width:850px){.candidate-image-editor-dialog{height:min(calc(100vh - 16px),900px)}.candidate-image-editor-main{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}.candidate-image-editor-stage canvas{width:min(100%,45vh)}.candidate-image-crop-guide{width:min(45vh,90%)}.candidate-image-editor-tools{padding:14px 18px;gap:14px}.candidate-editor-panel{gap:14px}.candidate-editor-transform{gap:12px}}
+@media(max-width:850px){.candidate-image-editor-dialog{width:min(100%,760px);height:min(calc(100vh - 32px),760px)}.candidate-image-editor-main{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}.candidate-image-editor-stage canvas{width:min(100%,45vh)}.candidate-image-crop-guide{width:min(45vh,90%)}.candidate-image-editor-tools{padding:14px 18px;gap:14px}.candidate-editor-panel{gap:14px}.candidate-editor-transform{gap:12px}}
 @media(max-width:520px){.candidate-image-editor-header{padding:0 16px}.candidate-image-editor-header h2{font-size:19px}.candidate-image-editor-footer{padding:0 14px}.candidate-image-editor-footer button{padding:10px 14px;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.candidate-image-editor{transition:none}}
 
