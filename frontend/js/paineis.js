@@ -464,7 +464,9 @@
       let count = 3;
       cameraFeedback.textContent = 'A foto será tirada em...';
       const tick = () => {
+        cameraCountdown.classList.remove('is-visible');
         cameraCountdown.textContent = String(count);
+        void cameraCountdown.offsetWidth;
         cameraCountdown.classList.add('is-visible');
         if (count > 1) {
           count -= 1;
