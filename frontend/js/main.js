@@ -280,8 +280,8 @@
       const attractionRadius = 80;
       const maxMagneticX = 55;
       const maxMagneticY = 34;
-      const spring = 270;
-      const damping = 10;
+      const spring = 320;
+      const damping = 8;
       const states = magneticLinks.map(link => ({
         link, x: 0, y: 0, vx: 0, vy: 0, targetX: 0, targetY: 0
       }));
