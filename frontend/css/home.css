@@ -659,3 +659,7 @@ html[data-theme="dark"] .job-salary-label {
     justify-content: center;
   }
 }
+
+
+/* Link para o guia completo da plataforma */
+.how-summary-link{text-align:center;margin-top:26px}
