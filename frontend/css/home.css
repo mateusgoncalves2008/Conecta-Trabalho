@@ -679,7 +679,7 @@ html[data-theme="dark"] .job-salary-label {
 }
 
 /* Página de detalhes da oportunidade */
-.job-detail-main { width: min(1120px, calc(100% - 48px)); margin: 42px auto 76px; }
+.job-detail-main { width: min(1120px, calc(100% - 48px)); min-height: calc(100vh - 160px); margin: 42px auto 76px; }
 .job-detail-back { display: inline-flex; margin-bottom: 20px; color: var(--muted); font-size: 14px; font-weight: 650; }
 .job-detail-layout { display: grid; grid-template-columns: minmax(0,1fr) 310px; gap: 22px; align-items: start; }
 .job-detail-primary, .job-detail-aside { display: grid; gap: 18px; min-width: 0; }
