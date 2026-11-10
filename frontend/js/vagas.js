@@ -61,7 +61,16 @@
       if (listContainer) {
         document.getElementById('results-count').textContent = vagas.length + (vagas.length === 1 ? ' vaga encontrada' : ' vagas encontradas');
       }
-      const shown = listContainer ? vagas : vagas.slice(0, 3);
+      const hasFilters = Boolean(busca.trim() || cidade.trim());
+      if (homeContainer) {
+        const heading = document.querySelector('#vagas-destaque .section-heading h2');
+        const description = document.querySelector('#vagas-destaque .section-heading p');
+        if (heading) heading.textContent = hasFilters ? 'Resultados da busca' : 'Vagas recentes';
+        if (description) description.textContent = hasFilters
+          ? (vagas.length ? vagas.length + (vagas.length === 1 ? ' oportunidade encontrada.' : ' oportunidades encontradas.') : 'Não encontramos vagas com esses filtros. Tente outro cargo ou cidade.')
+          : 'Confira algumas das oportunidades disponíveis.';
+      }
+      const shown = listContainer ? vagas : (hasFilters ? vagas : vagas.slice(0, 3));
       container.innerHTML = shown.length ? shown.map(card).join('') : '<div class="empty-state">Nenhuma vaga encontrada com esses filtros.</div>';
       container.querySelectorAll('[data-apply]').forEach(button => {
         button.addEventListener('click', () => applyToJob(button.dataset.apply, button));
@@ -73,13 +82,14 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const homeForm = document.getElementById('home-search');
-    if (homeForm) homeForm.addEventListener('submit', event => {
+    if (homeForm) homeForm.addEventListener('submit', async event => {
       event.preventDefault();
       const values = Object.fromEntries(new FormData(homeForm));
-      const params = new URLSearchParams();
-      if (values.busca) params.set('busca', values.busca.trim());
-      if (values.cidade) params.set('cidade', values.cidade.trim());
-      window.location.href = '/pages/vagas.html?' + params.toString();
+      await loadJobs({
+        busca: String(values.busca || '').trim(),
+        cidade: String(values.cidade || '').trim()
+      });
+      document.getElementById('vagas-destaque')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     const searchForm = document.getElementById('jobs-search');
