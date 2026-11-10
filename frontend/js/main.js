@@ -274,70 +274,126 @@
       button.style.removeProperty('--button-hover-text');
     });
 
-    // Apenas o link mais próximo do cursor recebe a atração magnética.
+    // Atração magnética com retorno físico de mola; somente um link é atraído por vez.
     const magneticLinks = [...document.querySelectorAll('.site-header .main-nav a')];
     if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const attractionRadius = 80;
       const maxMagneticX = 55;
       const maxMagneticY = 34;
-      const resetMagneticLink = link => {
-        if (!link.classList.contains('is-magnetic')) return;
+      const spring = 230;
+      const damping = 16;
+      const states = magneticLinks.map(link => ({
+        link, x: 0, y: 0, vx: 0, vy: 0, targetX: 0, targetY: 0
+      }));
+      let activeState = null;
+      let animationFrame = 0;
+      let previousTime = 0;
 
-        link.classList.remove('is-magnetic');
-        link.classList.add('is-returning');
-        link.style.setProperty('--magnetic-x', '0px');
-        link.style.setProperty('--magnetic-y', '0px');
+      const animateSpring = time => {
+        const dt = Math.min((time - (previousTime || time)) / 1000, 0.032);
+        previousTime = time;
+        let moving = false;
+
+        states.forEach(state => {
+          const wasMoving = Math.abs(state.x) > 0.08 || Math.abs(state.y) > 0.08 ||
+            Math.abs(state.vx) > 0.08 || Math.abs(state.vy) > 0.08 ||
+            Math.abs(state.targetX) > 0.08 || Math.abs(state.targetY) > 0.08;
+
+          if (!wasMoving) {
+            state.x = 0;
+            state.y = 0;
+            state.vx = 0;
+            state.vy = 0;
+            state.link.style.setProperty('--magnetic-x', '0px');
+            state.link.style.setProperty('--magnetic-y', '0px');
+            if (state !== activeState) {
+              state.link.classList.remove('is-returning');
+              state.link.classList.remove('is-magnetic');
+            }
+            return;
+          }
+
+          const ax = (state.targetX - state.x) * spring - state.vx * damping;
+          const ay = (state.targetY - state.y) * spring - state.vy * damping;
+          state.vx += ax * dt;
+          state.vy += ay * dt;
+          state.x += state.vx * dt;
+          state.y += state.vy * dt;
+
+          state.link.style.setProperty('--magnetic-x', state.x.toFixed(2) + 'px');
+          state.link.style.setProperty('--magnetic-y', state.y.toFixed(2) + 'px');
+          moving = true;
+        });
+
+        if (moving) {
+          animationFrame = requestAnimationFrame(animateSpring);
+        } else {
+          animationFrame = 0;
+          previousTime = 0;
+        }
       };
 
-      magneticLinks.forEach(link => {
-        link.addEventListener('transitionend', event => {
-          if (event.propertyName === 'transform') {
-            link.classList.remove('is-returning');
-          }
-        });
-      });
+      const startSpring = () => {
+        if (!animationFrame) animationFrame = requestAnimationFrame(animateSpring);
+      };
 
       document.addEventListener('pointermove', event => {
-        let closestLink = null;
+        let closestState = null;
         let closestDistance = Infinity;
         let closestDx = 0;
         let closestDy = 0;
 
-        magneticLinks.forEach(link => {
-          const rect = link.getBoundingClientRect();
+        states.forEach(state => {
+          const rect = state.link.getBoundingClientRect();
           const dx = event.clientX - (rect.left + rect.width / 2);
           const dy = event.clientY - (rect.top + rect.height / 2);
           const distance = Math.hypot(dx, dy);
-
           if (distance < closestDistance) {
-            closestLink = link;
+            closestState = state;
             closestDistance = distance;
             closestDx = dx;
             closestDy = dy;
           }
         });
 
-        magneticLinks.forEach(link => {
-          if (link !== closestLink || closestDistance >= attractionRadius) {
-            resetMagneticLink(link);
+        const nextActive = closestDistance < attractionRadius ? closestState : null;
+        if (activeState && activeState !== nextActive) {
+          activeState.targetX = 0;
+          activeState.targetY = 0;
+          activeState.link.classList.remove('is-magnetic');
+          activeState.link.classList.add('is-returning');
+        }
+
+        activeState = nextActive;
+        states.forEach(state => {
+          if (state !== activeState && state.targetX === 0 && state.targetY === 0) return;
+          if (state !== activeState) {
+            state.targetX = 0;
+            state.targetY = 0;
           }
         });
 
-        if (!closestLink || closestDistance >= attractionRadius) return;
+        if (activeState) {
+          const proximity = 1 - closestDistance / attractionRadius;
+          const strength = proximity * proximity;
+          activeState.targetX = Math.max(-maxMagneticX, Math.min(maxMagneticX, closestDx * 0.48 * strength));
+          activeState.targetY = Math.max(-maxMagneticY, Math.min(maxMagneticY, closestDy * 0.48 * strength));
+          activeState.link.classList.remove('is-returning');
+          activeState.link.classList.add('is-magnetic');
+        }
 
-        const proximity = 1 - closestDistance / attractionRadius;
-        const strength = proximity * proximity;
-        const moveX = Math.max(-maxMagneticX, Math.min(maxMagneticX, closestDx * 0.48 * strength));
-        const moveY = Math.max(-maxMagneticY, Math.min(maxMagneticY, closestDy * 0.48 * strength));
-
-        closestLink.classList.remove('is-returning');
-        closestLink.style.setProperty('--magnetic-x', moveX.toFixed(1) + 'px');
-        closestLink.style.setProperty('--magnetic-y', moveY.toFixed(1) + 'px');
-        closestLink.classList.add('is-magnetic');
+        startSpring();
       }, { passive: true });
 
       document.addEventListener('pointerleave', () => {
-        magneticLinks.forEach(resetMagneticLink);
+        if (activeState) {
+          activeState.targetX = 0;
+          activeState.targetY = 0;
+          activeState.link.classList.remove('is-magnetic');
+          activeState.link.classList.add('is-returning');
+        }
+        activeState = null;
+        startSpring();
       });
     }
 
