@@ -1,0 +1,50 @@
+/* Página de acessibilidade do ConectaTrabalho */
+.accessibility-main{overflow:hidden}
+.accessibility-hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(260px,.92fr);align-items:center;gap:48px;padding:76px max(7vw,24px);background:#f3f6fa}
+.accessibility-hero-copy{max-width:720px}
+.accessibility-brand{display:flex;align-items:center;gap:11px;margin-bottom:23px;color:var(--navy);font-size:15px;font-weight:750}
+.accessibility-brand img{width:44px;height:44px;object-fit:contain}
+.accessibility-hero h1{margin:0 0 18px;color:var(--navy);font-size:clamp(37px,5vw,57px);line-height:1.08;letter-spacing:-1.9px}
+.accessibility-hero h1 span{color:var(--orange)}
+.accessibility-hero-copy>p{max-width:680px;margin:0;color:var(--muted);font-size:16px;line-height:1.9}
+.accessibility-hero-art{display:flex;align-items:center;justify-content:center;min-width:0}
+.accessibility-hero-art img{display:block;width:100%;max-width:430px;height:auto;max-height:340px;object-fit:contain}
+.accessibility-section{padding:76px max(7vw,24px)}
+.accessibility-container{width:min(1120px,100%);margin:0 auto}
+.accessibility-heading{max-width:760px;margin:0 auto 38px;text-align:center}
+.accessibility-heading h2,.accessibility-section-copy h2,.accessibility-help h2{margin:9px 0 11px;color:var(--navy);font-size:clamp(27px,3.5vw,36px);line-height:1.2;letter-spacing:-.8px}
+.accessibility-heading>p,.accessibility-section-copy>p,.accessibility-help p{color:var(--muted);font-size:14px;line-height:1.85}
+.accessibility-heading>p{margin:0}
+.accessibility-principles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.accessibility-card{padding:26px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.accessibility-card-number{display:grid;place-items:center;width:40px;height:40px;margin-bottom:17px;border-radius:10px;background:#fff0e9;color:var(--orange-dark);font-size:14px;font-weight:800}
+.accessibility-card h3{margin:0 0 8px;color:var(--navy);font-size:17px}
+.accessibility-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.accessibility-section-soft{background:var(--page)}
+.accessibility-two-columns{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);align-items:center;gap:48px}
+.accessibility-section-copy>p{margin:12px 0}
+.accessibility-reference-link{display:inline-flex;align-items:center;gap:7px;margin-top:10px;color:var(--navy);font-size:14px;font-weight:700;text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:4px}
+.accessibility-highlight{padding:30px;border:1px solid var(--line);border-radius:15px;background:var(--surface)}
+.accessibility-highlight-symbol{display:inline-grid;place-items:center;min-width:64px;height:44px;margin-bottom:20px;padding:0 12px;border-radius:10px;background:#fff0e9;color:var(--orange-dark);font-size:17px;font-weight:800}
+.accessibility-highlight h3{margin:0 0 9px;color:var(--navy);font-size:20px;line-height:1.3}
+.accessibility-highlight p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.accessibility-help{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:start;gap:22px;max-width:900px}
+.accessibility-help-icon{display:grid;place-items:center;width:58px;height:58px;border-radius:15px;background:#fff0e9;color:var(--orange-dark);font-size:27px;font-weight:750}
+.accessibility-help h2{margin-top:7px}
+.accessibility-help p{margin:10px 0 0}
+.accessibility-final{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:42px max(7vw,24px);background:#10243d;color:#fff}
+.accessibility-final>div{max-width:760px}
+.accessibility-final .eyebrow{color:#f09a70}
+.accessibility-final h2{margin:8px 0;color:#fff;font-size:clamp(23px,3vw,32px);line-height:1.2}
+.accessibility-final p{margin:0;color:rgba(255,255,255,.76);font-size:13px;line-height:1.7}
+.accessibility-final .button{flex:0 0 auto}
+html[data-theme="dark"] .accessibility-hero{background:#151e2b}
+html[data-theme="dark"] .accessibility-hero h1,html[data-theme="dark"] .accessibility-brand,html[data-theme="dark"] .accessibility-heading h2,html[data-theme="dark"] .accessibility-section-copy h2,html[data-theme="dark"] .accessibility-help h2,html[data-theme="dark"] .accessibility-card h3,html[data-theme="dark"] .accessibility-highlight h3{color:#f3f7fb}
+html[data-theme="dark"] .accessibility-card,html[data-theme="dark"] .accessibility-highlight{background:#172538;border-color:#2c3c50}
+html[data-theme="dark"] .accessibility-card-number,html[data-theme="dark"] .accessibility-highlight-symbol,html[data-theme="dark"] .accessibility-help-icon{background:#493126;color:#ffb18a}
+html[data-theme="dark"] .accessibility-section-soft{background:#101a29}
+html[data-theme="dark"] .accessibility-final{background:#0b1320}
+html[data-theme="dark"] .accessibility-reference-link{color:#e5edf7}
+@media(max-width:850px){.accessibility-hero{grid-template-columns:1fr;gap:26px;padding-top:58px;padding-bottom:58px}.accessibility-hero-art img{max-height:280px}.accessibility-principles{grid-template-columns:1fr}.accessibility-two-columns{grid-template-columns:1fr;gap:28px}.accessibility-final{align-items:flex-start;flex-direction:column}.accessibility-final .button{width:100%}}
+@media(max-width:620px){.accessibility-hero{padding:46px 22px 50px;gap:18px}.accessibility-hero h1{font-size:40px;letter-spacing:-1.3px}.accessibility-hero-copy>p{font-size:14px}.accessibility-hero-art img{max-height:230px}.accessibility-section{padding:58px 22px}.accessibility-heading{margin-bottom:28px}.accessibility-card{padding:22px}.accessibility-highlight{padding:24px}.accessibility-help{grid-template-columns:1fr;gap:15px}.accessibility-final{padding:36px 22px}}
+@media(prefers-reduced-motion:reduce){.accessibility-main *{scroll-behavior:auto}}
