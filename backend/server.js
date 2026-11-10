@@ -140,6 +140,9 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS formacao TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS competencias TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS curriculo_url VARCHAR(500);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_site VARCHAR(300);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_setor VARCHAR(100);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
@@ -496,13 +499,13 @@ app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
     : req.params.tipo === 'banner' ? 'banner_perfil' : null;
   if (!field) return res.status(404).end();
   const result = await pool.query(
-    "SELECT id,foto_perfil,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo='candidato'",
+    "SELECT id,tipo,foto_perfil,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo IN ('candidato','empresa')",
     [req.params.id]
   );
   if (!result.rowCount) return res.status(404).end();
   const profile = result.rows[0];
   const owner = req.session.user && String(req.session.user.id) === String(profile.id);
-  if (!owner) {
+  if (profile.tipo === 'candidato' && !owner) {
     if (field === 'banner_perfil') return res.status(403).end();
     const visibility = profile.visibilidade_foto || 'todos';
     if (!(visibility === 'todos' || (visibility === 'usuarios' && Boolean(req.session.user)))) {
@@ -668,7 +671,9 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
   if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
   const result = await pool.query(
     `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,
-      u.nome_empresa,u.cidade AS empresa_cidade,u.descricao AS empresa_descricao,
+      u.id AS empresa_id,u.nome_empresa,u.cidade AS empresa_cidade,u.descricao AS empresa_descricao,
+      u.foto_perfil AS empresa_logo,u.banner_perfil AS empresa_banner,
+      u.empresa_site,u.empresa_setor,u.empresa_porte,
       (SELECT COUNT(*)::int FROM candidaturas c WHERE c.vaga_id=v.id) AS total_candidaturas
      FROM vagas v JOIN usuarios u ON u.id=v.empresa_id
      WHERE v.id=$1 AND v.status='aberta' AND u.tipo='empresa'`,
@@ -676,6 +681,99 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Esta vaga não foi encontrada ou não está mais disponível.' });
   res.json({ vaga: result.rows[0] });
+}));
+
+app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    `SELECT nome_empresa,nome_fantasia,razao_social,telefone,cidade,descricao,empresa_site,empresa_setor,empresa_porte,
+      foto_perfil,banner_perfil FROM usuarios WHERE id=$1 AND tipo='empresa'`,
+    [req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+  const profile = result.rows[0];
+  profile.foto_perfil = imageReference(req.session.user.id, 'foto_perfil', profile.foto_perfil);
+  profile.banner_perfil = imageReference(req.session.user.id, 'banner_perfil', profile.banner_perfil);
+  res.json({ perfil: profile });
+}));
+
+app.put('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const fields = {
+    nome_empresa: clean(req.body.nome_empresa, 160),
+    cidade: clean(req.body.cidade, 100),
+    telefone: clean(req.body.telefone, 30),
+    descricao: clean(req.body.descricao, 4000),
+    empresa_site: clean(req.body.empresa_site, 300),
+    empresa_setor: clean(req.body.empresa_setor, 100),
+    empresa_porte: clean(req.body.empresa_porte, 50)
+  };
+  if (fields.nome_empresa.length < 2) return res.status(400).json({ erro: 'Informe o nome da empresa.' });
+  if (fields.cidade.length < 2) return res.status(400).json({ erro: 'Informe a cidade da empresa.' });
+  if (fields.empresa_site && !/^https:\/\//i.test(fields.empresa_site)) {
+    return res.status(400).json({ erro: 'O site deve começar com https://.' });
+  }
+  const result = await pool.query(
+    `UPDATE usuarios SET nome_empresa=$1,cidade=$2,telefone=$3,descricao=$4,
+      empresa_site=$5,empresa_setor=$6,empresa_porte=$7
+     WHERE id=$8 AND tipo='empresa'
+     RETURNING nome_empresa,cidade,telefone,descricao,empresa_site,empresa_setor,empresa_porte`,
+    [fields.nome_empresa,fields.cidade,fields.telefone || null,fields.descricao || null,
+      fields.empresa_site || null,fields.empresa_setor || null,fields.empresa_porte || null,req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+  req.session.user.nomeEmpresa = fields.nome_empresa;
+  req.session.user.cidade = fields.cidade;
+  req.session.user.telefone = fields.telefone || null;
+  res.json({ sucesso: true, perfil: result.rows[0] });
+}));
+
+app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const field = req.body.campo;
+  const image = req.body.imagem;
+  if (!['foto_perfil','banner_perfil'].includes(field)) return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
+  if (image !== null && (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
+    return res.status(400).json({ erro: 'A imagem não pôde ser processada ou ultrapassou o limite permitido.' });
+  }
+  const current = await pool.query('SELECT ' + field + ' FROM usuarios WHERE id=$1 AND tipo=\'empresa\'', [req.session.user.id]);
+  if (!current.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+  let uploadedValue = null;
+  const newValue = image === null ? null : (uploadedValue = await uploadProfileImage(req.session.user.id, field, image));
+  try {
+    const result = await pool.query(
+      'UPDATE usuarios SET ' + field + '=$1 WHERE id=$2 AND tipo=\'empresa\' RETURNING ' + field,
+      [newValue,req.session.user.id]
+    );
+    if (!result.rowCount) {
+      await deleteStoredImage(uploadedValue);
+      return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+    }
+    await deleteStoredImage(current.rows[0][field]);
+    res.json({ sucesso: true, imagem: imageReference(req.session.user.id, field, result.rows[0][field]) });
+  } catch (error) {
+    await deleteStoredImage(uploadedValue);
+    throw error;
+  }
+}));
+
+app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const companyId = Number(req.params.id);
+  if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
+  const result = await pool.query(
+    `SELECT u.id,u.nome_empresa,u.nome_fantasia,u.cidade,u.descricao,u.empresa_site,u.empresa_setor,
+      u.empresa_porte,u.foto_perfil,u.banner_perfil,u.criado_em,
+      (SELECT COUNT(*)::int FROM vagas v WHERE v.empresa_id=u.id AND v.status='aberta') AS vagas_abertas,
+      (SELECT COUNT(*)::int FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id WHERE v.empresa_id=u.id) AS total_candidaturas
+     FROM usuarios u WHERE u.id=$1 AND u.tipo='empresa'`,
+    [companyId]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
+  const profile = result.rows[0];
+  profile.foto_perfil = imageReference(profile.id, 'foto_perfil', profile.foto_perfil);
+  profile.banner_perfil = imageReference(profile.id, 'banner_perfil', profile.banner_perfil);
+  res.json({ empresa: profile });
 }));
 
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
