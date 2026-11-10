@@ -121,6 +121,23 @@
       </section>
     </div>
 
+
+    <div class="candidate-camera-modal" id="candidate-camera-modal" aria-hidden="true">
+      <section class="candidate-camera-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-camera-title">
+        <header class="candidate-camera-header">
+          <h2 id="candidate-camera-title">Tirar foto</h2>
+          <button type="button" id="candidate-camera-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+        <div class="candidate-camera-content">
+          <video id="candidate-camera-video" autoplay playsinline muted></video>
+          <p id="candidate-camera-feedback" role="status">Posicione seu rosto dentro da área da câmera.</p>
+        </div>
+        <footer class="candidate-camera-actions">
+          <button type="button" id="candidate-camera-capture"><i class="fa-solid fa-camera"></i> Tirar foto</button>
+        </footer>
+      </section>
+    </div>
+
     <div class="candidate-image-editor" id="candidate-image-editor" aria-hidden="true">
       <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="candidate-image-editor-title">
         <header class="candidate-image-editor-header">
