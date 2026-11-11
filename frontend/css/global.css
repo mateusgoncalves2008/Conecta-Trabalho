@@ -1197,6 +1197,20 @@ body.page-leaving .listing-main {
 }
 
 
+/* Cabeçalho mobile permanece fixo no topo durante a rolagem */
+@media (max-width: 760px) {
+  .site-header,
+  .site-header.is-scrolled {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    transform: none !important;
+    border-radius: 0 !important;
+  }
+}
+
 /* Menu lateral mobile com ações de conta no rodapé */
 .site-header .main-nav .mobile-login-link { display: none; }
 @media (max-width: 760px) {
