@@ -54,7 +54,7 @@
     if (year) year.textContent = new Date().getFullYear();
 
     // Tema claro/escuro compartilhado entre todas as páginas
-    const themeButtonHost = document.querySelector('.header-actions, .dashboard-user, .auth-intro');
+    const themeButtonHost = document.querySelector('.auth-theme-slot, .header-actions, .dashboard-user, .auth-intro');
     const savedTheme = localStorage.getItem('conecta-theme');
     const applyTheme = theme => {
       document.documentElement.dataset.theme = theme;
@@ -74,7 +74,9 @@
       themeButton = document.createElement('button');
       themeButton.type = 'button';
       themeButton.className = 'theme-toggle';
-      if (themeButtonHost.classList.contains('auth-intro')) {
+      if (themeButtonHost.classList.contains('auth-theme-slot')) {
+        themeButtonHost.appendChild(themeButton);
+      } else if (themeButtonHost.classList.contains('auth-intro')) {
         themeButtonHost.insertBefore(themeButton, themeButtonHost.children[1] || null);
       } else {
         themeButtonHost.insertBefore(themeButton, themeButtonHost.firstElementChild);
