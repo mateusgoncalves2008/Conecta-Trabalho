@@ -1105,3 +1105,32 @@ body.page-leaving .listing-main {
 @media (prefers-reduced-motion: reduce) {
   .menu-toggle span { transition: none; }
 }
+
+
+/* Cadastro no menu mobile; Entrar permanece visível no cabeçalho */
+.mobile-register-link {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .site-header .header-actions a[href*="cadastro.html"] {
+    display: none;
+  }
+
+  .site-header .main-nav .mobile-register-link {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+    padding: 11px 14px;
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    background: var(--orange);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .site-header .main-nav .mobile-register-link::after {
+    display: none;
+  }
+}
