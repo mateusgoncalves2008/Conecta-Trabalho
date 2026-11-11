@@ -1124,10 +1124,8 @@ body.page-leaving .listing-main {
 }
 
 
-/* Cadastro no menu mobile; Entrar permanece visível no cabeçalho */
-.mobile-register-link {
-  display: none;
-}
+/* Cadastro fica como botão de ação, não como item da navegação desktop */
+.site-header .main-nav .mobile-register-link { display: none; }
 
 @media (max-width: 760px) {
   .site-header .header-actions a[href*="cadastro.html"] {
