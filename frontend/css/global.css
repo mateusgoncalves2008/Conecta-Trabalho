@@ -1185,7 +1185,16 @@ body.page-leaving .listing-main {
 /* Menu lateral mobile com ações de conta no rodapé */
 .site-header .main-nav .mobile-login-link { display: none; }
 @media (max-width: 760px) {
-  .site-header .header-actions { display: none !important; }
+  .site-header .header-actions {
+    display: flex !important; align-items: center; gap: 8px;
+    order: 1; margin-left: auto;
+  }
+  .site-header .header-actions > a { display: none !important; }
+  .site-header .header-actions .theme-toggle {
+    display: inline-flex !important; visibility: visible !important;
+    flex: 0 0 40px; width: 40px; height: 40px;
+    align-items: center; justify-content: center;
+  }
   .site-header .menu-toggle { position: relative; z-index: 102; margin-left: auto; }
   .site-header .menu-toggle.is-open span { background: #fff; }
   .site-header .main-nav,
