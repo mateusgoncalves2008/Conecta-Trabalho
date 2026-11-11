@@ -269,11 +269,21 @@
       });
     }
     if (toggle && nav) {
+      const closeMenu = () => {
+        nav.classList.remove('open');
+        toggle.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Abrir menu');
+      };
       toggle.addEventListener('click', () => {
         const opened = nav.classList.toggle('open');
         toggle.classList.toggle('is-open', opened);
         toggle.setAttribute('aria-expanded', String(opened));
         toggle.setAttribute('aria-label', opened ? 'Fechar menu' : 'Abrir menu');
+      });
+      nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeMenu();
       });
     }
     document.querySelectorAll('[data-logout]').forEach(button => {
