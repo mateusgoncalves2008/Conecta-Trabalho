@@ -1197,15 +1197,21 @@ body.page-leaving .listing-main {
 }
 
 
-/* Cabeçalho mobile permanece fixo no topo durante a rolagem */
+/* Cabeçalho mobile fixo na viewport, sem desaparecer durante a rolagem */
 @media (max-width: 760px) {
-  .site-header,
-  .site-header.is-scrolled {
-    position: sticky !important;
+  body:has(> .site-header:not(.dashboard-header)) {
+    padding-top: 68px;
+  }
+  body > .site-header:not(.dashboard-header),
+  body > .site-header:not(.dashboard-header).is-scrolled {
+    position: fixed !important;
     top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     z-index: 100 !important;
     width: 100% !important;
-    margin: 0 auto !important;
+    height: 68px !important;
+    margin: 0 !important;
     transform: none !important;
     border-radius: 0 !important;
   }
