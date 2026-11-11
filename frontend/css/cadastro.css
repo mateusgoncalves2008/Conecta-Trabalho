@@ -16,8 +16,18 @@
 
 .auth-card form > .field:first-child,
 .auth-card form > .button,
-.auth-card form > .form-feedback {
+.auth-card form > .form-feedback,
+.auth-card form .form-fields > .button {
   grid-column: 1 / -1;
+}
+
+/* O botão de cadastro ocupa uma linha própria, sem esticar na altura da grade */
+.auth-card form .form-fields > #register-submit {
+  width: 100%;
+  min-height: 48px;
+  height: auto;
+  align-self: start;
+  justify-self: stretch;
 }
 
 .auth-card form .field {
