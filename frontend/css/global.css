@@ -972,6 +972,11 @@ body.page-leaving .listing-main {
 }
 
 
+/* No desktop, o botão de tema aparece antes de Entrar */
+@media (min-width: 761px) {
+  .site-header .header-actions .theme-toggle { order: -1; }
+}
+
 /* Ações de conta exibidas junto à foto no menu superior */
 .site-header .header-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
 .site-header .header-actions .theme-toggle{order:2}
