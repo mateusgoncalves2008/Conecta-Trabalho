@@ -1058,3 +1058,50 @@ body.page-leaving .listing-main {
     font-size: 13px;
   }
 }
+
+
+/* Menu mobile: dois traços que se transformam em X */
+.menu-toggle {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  flex: 0 0 42px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle span {
+  position: absolute;
+  left: 10px;
+  width: 22px;
+  height: 2px;
+  margin: 0;
+  border-radius: 2px;
+  background: var(--navy);
+  transform-origin: center;
+  transition: top .22s ease, transform .22s ease, opacity .16s ease;
+}
+
+.menu-toggle span:nth-child(1) { top: 15px; }
+.menu-toggle span:nth-child(2) { top: 23px; }
+.menu-toggle span:nth-child(3) { display: none; }
+
+.menu-toggle.is-open span:nth-child(1) {
+  top: 19px;
+  transform: rotate(45deg);
+}
+
+.menu-toggle.is-open span:nth-child(2) {
+  top: 19px;
+  transform: rotate(-45deg);
+}
+
+@media (max-width: 760px) {
+  .menu-toggle { display: inline-flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-toggle span { transition: none; }
+}
