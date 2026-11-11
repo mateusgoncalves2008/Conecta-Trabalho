@@ -533,14 +533,26 @@ body.page-entry .job-card:nth-child(3) { animation-delay: 380ms; }
   display:grid;
   place-items:center;
   padding:0;
-  border:1px solid rgba(20,43,73,.13);
-  border-radius:8px;
-  background:rgba(255,255,255,.48);
+  border:0;
+  border-radius:0;
+  background:transparent;
   color:var(--navy);
   cursor:pointer;
-  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+  transition:color .2s ease;
 }
-.theme-toggle:hover{background:rgba(214,107,61,.1);border-color:rgba(214,107,61,.42);color:var(--orange-dark)}
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover{background:transparent;border:0;color:var(--orange-dark)}
+}
+@media (hover: none), (pointer: coarse) {
+  .theme-toggle,
+  .theme-toggle:hover,
+  .theme-toggle:active {
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+}
 .theme-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .dashboard-user .theme-toggle{margin-right:2px}
 @media(max-width:760px){.theme-toggle{width:34px;height:34px;flex-basis:34px}.header-actions{gap:6px}}
@@ -573,7 +585,7 @@ html[data-theme="dark"] .dashboard-header.site-header.is-scrolled{
 html[data-theme="dark"] .brand,
 html[data-theme="dark"] .site-header .main-nav a,
 html[data-theme="dark"] .dashboard-user{color:#e7edf5}
-html[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#f5c56b}
+html[data-theme="dark"] .theme-toggle{background:transparent;border:0;color:#f5c56b}
 html[data-theme="dark"] .main-nav,
 html[data-theme="dark"] .site-header .main-nav{
   background:rgba(24,34,49,.97);
