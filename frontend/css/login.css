@@ -401,3 +401,37 @@ html[data-theme="dark"] .form-feedback.success { color: #72d6a1; }
 @media (prefers-reduced-motion: reduce) {
   .auth-page * { scroll-behavior: auto; }
 }
+
+
+/* Garante o seletor de tema no extremo direito da barra superior do login */
+.auth-topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+.auth-topbar > .auth-theme-slot {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  margin-left: auto !important;
+  padding: 0 !important;
+}
+.auth-topbar > .auth-theme-slot > .theme-toggle {
+  position: static !important;
+  display: grid !important;
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+@media (max-width: 760px) {
+  .auth-topbar > .auth-theme-slot {
+    flex-basis: 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+  }
+}
