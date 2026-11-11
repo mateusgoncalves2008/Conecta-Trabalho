@@ -1183,6 +1183,7 @@ body.page-leaving .listing-main {
 
 
 /* Menu lateral mobile com ações de conta no rodapé */
+.site-header .main-nav .mobile-login-link { display: none; }
 @media (max-width: 760px) {
   .site-header .header-actions { display: none !important; }
   .site-header .menu-toggle { position: relative; z-index: 102; margin-left: auto; }
