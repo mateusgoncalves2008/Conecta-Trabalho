@@ -1192,9 +1192,10 @@ body.page-leaving .listing-main {
   .site-header .header-actions > a { display: none !important; }
   .site-header .header-actions .theme-toggle {
     display: inline-flex !important; visibility: visible !important;
-    flex: 0 0 40px; width: 40px; height: 40px;
-    align-items: center; justify-content: center;
+    flex: 0 0 32px; width: 32px; height: 32px; min-width: 32px;
+    padding: 0; align-items: center; justify-content: center;
   }
+  .site-header .header-actions .theme-toggle svg { width: 16px; height: 16px; }
   .site-header .menu-toggle { position: relative; z-index: 102; margin-left: auto; }
   .site-header .menu-toggle.is-open span { background: #fff; }
   .site-header .main-nav,
