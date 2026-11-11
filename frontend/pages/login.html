@@ -10,31 +10,34 @@
   <script src="../js/login.js" defer></script>
 </head>
 <body class="auth-page">
-  <a class="back-link" href="../">← Voltar ao início</a>
+  <header class="auth-topbar">
+    <a class="brand brand-auth" href="../" aria-label="ConectaTrabalho - início">
+      <img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38">
+      <span>Conecta<span class="brand-light">Trabalho</span></span>
+    </a>
+    <div class="auth-theme-slot" aria-label="Preferências de aparência"></div>
+  </header>
+
+  <div class="auth-back-row">
+    <a class="back-link" href="../">← Voltar ao início</a>
+  </div>
+
   <main class="auth-layout">
     <section class="auth-intro">
-      <a class="brand brand-auth" href="../">
-        <img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38">
-        <span>Conecta<span class="brand-light">Trabalho</span></span>
-      </a>
       <span class="eyebrow">BEM-VINDO DE VOLTA</span>
       <h1>Seu próximo passo profissional começa aqui.</h1>
       <p>Entre na sua conta e continue conectado a novas oportunidades.</p>
-      <div class="login-illustration-wrap">
-        <img class="page-illustration" src="../img/login/ilustracao-login.png" data-theme-light="../img/login/ilustracao-login.png" data-theme-dark="../img/login/ilustracao-login-dark.png" alt="Ilustração sobre acesso à plataforma ConectaTrabalho" width="1430" height="1024" fetchpriority="high">
-      </div>
     </section>
 
-    <section class="auth-card">
+    <section class="auth-card" aria-labelledby="login-heading">
       <div class="login-card-heading">
         <span class="eyebrow">SUA CONTA</span>
-        <h2>Entrar na conta</h2>
+        <h2 id="login-heading">Entrar na conta</h2>
         <p class="form-subtitle">Informe seus dados para continuar.</p>
       </div>
       <form id="login-form" novalidate>
         <label class="field">E-mail
           <input type="text" name="email" autocomplete="username" maxlength="160" required placeholder="Digite seu usuário ou e-mail">
-          
         </label>
         <label class="field">Senha
           <input type="password" name="senha" autocomplete="current-password" required maxlength="72" placeholder="Sua senha">
@@ -45,22 +48,24 @@
       <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
     </section>
   </main>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<footer class="site-footer site-footer-simple">
-            <nav class="footer-simple-links" aria-label="Links institucionais">
-  <a href="/pages/sobre.html" class="footer-simple-link">Sobre</a>
-  <a href="/pages/acessibilidade.html" class="footer-simple-link">Acessibilidade</a>
-  <a href="/pages/central-ajuda.html" class="footer-simple-link">Central de Ajuda</a>
-  <a href="/pages/termos-privacidade.html" class="footer-simple-link">Termos e Privacidade <span class="footer-link-caret" aria-hidden="true"></span></a>
-  <a href="/pages/publicidade.html" class="footer-simple-link">Publicidade</a>
-  <a href="/pages/solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas <span class="footer-link-caret" aria-hidden="true"></span></a>
-  <a href="/pages/aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a>
-  <a href="/pages/mais.html" class="footer-simple-link">Mais</a>
-</nav>
-            <div class="footer-simple-copyright">
-                <a class="footer-simple-brand" href="/" aria-label="ConectaTrabalho - início">ConectaTrabalho</a>
-                <span>ConectaTrabalho © <span class="current-year"></span></span>
-            </div>
-        </footer>
+
+  <footer class="site-footer site-footer-simple">
+    <nav class="footer-simple-links" aria-label="Links institucionais">
+      <a href="/pages/sobre.html" class="footer-simple-link">Sobre</a>
+      <a href="/pages/acessibilidade.html" class="footer-simple-link">Acessibilidade</a>
+      <a href="/pages/central-ajuda.html" class="footer-simple-link">Central de Ajuda</a>
+      <a href="/pages/termos-privacidade.html" class="footer-simple-link">Termos e Privacidade <span class="footer-link-caret" aria-hidden="true"></span></a>
+      <a href="/pages/publicidade.html" class="footer-simple-link">Publicidade</a>
+      <a href="/pages/solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas <span class="footer-link-caret" aria-hidden="true"></span></a>
+      <a href="/pages/aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a>
+      <a href="/pages/mais.html" class="footer-simple-link">Mais</a>
+    </nav>
+    <div class="footer-simple-copyright">
+      <a class="footer-simple-brand" href="/" aria-label="ConectaTrabalho - início">ConectaTrabalho</a>
+      <span>ConectaTrabalho © <span class="current-year"></span></span>
+    </div>
+  </footer>
 </body>
 </html>
