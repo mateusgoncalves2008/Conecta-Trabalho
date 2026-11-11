@@ -1,4 +1,4 @@
-const CACHE_NAME = 'conectatrabalho-pwa-v7';
+const CACHE_NAME = 'conectatrabalho-pwa-v8';
 const APP_SHELL = [
   '/',
   '/pages/aplicativo.html',
