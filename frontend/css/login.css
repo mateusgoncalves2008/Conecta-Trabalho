@@ -759,3 +759,65 @@ html[data-theme="dark"] .auth-card .auth-switch a:hover {
   body.auth-page:has(.auth-topbar) .auth-card { padding: 21px 17px; }
   body.auth-page:has(.auth-topbar) .footer-simple-links { column-gap: 12px; }
 }
+
+
+/* Links institucionais integrados à área da ilustração no login desktop */
+@media (min-width: 761px) {
+  body.auth-page > .site-footer.site-footer-simple {
+    display: none !important;
+  }
+
+  body.auth-page .login-illustration-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 18px;
+    width: 100%;
+  }
+
+  body.auth-page .login-illustration-wrap .page-illustration {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  body.auth-page .login-illustration-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 9px 18px;
+    width: 100%;
+    padding: 12px 0 2px;
+    border-top: 1px solid rgba(20, 43, 73, .13);
+  }
+
+  body.auth-page .login-illustration-footer a {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+
+  body.auth-page .login-illustration-footer a:hover {
+    color: var(--orange);
+  }
+
+  html[data-theme="dark"] body.auth-page .login-illustration-footer {
+    border-top-color: rgba(231, 237, 245, .16);
+  }
+
+  html[data-theme="dark"] body.auth-page .login-illustration-footer a {
+    color: #a5b1c1;
+  }
+
+  html[data-theme="dark"] body.auth-page .login-illustration-footer a:hover {
+    color: #f08a58;
+  }
+}
+
+@media (max-width: 760px) {
+  body.auth-page .login-illustration-footer {
+    display: none !important;
+  }
+}
