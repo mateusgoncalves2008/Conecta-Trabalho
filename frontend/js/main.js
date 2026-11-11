@@ -55,7 +55,8 @@
 
     // Tema claro/escuro compartilhado entre todas as páginas
     const authThemeSlot = document.querySelector('.auth-topbar .auth-theme-slot');
-    const themeButtonHost = authThemeSlot || document.querySelector('.header-actions, .dashboard-user, .auth-intro');
+    const isMobileAuth = Boolean(authThemeSlot && window.matchMedia('(max-width: 760px)').matches);
+    const themeButtonHost = isMobileAuth ? authThemeSlot : document.querySelector('.header-actions, .dashboard-user, .auth-intro');
     const savedTheme = localStorage.getItem('conecta-theme');
     const applyTheme = theme => {
       document.documentElement.dataset.theme = theme;
