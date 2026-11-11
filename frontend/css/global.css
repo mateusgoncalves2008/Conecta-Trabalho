@@ -1180,3 +1180,48 @@ body.page-leaving .listing-main {
     flex-basis: 38px;
   }
 }
+
+
+/* Menu lateral mobile com ações de conta no rodapé */
+@media (max-width: 760px) {
+  .site-header .header-actions { display: none !important; }
+  .site-header .menu-toggle { position: relative; z-index: 102; margin-left: auto; }
+  .site-header .menu-toggle.is-open span { background: #fff; }
+  .site-header .main-nav,
+  .site-header .main-nav.open {
+    position: fixed; inset: 0 0 0 auto; z-index: 101;
+    display: flex; flex-direction: column; align-items: stretch; gap: 0;
+    width: min(88vw, 360px); height: 100vh; height: 100dvh;
+    max-height: 100dvh; margin: 0; padding: 92px 24px 28px;
+    overflow-y: auto; overscroll-behavior: contain;
+    border: 0; border-left: 1px solid rgba(255,255,255,.12);
+    border-radius: 0; background: #142b49;
+    box-shadow: -100vw 0 0 100vw rgba(8, 19, 33, .58);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    transform: translateX(105%); visibility: hidden;
+    transition: transform .28s ease, visibility .28s ease;
+  }
+  .site-header .main-nav.open { transform: translateX(0); visibility: visible; }
+  .site-header .main-nav a {
+    display: flex; align-items: center; min-height: 52px;
+    padding: 13px 4px; border-bottom: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.86); font-size: 15px; font-weight: 550;
+  }
+  .site-header .main-nav a:hover, .site-header .main-nav a.active { color: #fff; }
+  .site-header .main-nav a::after { display: none !important; }
+  .site-header .main-nav .mobile-login-link,
+  .site-header .main-nav .mobile-register-link {
+    width: 100%; min-height: 48px; justify-content: center;
+    margin: 0; border: 1px solid var(--orange); border-radius: 9px;
+    font-weight: 700;
+  }
+  .site-header .main-nav .mobile-login-link {
+    margin-top: auto; background: transparent; color: #fff;
+  }
+  .site-header .main-nav .mobile-register-link {
+    margin-top: 10px; background: var(--orange); color: #fff;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .main-nav { transition: none; }
+}
