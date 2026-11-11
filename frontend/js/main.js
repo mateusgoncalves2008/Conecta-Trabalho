@@ -261,7 +261,9 @@
           setActiveSection(link.dataset.sectionLink);
           if (nav && toggle) {
             nav.classList.remove('open');
+            toggle.classList.remove('is-open');
             toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', 'Abrir menu');
           }
         });
       });
@@ -269,7 +271,9 @@
     if (toggle && nav) {
       toggle.addEventListener('click', () => {
         const opened = nav.classList.toggle('open');
+        toggle.classList.toggle('is-open', opened);
         toggle.setAttribute('aria-expanded', String(opened));
+        toggle.setAttribute('aria-label', opened ? 'Fechar menu' : 'Abrir menu');
       });
     }
     document.querySelectorAll('[data-logout]').forEach(button => {
