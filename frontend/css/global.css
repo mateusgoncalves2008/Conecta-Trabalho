@@ -1198,7 +1198,7 @@ body.page-leaving .listing-main {
 .site-header .main-nav .mobile-login-link { display: none; }
 @media (max-width: 760px) {
   .site-header .header-actions {
-    display: flex !important; align-items: center; gap: 8px;
+    display: flex !important; align-items: center; gap: 4px;
     order: 1; margin-left: auto;
   }
   .site-header .header-actions > a { display: none !important; }
@@ -1208,7 +1208,7 @@ body.page-leaving .listing-main {
     padding: 0; align-items: center; justify-content: center;
   }
   .site-header .header-actions .theme-toggle svg { width: 16px; height: 16px; }
-  .site-header .menu-toggle { position: relative; z-index: 102; margin-left: auto; }
+  .site-header .menu-toggle { position: relative; z-index: 102; margin-left: 0 !important; }
   .site-header .menu-toggle.is-open span { background: #fff; }
   .site-header .main-nav,
   .site-header .main-nav.open {
