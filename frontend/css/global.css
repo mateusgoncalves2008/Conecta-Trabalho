@@ -1212,7 +1212,7 @@ body.page-leaving .listing-main {
   .site-header .main-nav a::after { display: none !important; }
   .site-header .main-nav .mobile-login-link,
   .site-header .main-nav .mobile-register-link {
-    width: 100%; min-height: 48px; justify-content: center;
+    display: flex; width: 100%; min-height: 48px; justify-content: center;
     margin: 0; border: 1px solid var(--orange); border-radius: 9px;
     font-weight: 700;
   }
