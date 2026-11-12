@@ -702,3 +702,20 @@ html[data-theme="dark"] .company-cover-placeholder-mark{background:#22364d;borde
     padding: 17px;
   }
 }
+
+
+/* Área de vagas salvas do candidato */
+#vagas-salvas .dashboard-item-actions {
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#vagas-salvas .dashboard-item-actions .button {
+  white-space: nowrap;
+}
+
+@media (max-width: 650px) {
+  #vagas-salvas .dashboard-item-actions {
+    justify-content: flex-start;
+  }
+}
