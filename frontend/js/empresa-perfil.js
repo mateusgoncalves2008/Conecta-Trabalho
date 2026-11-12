@@ -5,7 +5,7 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
-  const initials = value => String(value || 'EMP').trim().split(/\\s+/).slice(0, 2)
+  const initials = value => String(value || 'EMP').trim().split(/\s+/).slice(0, 2)
     .map(part => part[0] || '').join('').toUpperCase() || 'EMP';
   const dateLabel = value => {
     const date = new Date(value);
@@ -143,7 +143,7 @@
 
   async function load() {
     const id = new URLSearchParams(location.search).get('id');
-    if (!id || !/^\\d+$/.test(id)) {
+    if (!id || !/^\d+$/.test(id)) {
       root.textContent = 'Identificador da empresa inválido.';
       return;
     }
