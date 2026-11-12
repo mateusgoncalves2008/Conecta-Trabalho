@@ -73,7 +73,7 @@
 
         <nav class="company-public-nav" aria-label="Navegação do perfil da empresa">
           <a href="#company-public-about">Sobre</a>
-          <a href="#company-public-jobs">Vagas</a>
+          <a href="#company-public-gallery">Fotos</a>\n          <a href="#company-public-jobs">Vagas</a>
           <a href="#company-public-details">Informações</a>
         </nav>
 
@@ -85,6 +85,13 @@
               <p class="company-public-description">${esc(company.descricao || 'Esta empresa ainda não adicionou uma apresentação institucional.')}</p>
             </section>
 
+
+            ${company.fotos && company.fotos.length ? `
+            <section class="company-public-panel company-public-gallery" id="company-public-gallery" aria-labelledby="company-public-gallery-title">
+              <span class="company-public-section-kicker">NOSSO ESPAÇO</span>
+              <h2 id="company-public-gallery-title">Fotos da empresa</h2>
+              <div class="company-public-gallery-grid">${company.fotos.map(photo => `<img src="${esc(photo.url)}" alt="Foto de ${esc(company.nome_empresa)}" loading="lazy">`).join('')}</div>
+            </section>` : ''}
             <section class="company-public-panel company-public-jobs-panel" id="company-public-jobs" aria-labelledby="company-public-jobs-title">
               <div class="company-public-jobs-heading">
                 <div><span class="company-public-section-kicker">OPORTUNIDADES</span><h2 id="company-public-jobs-title">Vagas disponíveis</h2></div>
