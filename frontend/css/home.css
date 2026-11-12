@@ -770,3 +770,7 @@ html[data-theme="dark"] .company-public-logo-fallback,html[data-theme="dark"] .c
 @media(prefers-reduced-motion:reduce){.company-public-primary-action{transition:none}}
 .job-detail-company-mark-link{display:block;flex:0 0 58px}.job-detail-company-mark img{width:100%;height:100%;object-fit:cover;border-radius:10px}.job-detail-company-link{display:block;text-decoration:none}.job-detail-company-profile-link{display:inline-flex;margin-top:5px;color:var(--orange-dark);font-size:12px;font-weight:700}.job-detail-company-profile-link:hover{text-decoration:underline}
 .job-company-identity{display:inline-flex;align-items:center;gap:9px}.job-company-identity>img,.job-company-initials{width:34px;height:34px;flex:0 0 34px;border-radius:8px;object-fit:cover}.job-company-initials{display:grid;place-items:center;background:var(--soft);color:var(--navy);font-size:11px;font-weight:800}
+
+.company-public-gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.company-public-gallery-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:9px;background:#e9eef4}
+@media(max-width:600px){.company-public-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
