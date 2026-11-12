@@ -146,6 +146,14 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_site VARCHAR(300);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_setor VARCHAR(100);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
+  CREATE TABLE IF NOT EXISTS vagas_salvas (
+    candidato_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
+    salva_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (candidato_id, vaga_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_vagas_salvas_candidato_data
+    ON vagas_salvas (candidato_id, salva_em DESC);
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
@@ -830,6 +838,63 @@ app.get('/api/painel/candidato', role('candidato'), asyncRoute(async (req, res) 
      WHERE c.candidato_id=$1 ORDER BY c.criada_em DESC`, [req.session.user.id]
   );
   res.json({ candidaturas: result.rows });
+}));
+
+app.get('/api/vagas-salvas', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    `SELECT v.id,v.titulo,v.cidade,v.modalidade,v.tipo_contrato,v.salario,v.status,v.criado_em,
+      sv.salva_em,u.id AS empresa_id,u.nome_empresa,u.foto_perfil AS empresa_logo
+     FROM vagas_salvas sv
+     JOIN vagas v ON v.id=sv.vaga_id
+     JOIN usuarios u ON u.id=v.empresa_id
+     WHERE sv.candidato_id=$1
+     ORDER BY sv.salva_em DESC`,
+    [req.session.user.id]
+  );
+  for (const vaga of result.rows) {
+    vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
+  }
+  res.json({ vagas: result.rows });
+}));
+
+app.post('/api/vagas-salvas/importar', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const ids = [...new Set((Array.isArray(req.body.ids) ? req.body.ids : [])
+    .map(Number).filter(id => Number.isSafeInteger(id) && id > 0))].slice(0, 100);
+  if (ids.length) {
+    await pool.query(
+      `INSERT INTO vagas_salvas (candidato_id,vaga_id)
+       SELECT $1,v.id FROM vagas v WHERE v.id=ANY($2::bigint[])
+       ON CONFLICT (candidato_id,vaga_id) DO NOTHING`,
+      [req.session.user.id, ids]
+    );
+  }
+  res.json({ sucesso: true });
+}));
+
+app.post('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const vagaId = Number(req.params.id);
+  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const vaga = await pool.query('SELECT id FROM vagas WHERE id=$1', [vagaId]);
+  if (!vaga.rowCount) return res.status(404).json({ erro: 'Esta vaga não foi encontrada.' });
+  await pool.query(
+    'INSERT INTO vagas_salvas (candidato_id,vaga_id) VALUES ($1,$2) ON CONFLICT (candidato_id,vaga_id) DO NOTHING',
+    [req.session.user.id, vagaId]
+  );
+  res.status(201).json({ sucesso: true });
+}));
+
+app.delete('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const vagaId = Number(req.params.id);
+  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  await pool.query(
+    'DELETE FROM vagas_salvas WHERE candidato_id=$1 AND vaga_id=$2',
+    [req.session.user.id, vagaId]
+  );
+  res.json({ sucesso: true });
 }));
 
 app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, res) => {
