@@ -28,6 +28,61 @@
     }
   }
 
+  async function migrateLegacySavedJobs() {
+    const key = 'conecta-vagas-salvas';
+    try {
+      const legacy = JSON.parse(localStorage.getItem(key) || '[]');
+      const ids = Array.isArray(legacy) ? [...new Set(legacy.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
+      if (!ids.length) return;
+      await Conecta.api('/api/vagas-salvas/importar', {
+        method: 'POST',
+        body: JSON.stringify({ ids })
+      });
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn('Não foi possível sincronizar as vagas salvas antigas:', error.message);
+    }
+  }
+
+  async function loadSavedJobs() {
+    const container = document.getElementById('candidate-saved-jobs');
+    if (!container) return;
+    try {
+      const data = await Conecta.api('/api/vagas-salvas');
+      const jobs = data.vagas || [];
+      if (!jobs.length) {
+        container.innerHTML = '<div class="dashboard-empty">Você ainda não salvou nenhuma vaga. <a class="text-link" href="vagas.html">Explore as oportunidades disponíveis</a> e guarde as que deseja consultar depois.</div>';
+        return;
+      }
+      container.innerHTML = jobs.map(item => {
+        const isOpen = item.status === 'aberta';
+        const details = isOpen
+          ? '<a class="button button-outline button-small" href="vaga-detalhes.html?id=' + encodeURIComponent(item.id) + '">Ver vaga</a>'
+          : '<span class="status-label">' + escapeHTML(statusText(item.status)) + '</span>';
+        return '<article class="dashboard-item"><div><h3>' + escapeHTML(item.titulo) + '</h3><p>' +
+          escapeHTML(item.nome_empresa || 'Empresa') + ' · ' + escapeHTML(item.cidade || 'Local não informado') +
+          '</p><p>Salva em ' + escapeHTML(dateLabel(item.salva_em)) + '</p></div><div class="dashboard-item-actions">' +
+          details + '<button type="button" class="button button-outline button-small" data-remove-saved="' +
+          escapeHTML(item.id) + '">Remover</button></div></article>';
+      }).join('');
+      container.querySelectorAll('[data-remove-saved]').forEach(button => {
+        button.addEventListener('click', async () => {
+          button.disabled = true;
+          try {
+            await Conecta.api('/api/vagas/' + encodeURIComponent(button.dataset.removeSaved) + '/salvar', { method: 'DELETE' });
+            Conecta.toast('Vaga removida dos itens salvos.');
+            await loadSavedJobs();
+          } catch (error) {
+            Conecta.toast(error.message);
+            button.disabled = false;
+          }
+        });
+      });
+    } catch (error) {
+      container.innerHTML = '<div class="dashboard-empty">' + escapeHTML(error.message) + '</div>';
+    }
+  }
+
   async function loadCandidate() {
     const container = document.getElementById('candidate-applications');
     const [data, profileData] = await Promise.all([
@@ -41,6 +96,8 @@
     document.getElementById('candidate-active').textContent = active;
     document.getElementById('candidate-interviews').textContent = interviews;
     renderCandidateProfile(profileData.perfil || {});
+    await migrateLegacySavedJobs();
+    await loadSavedJobs();
     const photoVisibility = profileData.perfil?.visibilidade_foto || 'todos';
     const visibilityLabel = document.getElementById('candidate-photo-visibility-label');
     const visibilityNames = { conexoes: 'Conexões', rede: 'Sua rede', usuarios: 'Todos os usuários', todos: 'Todos' };
