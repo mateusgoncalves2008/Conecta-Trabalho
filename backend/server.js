@@ -134,7 +134,18 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
-  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120,
+  pool.query(`
+    CREATE TABLE IF NOT EXISTS fotos_empresa (
+      id BIGSERIAL PRIMARY KEY,
+      empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+      imagem TEXT NOT NULL,
+      criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_fotos_empresa_empresa_data
+      ON fotos_empresa (empresa_id, criada_em DESC);
+  `)
+);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_oportunidade VARCHAR(80);
@@ -504,6 +515,18 @@ app.post('/api/logout', (req, res) => {
   });
 });
 app.get('/api/me', (req, res) => res.json({ usuario: req.session.user || null }));
+app.get('/api/imagens/empresa/:empresaId/:fotoId', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query('SELECT imagem FROM fotos_empresa WHERE id=$1 AND empresa_id=$2', [req.params.fotoId, req.params.empresaId]);
+  if (!result.rowCount) return res.status(404).end();
+  const value = result.rows[0].imagem;
+  if (typeof value !== 'string' || !value.startsWith('s3:') || !s3) return res.status(404).end();
+  const object = await s3.send(new GetObjectCommand({ Bucket: storageBucket, Key: value.slice(3) }));
+  res.type('image/jpeg').set('Cache-Control', 'private, max-age=300');
+  if (object.Body && typeof object.Body.pipe === 'function') return object.Body.pipe(res);
+  if (object.Body && typeof object.Body.transformToByteArray === 'function') return res.send(Buffer.from(await object.Body.transformToByteArray()));
+  return res.status(502).end();
+}));
 app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const field = req.params.tipo === 'foto' ? 'foto_perfil'
@@ -774,6 +797,30 @@ app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, re
   }
 }));
 
+app.get('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query('SELECT id,criada_em FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC', [req.session.user.id]);
+  res.json({ fotos: result.rows.map(photo => ({ ...photo, url: '/api/imagens/empresa/' + req.session.user.id + '/' + photo.id })) });
+}));
+app.post('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const image = req.body.imagem;
+  if (typeof image !== 'string' || !/^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) return res.status(400).json({ erro: 'Imagem inválida ou muito grande.' });
+  const count = await pool.query('SELECT COUNT(*)::int AS total FROM fotos_empresa WHERE empresa_id=$1', [req.session.user.id]);
+  if (count.rows[0].total >= 12) return res.status(400).json({ erro: 'Você pode adicionar até 12 fotos à galeria.' });
+  const stored = await uploadProfileImage(req.session.user.id, 'galeria-' + crypto.randomUUID(), image);
+  try {
+    const result = await pool.query('INSERT INTO fotos_empresa (empresa_id,imagem) VALUES ($1,$2) RETURNING id,criada_em', [req.session.user.id, stored]);
+    res.status(201).json({ sucesso: true, foto: { ...result.rows[0], url: '/api/imagens/empresa/' + req.session.user.id + '/' + result.rows[0].id } });
+  } catch (error) { await deleteStoredImage(stored); throw error; }
+}));
+app.delete('/api/empresa/fotos/:id', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query('DELETE FROM fotos_empresa WHERE id=$1 AND empresa_id=$2 RETURNING imagem', [req.params.id, req.session.user.id]);
+  if (!result.rowCount) return res.status(404).json({ erro: 'Foto não encontrada.' });
+  await deleteStoredImage(result.rows[0].imagem);
+  res.json({ sucesso: true });
+}));
 app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const companyId = Number(req.params.id);
@@ -795,6 +842,8 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   );
   profile.foto_perfil = imageReference(profile.id, 'foto_perfil', profile.foto_perfil);
   profile.banner_perfil = imageReference(profile.id, 'banner_perfil', profile.banner_perfil);
+  const gallery = await pool.query('SELECT id FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC', [profile.id]);
+  profile.fotos = gallery.rows.map(photo => ({ id: photo.id, url: '/api/imagens/empresa/' + profile.id + '/' + photo.id }));
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
