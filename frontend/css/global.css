@@ -1388,3 +1388,9 @@ body.page-leaving .listing-main {
 #save-job:disabled {
   cursor: not-allowed;
 }
+
+/* Mantém os links de visitante ocultos até a confirmação da sessão. */
+.site-header .header-actions.auth-checking > a[href*="login.html"],
+.site-header .header-actions.auth-checking > a[href*="cadastro.html"] {
+  visibility: hidden;
+}
