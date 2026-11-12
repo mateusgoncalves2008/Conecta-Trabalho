@@ -715,7 +715,7 @@ html[data-theme="dark"] .job-detail-actions .button-save { border-color: #52647a
 .company-public-main{width:min(1160px,calc(100% - 48px));margin:28px auto 76px}
 .company-public-layout{display:grid;gap:16px}
 .company-public-hero,.company-public-panel{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 8px 28px rgba(20,43,73,.045)}
-.company-public-cover{height:250px;position:relative;background:linear-gradient(135deg,#e8edf3,#dce5ee) center/cover no-repeat}
+.company-public-cover{height:250px;position:relative;background:#dfe7ef center/cover no-repeat}
 .company-public-cover:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,43,73,.12),transparent 65%)}
 .company-public-cover-label{position:absolute;z-index:1;right:22px;bottom:18px;color:#fff;font-size:10px;font-weight:800;letter-spacing:1.4px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
 .company-public-identity{display:flex;align-items:center;gap:20px;padding:0 30px 22px;border-bottom:1px solid var(--line)}
