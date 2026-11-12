@@ -10,9 +10,11 @@
   };
   const initials = value => String(value || 'Empresa').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase();
   const savedKey = 'conecta-vagas-salvas';
-  const getSaved = () => {
-    try { const value = JSON.parse(localStorage.getItem(savedKey) || '[]'); return Array.isArray(value) ? value.map(Number) : []; }
-    catch { return []; }
+  const getLegacySaved = () => {
+    try {
+      const value = JSON.parse(localStorage.getItem(savedKey) || '[]');
+      return Array.isArray(value) ? [...new Set(value.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
+    } catch { return []; }
   };
   async function apply(id, button) {
     try {
@@ -37,7 +39,20 @@
       const result = await Conecta.api('/api/vagas/' + encodeURIComponent(id));
       const vaga = result.vaga;
       const company = vaga.nome_empresa || 'Empresa';
-      const saved = getSaved().includes(Number(vaga.id));
+      const session = await Conecta.api('/api/me');
+      let saved = false;
+      if (session.usuario?.tipo === 'candidato') {
+        const legacyIds = getLegacySaved();
+        if (legacyIds.length) {
+          await Conecta.api('/api/vagas-salvas/importar', {
+            method: 'POST',
+            body: JSON.stringify({ ids: legacyIds })
+          });
+          localStorage.removeItem(savedKey);
+        }
+        const savedResult = await Conecta.api('/api/vagas-salvas');
+        saved = (savedResult.vagas || []).some(item => Number(item.id) === Number(vaga.id));
+      }
       root.className = 'job-detail-layout';
       root.innerHTML = `
         <div class="job-detail-primary">
@@ -74,16 +89,32 @@
           </section>
         </aside>`;
       document.getElementById('apply-job').addEventListener('click', event => apply(vaga.id, event.currentTarget));
-      document.getElementById('save-job').addEventListener('click', event => {
+      document.getElementById('save-job').addEventListener('click', async event => {
         const button = event.currentTarget;
-        const ids = getSaved();
-        const index = ids.indexOf(Number(vaga.id));
-        if (index >= 0) ids.splice(index, 1); else ids.push(Number(vaga.id));
-        localStorage.setItem(savedKey, JSON.stringify(ids));
-        const isSaved = ids.includes(Number(vaga.id));
-        button.textContent = isSaved ? 'Vaga salva' : 'Salvar vaga';
-        button.setAttribute('aria-pressed', String(isSaved));
-        Conecta.toast(isSaved ? 'Vaga salva neste navegador.' : 'Vaga removida dos itens salvos.');
+        button.disabled = true;
+        try {
+          const currentSession = await Conecta.api('/api/me');
+          if (!currentSession.usuario) {
+            window.location.href = '/pages/login.html';
+            return;
+          }
+          if (currentSession.usuario.tipo !== 'candidato') {
+            Conecta.toast('Somente contas de candidato podem salvar vagas.');
+            return;
+          }
+          const wasSaved = button.getAttribute('aria-pressed') === 'true';
+          await Conecta.api('/api/vagas/' + encodeURIComponent(vaga.id) + '/salvar', {
+            method: wasSaved ? 'DELETE' : 'POST'
+          });
+          const isSaved = !wasSaved;
+          button.textContent = isSaved ? 'Vaga salva' : 'Salvar vaga';
+          button.setAttribute('aria-pressed', String(isSaved));
+          Conecta.toast(isSaved ? 'Vaga salva na sua conta.' : 'Vaga removida dos itens salvos.');
+        } catch (error) {
+          Conecta.toast(error.message);
+        } finally {
+          button.disabled = false;
+        }
       });
       document.title = vaga.titulo + ' | ConectaTrabalho';
     } catch (error) {
