@@ -1383,3 +1383,8 @@ body.page-leaving .listing-main {
     max-height: 100dvh !important;
   }
 }
+
+/* Indica que a vaga já foi salva e não pode ser salva novamente. */
+#save-job:disabled {
+  cursor: not-allowed;
+}
