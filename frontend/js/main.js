@@ -1,4 +1,7 @@
 (() => {
+  // Evita mostrar os links de visitante antes de confirmar a sessão.
+  document.querySelector('.site-header .header-actions')?.classList.add('auth-checking');
+
   const api = async (url, options = {}) => {
     const response = await fetch(url, {
       credentials: 'same-origin',
@@ -341,7 +344,9 @@
           });
           publicHeaderActions.appendChild(logout);
         }
-      }).catch(() => {});
+      }).catch(() => {}).finally(() => {
+        publicHeaderActions.classList.remove('auth-checking');
+      });
     }
 
     // Registro do PWA: permite instalar o site e disponibiliza o modo offline básico.
