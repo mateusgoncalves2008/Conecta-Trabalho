@@ -802,7 +802,7 @@ app.get('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
 app.post('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const image = req.body.imagem;
-  if (typeof image !== 'string' || !/^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) return res.status(400).json({ erro: 'Imagem inválida ou muito grande.' });
+  if (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) return res.status(400).json({ erro: 'Imagem inválida ou muito grande.' });
   const count = await pool.query('SELECT COUNT(*)::int AS total FROM fotos_empresa WHERE empresa_id=$1', [req.session.user.id]);
   if (count.rows[0].total >= 12) return res.status(400).json({ erro: 'Você pode adicionar até 12 fotos à galeria.' });
   const stored = await uploadProfileImage(req.session.user.id, 'galeria-' + crypto.randomUUID(), image);
