@@ -69,7 +69,7 @@
             </div>
             <div class="job-detail-actions">
               <button class="button button-primary" type="button" id="apply-job">Candidatar-se</button>
-              <button class="button button-save" type="button" id="save-job" aria-pressed="${saved}">${saved ? 'Vaga salva' : 'Salvar vaga'}</button>
+              <button class="button button-save" type="button" id="save-job" aria-pressed="${saved}" ${saved ? 'disabled' : ''}>${saved ? 'Vaga salva' : 'Salvar vaga'}</button>
             </div>
           </section>
           <section class="job-detail-panel">
@@ -91,6 +91,7 @@
       document.getElementById('apply-job').addEventListener('click', event => apply(vaga.id, event.currentTarget));
       document.getElementById('save-job').addEventListener('click', async event => {
         const button = event.currentTarget;
+        if (button.getAttribute('aria-pressed') === 'true') return;
         button.disabled = true;
         try {
           const currentSession = await Conecta.api('/api/me');
@@ -102,17 +103,15 @@
             Conecta.toast('Somente contas de candidato podem salvar vagas.');
             return;
           }
-          const wasSaved = button.getAttribute('aria-pressed') === 'true';
           await Conecta.api('/api/vagas/' + encodeURIComponent(vaga.id) + '/salvar', {
-            method: wasSaved ? 'DELETE' : 'POST'
+            method: 'POST'
           });
-          const isSaved = !wasSaved;
-          button.textContent = isSaved ? 'Vaga salva' : 'Salvar vaga';
-          button.setAttribute('aria-pressed', String(isSaved));
-          Conecta.toast(isSaved ? 'Vaga salva na sua conta.' : 'Vaga removida dos itens salvos.');
+          button.textContent = 'Vaga salva';
+          button.setAttribute('aria-pressed', 'true');
+          button.disabled = true;
+          Conecta.toast('Vaga salva na sua conta. Você pode encontrá-la em Vagas salvas no seu painel.');
         } catch (error) {
           Conecta.toast(error.message);
-        } finally {
           button.disabled = false;
         }
       });
