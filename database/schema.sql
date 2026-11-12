@@ -41,6 +41,16 @@ CREATE INDEX IF NOT EXISTS idx_vagas_cidade ON vagas(cidade);
 CREATE INDEX IF NOT EXISTS idx_candidaturas_candidato ON candidaturas(candidato_id, criada_em DESC);
 CREATE INDEX IF NOT EXISTS idx_candidaturas_vaga ON candidaturas(vaga_id, criada_em DESC);
 
+CREATE TABLE IF NOT EXISTS vagas_salvas (
+  candidato_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
+  salva_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (candidato_id, vaga_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_vagas_salvas_candidato_data
+  ON vagas_salvas (candidato_id, salva_em DESC);
+
 
 -- Dados adicionais para contas empresariais.
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cnpj VARCHAR(14);
