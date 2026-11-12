@@ -804,6 +804,38 @@
     };
     bindImage('company-logo-edit','company-logo-input','foto_perfil',600,600,'Logotipo');
     bindImage('company-cover-edit','company-cover-input','banner_perfil',1600,600,'Imagem de capa');
+    const galleryInput = document.getElementById('company-gallery-input');
+    const galleryGrid = document.getElementById('company-gallery-grid');
+    const galleryFeedback = document.getElementById('company-gallery-feedback');
+    const renderCompanyGallery = async () => {
+      const data = await Conecta.api('/api/empresa/fotos');
+      galleryGrid.innerHTML = data.fotos.length ? data.fotos.map(photo => `
+        <figure class="company-gallery-item">
+          <img src="${escapeHTML(photo.url)}" alt="Foto da empresa" loading="lazy">
+          <button type="button" data-remove-company-photo="${photo.id}" aria-label="Remover foto">Remover</button>
+        </figure>`).join('') : '<div class="dashboard-empty">Adicione fotos para apresentar sua empresa.</div>';
+      galleryGrid.querySelectorAll('[data-remove-company-photo]').forEach(button => button.addEventListener('click', async () => {
+        if (!window.confirm('Deseja remover esta foto da galeria?')) return;
+        button.disabled = true;
+        try { await Conecta.api('/api/empresa/fotos/' + button.dataset.removeCompanyPhoto, { method: 'DELETE' }); await renderCompanyGallery(); }
+        catch (error) { Conecta.toast(error.message); button.disabled = false; }
+      }));
+    };
+    if (galleryInput) {
+      galleryInput.addEventListener('change', async () => {
+        const files = Array.from(galleryInput.files || []);
+        galleryInput.value = '';
+        for (const file of files) {
+          try {
+            const image = await prepareCompanyImage(file, 1200, 900);
+            await Conecta.api('/api/empresa/fotos', { method: 'POST', body: JSON.stringify({ imagem: image }) });
+          } catch (error) { galleryFeedback.textContent = error.message; break; }
+        }
+        try { await renderCompanyGallery(); } catch (error) { galleryFeedback.textContent = error.message; }
+      });
+      renderCompanyGallery().catch(error => { galleryFeedback.textContent = error.message; });
+    }
+
   }
 
   async function loadCompany() {
