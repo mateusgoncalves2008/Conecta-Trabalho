@@ -23,16 +23,6 @@
   </header>
 
   <main class="dashboard-main">
-    <section class="dashboard-welcome">
-      <div class="welcome-copy">
-        <span class="eyebrow">PAINEL DA EMPRESA</span>
-        <h1>Bem-vinda, <span id="welcome-name">empresa</span>.</h1>
-        <p>Divulgue oportunidades e encontre pessoas para fazer parte da sua equipe.</p>
-      </div>
-      <img class="page-illustration" src="../img/illustrations/empresa.svg" data-theme-light="../img/illustrations/empresa.svg" data-theme-dark="../img/illustrations/empresa-dark.svg" alt="" aria-hidden="true" loading="eager">
-      <div class="welcome-detail"><span class="welcome-detail-mark" aria-hidden="true"></span><span>Gerencie suas vagas e acompanhe as candidaturas em um só lugar.</span></div>
-    </section>
-
     <section class="dashboard-section company-profile-section" aria-labelledby="company-profile-heading">
       <div class="section-heading"><div><h2 id="company-profile-heading">Perfil da empresa</h2><p>Apresente sua empresa para quem está conhecendo suas oportunidades.</p></div><a class="company-profile-preview-link" id="company-public-preview" href="#" target="_blank" rel="noopener noreferrer">Visualizar perfil público</a></div>
       <div class="company-profile-card">
@@ -66,6 +56,16 @@
         <p class="company-image-hint">Dica: use o logotipo quadrado e uma imagem de capa horizontal. As imagens serão ajustadas automaticamente.</p>
       </div>
     </section>
+    <section class="dashboard-section company-gallery-section" aria-labelledby="company-gallery-title">
+      <div class="section-heading">
+        <div><h2 id="company-gallery-title">Fotos da empresa</h2><p>Mostre o ambiente, a equipe e a estrutura da sua empresa para quem visita seu perfil.</p></div>
+        <label class="button button-primary company-gallery-add" for="company-gallery-input">Adicionar fotos</label>
+        <input type="file" id="company-gallery-input" accept="image/*" multiple hidden>
+      </div>
+      <p class="company-gallery-feedback" id="company-gallery-feedback" aria-live="polite"></p>
+      <div class="company-gallery-grid" id="company-gallery-grid"><div class="dashboard-empty">Suas fotos aparecerão aqui.</div></div>
+    </section>
+
 
     <section class="dashboard-section company-publish-section">
       <div class="section-heading">
