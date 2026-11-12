@@ -134,18 +134,15 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
-  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120,
-  pool.query(`
-    CREATE TABLE IF NOT EXISTS fotos_empresa (
-      id BIGSERIAL PRIMARY KEY,
-      empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      imagem TEXT NOT NULL,
-      criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_fotos_empresa_empresa_data
-      ON fotos_empresa (empresa_id, criada_em DESC);
-  `)
-);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
+  CREATE TABLE IF NOT EXISTS fotos_empresa (
+    id BIGSERIAL PRIMARY KEY,
+    empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    imagem TEXT NOT NULL,
+    criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+  CREATE INDEX IF NOT EXISTS idx_fotos_empresa_empresa_data
+    ON fotos_empresa (empresa_id, criada_em DESC);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_oportunidade VARCHAR(80);
