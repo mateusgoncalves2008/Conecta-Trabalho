@@ -719,3 +719,15 @@ html[data-theme="dark"] .company-cover-placeholder-mark{background:#22364d;borde
     justify-content: flex-start;
   }
 }
+
+/* Galeria de fotos da empresa */
+.company-gallery-add{display:inline-flex;align-items:center;cursor:pointer}
+.company-gallery-feedback{margin:8px 0;color:var(--muted);font-size:12px}
+.company-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.company-gallery-item{position:relative;aspect-ratio:4/3;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#e9eef4}
+.company-gallery-item img{width:100%;height:100%;object-fit:cover}
+.company-gallery-item button{position:absolute;right:9px;bottom:9px;padding:7px 10px;border:0;border-radius:6px;background:rgba(20,43,73,.9);color:#fff;font-size:11px;cursor:pointer}
+.company-gallery-item button:disabled{opacity:.6;cursor:wait}
+html[data-theme="dark"] .company-gallery-item{background:#22364d;border-color:#40536a}
+@media(max-width:850px){.company-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.company-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.company-gallery-section .section-heading{align-items:flex-start;flex-wrap:wrap}.company-gallery-add{width:100%;justify-content:center}}
