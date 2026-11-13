@@ -105,7 +105,7 @@ const uploadCompanyProfileImage = async (userId, field, dataUrl) => {
     error.statusCode = 503;
     throw error;
   }
-  const match = typeof dataUrl === 'string' && dataUrl.match(/^data:(image\\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/);
+  const match = typeof dataUrl === 'string' && dataUrl.match(/^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/);
   if (!match || dataUrl.length > 1400000) {
     const error = new Error('Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.');
     error.statusCode = 400;
@@ -806,7 +806,7 @@ app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, re
   const field = req.body.campo;
   const image = req.body.imagem;
   if (!['foto_perfil','banner_perfil'].includes(field)) return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
-  if (image !== null && (typeof image !== 'string' || !/^data:image\\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
+  if (image !== null && (typeof image !== 'string' || !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
     return res.status(400).json({ erro: 'Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.' });
   }
   const current = await pool.query('SELECT ' + field + ' FROM usuarios WHERE id=$1 AND tipo=\'empresa\'', [req.session.user.id]);
@@ -1129,7 +1129,7 @@ const uploadCompanyProfileImage = async (userId, field, dataUrl) => {
     error.statusCode = 503;
     throw error;
   }
-  const match = typeof dataUrl === 'string' && dataUrl.match(/^data:(image\\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/);
+  const match = typeof dataUrl === 'string' && dataUrl.match(/^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/);
   if (!match || dataUrl.length > 1400000) {
     const error = new Error('Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.');
     error.statusCode = 400;
@@ -1830,7 +1830,7 @@ app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, re
   const field = req.body.campo;
   const image = req.body.imagem;
   if (!['foto_perfil','banner_perfil'].includes(field)) return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
-  if (image !== null && (typeof image !== 'string' || !/^data:image\\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
+  if (image !== null && (typeof image !== 'string' || !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
     return res.status(400).json({ erro: 'Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.' });
   }
   const current = await pool.query('SELECT ' + field + ' FROM usuarios WHERE id=$1 AND tipo=\'empresa\'', [req.session.user.id]);
