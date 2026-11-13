@@ -727,6 +727,56 @@
     cover.classList.toggle('has-image', Boolean(profile.banner_perfil));
   }
 
+  async function prepareCompanyProfileImage(file, width, height) {
+    const formats = {
+      'image/png': 'image/png',
+      'image/jpeg': 'image/jpeg',
+      'image/webp': 'image/webp'
+    };
+    const outputType = file && formats[file.type];
+    if (!outputType) throw new Error('Formato não permitido. Escolha PNG, JPG/JPEG ou WEBP.');
+    if (file.size > 5 * 1024 * 1024) throw new Error('Escolha uma imagem de até 5 MB.');
+    let image;
+    try { image = await createImageBitmap(file); }
+    catch {
+      image = await new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const element = new Image();
+        element.onload = () => { URL.revokeObjectURL(objectUrl); resolve(element); };
+        element.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Não foi possível abrir essa imagem.')); };
+        element.src = objectUrl;
+      });
+    }
+    const sourceWidth = image.width || image.naturalWidth;
+    const sourceHeight = image.height || image.naturalHeight;
+    const scale = Math.max(width / sourceWidth, height / sourceHeight);
+    const cropWidth = width / scale;
+    const cropHeight = height / scale;
+    const sx = (sourceWidth - cropWidth) / 2;
+    const sy = (sourceHeight - cropHeight) / 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (outputType === 'image/jpeg') {
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
+    }
+    context.drawImage(image, sx, sy, cropWidth, cropHeight, 0, 0, width, height);
+    image.close?.();
+    let quality = .9;
+    let result = canvas.toDataURL(outputType, quality);
+    if (!result.startsWith('data:' + outputType + ';base64,')) {
+      throw new Error('Seu navegador não conseguiu processar esse formato. Tente PNG, JPG/JPEG ou WEBP.');
+    }
+    while (result.length > 1400000 && outputType !== 'image/png' && quality > .45) {
+      quality -= .1;
+      result = canvas.toDataURL(outputType, quality);
+    }
+    if (result.length > 1400000) throw new Error('A imagem processada ficou grande demais. Escolha uma imagem menor.');
+    return result;
+  }
+
   async function prepareCompanyImage(file, width, height) {
     if (!file || !file.type.startsWith('image/')) throw new Error('Selecione um arquivo de imagem válido.');
     if (file.size > 5 * 1024 * 1024) throw new Error('Escolha uma imagem de até 5 MB.');
@@ -794,7 +844,7 @@
         if (!file) return;
         button.disabled = true;
         try {
-          const image = await prepareCompanyImage(file,width,height);
+          const image = await prepareCompanyProfileImage(file,width,height);
           await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:field,imagem:image})});
           await loadCompanyProfile();
           Conecta.toast(label + ' atualizada com sucesso.');
