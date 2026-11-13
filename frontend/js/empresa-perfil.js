@@ -169,28 +169,26 @@
       root.className = 'company-public-layout';
       root.innerHTML = `
         <section class="company-public-hero" aria-labelledby="company-public-name">
-          <div class="company-public-cover">${banner}<span class="company-public-cover-label">CONECTATRABALHO</span></div>
+          <div class="company-public-cover">${banner}</div>
           <div class="company-public-identity">
             ${logo}
             <div class="company-public-heading">
               <h1 id="company-public-name">${esc(name)}</h1>
-              <p>${esc(company.empresa_setor || 'Empresa')}${company.cidade ? ' · ' + esc(company.cidade) : ''}</p>
+              <p>${esc(company.empresa_setor || 'Empresa')}${company.cidade ? ' · ' + esc(company.cidade) : ''}${jobs.length ? ' · ' + jobs.length + (jobs.length === 1 ? ' vaga aberta' : ' vagas abertas') : ''}</p>
             </div>
-            <button class="company-public-primary-action" type="button" data-open-section="vagas">Ver vagas</button>
+            <div class="company-public-actions">
+              <button class="company-public-primary-action" type="button" data-open-section="vagas">Ver vagas</button>
+              ${website ? `<a class="company-public-secondary-action" href="${esc(website)}" target="_blank" rel="noopener noreferrer">Visite o site <span aria-hidden="true">↗</span></a>` : ''}
+            </div>
           </div>
-          <div class="company-public-stats">
-            <div><strong>${Number(company.vagas_abertas) || 0}</strong><span>Vagas abertas</span></div>
-            <div><strong>${esc(dateLabel(company.criado_em))}</strong><span>No ConectaTrabalho desde</span></div>
-          </div>
+          <nav class="company-public-nav" aria-label="Navegação do perfil da empresa">
+            <button type="button" data-company-section="inicio" aria-current="page">Início</button>
+            <button type="button" data-company-section="sobre">Sobre</button>
+            <button type="button" data-company-section="publicacoes">Publicações</button>
+            <button type="button" data-company-section="vagas">Vagas</button>
+            <button type="button" data-company-section="pessoas">Pessoas</button>
+          </nav>
         </section>
-
-        <nav class="company-public-nav" aria-label="Navegação do perfil da empresa">
-          <button type="button" data-company-section="inicio" aria-current="page">Início</button>
-          <button type="button" data-company-section="sobre">Sobre</button>
-          <button type="button" data-company-section="publicacoes">Publicações</button>
-          <button type="button" data-company-section="vagas">Vagas</button>
-          <button type="button" data-company-section="pessoas">Pessoas</button>
-        </nav>
 
         <div class="company-public-tab-content" id="company-public-tab-content" aria-live="polite">
           ${renderSection('inicio', company, jobs, info, website)}
