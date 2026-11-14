@@ -1148,7 +1148,7 @@
     const galleryFeedback = document.getElementById('company-gallery-feedback');
     const renderCompanyGallery = async () => {
       const data = await Conecta.api('/api/empresa/fotos');
-      const photos = data.fotos.slice(0, 4);
+      const photos = data.fotos;
       galleryGrid.innerHTML = photos.length ? photos.map(photo => {
         const date = new Date(photo.criada_em);
         const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
