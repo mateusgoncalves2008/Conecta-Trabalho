@@ -710,10 +710,27 @@
   let companyProfileEditModeSetter = null;
   const companyInitials = name => String(name || 'EMP').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase() || 'EMP';
 
+  function renderCompanyInstitutionalInfo(profile) {
+    const values = {
+      'company-view-name': profile.nome_empresa,
+      'company-view-city': profile.cidade,
+      'company-view-sector': profile.empresa_setor,
+      'company-view-size': profile.empresa_porte,
+      'company-view-phone': profile.telefone,
+      'company-view-site': profile.empresa_site,
+      'company-view-description': profile.descricao
+    };
+    Object.entries(values).forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value || (id === 'company-view-description' ? 'Nenhuma apresentação institucional cadastrada.' : 'Não informado');
+    });
+  }
+
   async function loadCompanyProfile() {
     const data = await Conecta.api('/api/empresa/perfil');
     companyProfileCache = data.perfil || {};
     const profile = companyProfileCache;
+    renderCompanyInstitutionalInfo(profile);
     const publicPreview = document.getElementById('company-public-preview');
     if (publicPreview) publicPreview.href = '/pages/empresa-perfil.html?id=' + encodeURIComponent(profile.id);
     const form = document.getElementById('company-profile-form');
@@ -863,6 +880,7 @@
       try {
         const profile = await Conecta.api('/api/empresa/perfil', { method: 'PUT', body: JSON.stringify(Object.fromEntries(new FormData(form))) });
         companyProfileCache = { ...companyProfileCache, ...profile.perfil };
+        renderCompanyInstitutionalInfo(companyProfileCache);
         document.getElementById('company-profile-name').textContent = profile.perfil.nome_empresa;
         document.getElementById('company-profile-location').textContent = profile.perfil.cidade;
         document.getElementById('company-logo-initials').textContent = companyInitials(profile.perfil.nome_empresa);
