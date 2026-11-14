@@ -926,10 +926,12 @@
       coverEditorContext.translate(width / 2, height / 2);
       coverEditorContext.rotate(radians);
       coverEditorContext.scale(coverEditorState.flipX * scale, coverEditorState.flipY * scale);
-      const brightness = Math.max(0, 100 + (coverEditorState.brightness - 100) * 3.2);
-      const contrast = Math.max(0, 100 + (coverEditorState.contrast - 100) * 3.2);
-      const saturation = Math.max(0, 100 + (coverEditorState.saturation - 100) * 3.0);
-      coverEditorContext.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) ${coverEditorState.filter}`;
+      // Mantém os valores exibidos nos controles, mas torna a variação visual mais perceptível.
+      const brightness = Math.max(0, 100 + (coverEditorState.brightness - 100) * 2.4);
+      const contrast = Math.max(0, 100 + (coverEditorState.contrast - 100) * 2.4);
+      const saturation = Math.max(0, 100 + (coverEditorState.saturation - 100) * 2.0);
+      const presetFilter = coverEditorState.filter === 'none' ? '' : ` ${coverEditorState.filter}`;
+      coverEditorContext.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)${presetFilter}`;
       coverEditorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
       coverEditorContext.restore();
       if (coverEditorState.vignette > 0) {
