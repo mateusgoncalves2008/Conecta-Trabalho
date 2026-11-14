@@ -861,7 +861,6 @@
     const coverEditAction = document.getElementById('company-cover-edit-image');
     const coverChangeAction = document.getElementById('company-cover-change-image');
     const coverDeleteAction = document.getElementById('company-cover-delete-image');
-    let coverEditing = false;
     const closeCoverModal = () => {
       coverModal.classList.remove('is-open');
       coverModal.setAttribute('aria-hidden', 'true');
@@ -1053,8 +1052,6 @@
         coverModalImage.hidden = false;
         coverEditAction.disabled = false;
         coverDeleteAction.disabled = false;
-        coverEditor.hidden = true;
-        coverEditing = false;
         coverEditAction.textContent = 'Editar';
         coverFeedback.textContent = 'Foto de capa atualizada com sucesso.';
         Conecta.toast('Imagem de capa atualizada com sucesso.');
@@ -1077,8 +1074,6 @@
         coverModalImage.hidden = true;
         coverEditAction.disabled = true;
         coverDeleteAction.disabled = true;
-        coverEditor.hidden = true;
-        coverEditing = false;
         coverEditAction.textContent = 'Editar';
         coverFeedback.textContent = 'Foto de capa excluída.';
       } catch (error) {
