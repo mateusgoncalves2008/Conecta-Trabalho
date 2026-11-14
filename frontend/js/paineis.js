@@ -857,8 +857,6 @@
     const coverInput = document.getElementById('company-cover-input');
     const coverModal = document.getElementById('company-cover-modal');
     const coverModalImage = document.getElementById('company-cover-modal-image');
-    const coverEditor = document.getElementById('company-cover-editor');
-    const coverZoom = document.getElementById('company-cover-zoom');
     const coverFeedback = document.getElementById('company-cover-modal-feedback');
     const coverEditAction = document.getElementById('company-cover-edit-image');
     const coverChangeAction = document.getElementById('company-cover-change-image');
@@ -868,10 +866,6 @@
       coverModal.classList.remove('is-open');
       coverModal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('company-cover-modal-open');
-      coverEditor.hidden = true;
-      coverEditing = false;
-      coverZoom.value = '100';
-      coverModalImage.style.transform = '';
       coverFeedback.textContent = '';
     };
     const openCoverModal = () => {
@@ -896,50 +890,154 @@
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && coverModal.classList.contains('is-open')) closeCoverModal();
     });
-    coverEditAction.addEventListener('click', async () => {
-      if (!coverModalImage.src) return;
-      if (!coverEditing) {
-        coverEditing = true;
-        coverEditor.hidden = false;
-        coverEditAction.textContent = 'Salvar edição';
-        coverFeedback.textContent = 'Ajuste o zoom da imagem e salve quando estiver pronto.';
-        return;
+    const coverImageEditor = document.getElementById('company-cover-image-editor');
+    const coverEditorCanvas = document.getElementById('company-cover-editor-canvas');
+    const coverEditorContext = coverEditorCanvas.getContext('2d');
+    const coverEditorFeedback = document.getElementById('company-cover-image-editor-feedback');
+    const coverEditorSave = document.getElementById('company-cover-image-editor-save');
+    const coverEditorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
+    const coverEditorTabs = coverImageEditor.querySelectorAll('[data-cover-editor-tab]');
+    const coverEditorPanels = coverImageEditor.querySelectorAll('[data-cover-editor-panel]');
+    const coverFilterButtons = coverImageEditor.querySelectorAll('[data-cover-image-filter]');
+    const resetCoverEditor = () => {
+      Object.assign(coverEditorState, { angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 });
+      ['brightness','contrast','saturation'].forEach(key => {
+        document.getElementById('company-cover-' + key).value = '100';
+        document.getElementById('company-cover-' + key + '-value').textContent = '100%';
+      });
+      document.getElementById('company-cover-vignette').value = '0';
+      document.getElementById('company-cover-vignette-value').textContent = '0%';
+      document.getElementById('company-cover-image-zoom').value = '1';
+      document.getElementById('company-cover-image-angle').value = '0';
+      coverFilterButtons.forEach(button => button.classList.toggle('active', button.dataset.coverImageFilter === 'none'));
+      coverEditorTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.coverEditorTab === 'crop'));
+      coverEditorPanels.forEach(panel => panel.classList.toggle('active', panel.dataset.coverEditorPanel === 'crop'));
+    };
+    const renderCoverEditor = () => {
+      const image = coverEditorState.image;
+      if (!image) return;
+      const width = coverEditorCanvas.width, height = coverEditorCanvas.height;
+      const radians = coverEditorState.angle * Math.PI / 180;
+      const cos = Math.abs(Math.cos(radians)), sin = Math.abs(Math.sin(radians));
+      const rotatedWidth = image.width * cos + image.height * sin;
+      const rotatedHeight = image.width * sin + image.height * cos;
+      const scale = Math.max(width / rotatedWidth, height / rotatedHeight) * coverEditorState.zoom;
+      coverEditorContext.clearRect(0, 0, width, height);
+      coverEditorContext.save();
+      coverEditorContext.translate(width / 2, height / 2);
+      coverEditorContext.rotate(radians);
+      coverEditorContext.scale(coverEditorState.flipX * scale, coverEditorState.flipY * scale);
+      const brightness = Math.max(0, 100 + (coverEditorState.brightness - 100) * 1.8);
+      const contrast = Math.max(0, 100 + (coverEditorState.contrast - 100) * 1.8);
+      const saturation = Math.max(0, 100 + (coverEditorState.saturation - 100) * 1.8);
+      coverEditorContext.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) ${coverEditorState.filter}`;
+      coverEditorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
+      coverEditorContext.restore();
+      if (coverEditorState.vignette > 0) {
+        const radius = Math.max(width, height) * .72;
+        const gradient = coverEditorContext.createRadialGradient(width / 2, height / 2, radius * .18, width / 2, height / 2, radius);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, `rgba(0,0,0,${Math.min(.95, coverEditorState.vignette / 100 * 1.25)})`);
+        coverEditorContext.save();
+        coverEditorContext.fillStyle = gradient;
+        coverEditorContext.fillRect(0, 0, width, height);
+        coverEditorContext.restore();
       }
-      if (!coverModalImage.complete || !coverModalImage.naturalWidth) {
-        coverFeedback.textContent = 'Aguarde a imagem terminar de carregar.';
-        return;
-      }
-      coverEditAction.disabled = true;
-      coverFeedback.textContent = 'Salvando ajuste...';
+      coverFilterButtons.forEach(button => {
+        const preview = button.querySelector('.candidate-filter-preview');
+        if (preview) {
+          preview.src = image.src;
+          preview.style.filter = button.dataset.coverImageFilter === 'none' ? 'none' : button.dataset.coverImageFilter;
+        }
+      });
+    };
+    const closeCoverImageEditor = (reopenCover = true) => {
+      coverImageEditor.classList.remove('is-open');
+      coverImageEditor.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-image-editor-open');
+      if (reopenCover && companyProfileCache.banner_perfil) openCoverModal();
+    };
+    const openCoverImageEditor = () => {
+      const source = companyProfileCache.banner_perfil || coverModalImage.src;
+      if (!source) return;
+      const image = new Image();
+      image.onload = () => {
+        coverEditorState.image = image;
+        resetCoverEditor();
+        renderCoverEditor();
+        closeCoverModal();
+        coverEditorFeedback.textContent = '';
+        coverImageEditor.classList.add('is-open');
+        coverImageEditor.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('candidate-image-editor-open');
+      };
+      image.onerror = () => { coverFeedback.textContent = 'Não foi possível abrir a foto de capa para edição.'; };
+      image.src = source;
+    };
+    coverEditAction.addEventListener('click', openCoverImageEditor);
+    document.getElementById('company-cover-image-editor-close').addEventListener('click', () => closeCoverImageEditor(true));
+    coverImageEditor.addEventListener('click', event => {
+      if (event.target === coverImageEditor) closeCoverImageEditor(true);
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && coverImageEditor.classList.contains('is-open')) closeCoverImageEditor(true);
+    });
+    coverEditorTabs.forEach(tab => tab.addEventListener('click', () => {
+      coverEditorTabs.forEach(item => item.classList.toggle('active', item === tab));
+      coverEditorPanels.forEach(panel => panel.classList.toggle('active', panel.dataset.coverEditorPanel === tab.dataset.coverEditorTab));
+    }));
+    document.getElementById('company-cover-rotate-left').addEventListener('click', () => {
+      coverEditorState.angle = ((coverEditorState.angle - 90 + 180) % 360 + 360) % 360 - 180;
+      document.getElementById('company-cover-image-angle').value = String(coverEditorState.angle);
+      renderCoverEditor();
+    });
+    document.getElementById('company-cover-rotate-right').addEventListener('click', () => {
+      coverEditorState.angle = ((coverEditorState.angle + 90 + 180) % 360 + 360) % 360 - 180;
+      document.getElementById('company-cover-image-angle').value = String(coverEditorState.angle);
+      renderCoverEditor();
+    });
+    document.getElementById('company-cover-flip-horizontal').addEventListener('click', () => { coverEditorState.flipX *= -1; renderCoverEditor(); });
+    document.getElementById('company-cover-flip-vertical').addEventListener('click', () => { coverEditorState.flipY *= -1; renderCoverEditor(); });
+    document.getElementById('company-cover-image-zoom').addEventListener('input', event => { coverEditorState.zoom = Number(event.target.value); renderCoverEditor(); });
+    document.getElementById('company-cover-image-angle').addEventListener('input', event => { coverEditorState.angle = Number(event.target.value); renderCoverEditor(); });
+    coverFilterButtons.forEach(button => button.addEventListener('click', () => {
+      coverEditorState.filter = button.dataset.coverImageFilter === 'none' ? 'none' : button.dataset.coverImageFilter;
+      coverFilterButtons.forEach(item => item.classList.toggle('active', item === button));
+      renderCoverEditor();
+    }));
+    ['brightness','contrast','saturation','vignette'].forEach(key => {
+      document.getElementById('company-cover-' + key).addEventListener('input', event => {
+        coverEditorState[key] = Number(event.target.value);
+        document.getElementById('company-cover-' + key + '-value').textContent = event.target.value + '%';
+        renderCoverEditor();
+      });
+    });
+    coverEditorSave.addEventListener('click', async () => {
+      if (!coverEditorState.image) return;
+      coverEditorSave.disabled = true;
+      coverEditorFeedback.textContent = 'Salvando alterações...';
       try {
-        const width = 1600, height = 600;
-        const image = coverModalImage;
-        const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * (Number(coverZoom.value) / 100);
-        const cropWidth = width / scale, cropHeight = height / scale;
-        const sx = (image.naturalWidth - cropWidth) / 2;
-        const sy = (image.naturalHeight - cropHeight) / 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d').drawImage(image,sx,sy,cropWidth,cropHeight,0,0,width,height);
-        const editedImage = canvas.toDataURL('image/jpeg',.88);
-        if (editedImage.length > 1400000) throw new Error('A imagem ajustada ficou grande demais.');
-        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:editedImage})});
+        let quality = .9;
+        let editedImage = coverEditorCanvas.toDataURL('image/jpeg', quality);
+        while (editedImage.length > 1400000 && quality > .45) {
+          quality -= .1;
+          editedImage = coverEditorCanvas.toDataURL('image/jpeg', quality);
+        }
+        if (editedImage.length > 1400000) throw new Error('Não foi possível reduzir a imagem para o tamanho permitido.');
+        await Conecta.api('/api/empresa/perfil/imagem', { method: 'PUT', body: JSON.stringify({ campo: 'banner_perfil', imagem: editedImage }) });
         await loadCompanyProfile();
         coverModalImage.src = companyProfileCache.banner_perfil;
-        coverEditor.hidden = true;
-        coverEditing = false;
-        coverZoom.value = '100';
-        coverModalImage.style.transform = '';
-        coverEditAction.textContent = 'Editar';
-        coverFeedback.textContent = 'Ajuste salvo com sucesso.';
-      } catch (error) {
-        coverFeedback.textContent = error.message;
-      } finally {
+        coverModalImage.hidden = false;
         coverEditAction.disabled = false;
+        coverDeleteAction.disabled = false;
+        closeCoverImageEditor(false);
+        openCoverModal();
+        coverFeedback.textContent = 'Foto de capa atualizada com sucesso.';
+      } catch (error) {
+        coverEditorFeedback.textContent = error.message || 'Não foi possível salvar a foto de capa.';
+      } finally {
+        coverEditorSave.disabled = false;
       }
-    });
-    coverZoom.addEventListener('input', () => {
-      coverModalImage.style.transform = 'scale(' + (Number(coverZoom.value) / 100) + ')';
     });
     coverChangeAction.addEventListener('click', () => coverInput.click());
     coverInput.addEventListener('change', async () => {
