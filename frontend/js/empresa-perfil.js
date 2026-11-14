@@ -33,6 +33,28 @@
       <span class="company-public-job-arrow">Ver vaga <span aria-hidden="true">→</span></span>
     </a>`;
 
+  const companyJobsUrl = (companyId, jobId) =>
+    '/pages/empresa-vagas.html?empresa=' + encodeURIComponent(companyId) +
+    (jobId ? '&vaga=' + encodeURIComponent(jobId) : '');
+
+  const companyJobCard = (job, company) => {
+    const name = company.nome_empresa || company.nome_fantasia || 'Empresa';
+    const mark = company.foto_perfil
+      ? `<img src="${esc(company.foto_perfil)}" alt="" loading="lazy">`
+      : `<span aria-hidden="true">${esc(initials(name))}</span>`;
+    return `
+      <a class="company-public-job-card" href="${companyJobsUrl(company.id, job.id)}">
+        <div class="company-public-job-card-top">
+          <span class="company-public-job-card-logo">${mark}</span>
+          <span class="company-public-job-card-open" aria-hidden="true">↗</span>
+        </div>
+        <strong class="company-public-job-card-title">${esc(job.titulo)}</strong>
+        <span class="company-public-job-card-company">${esc(name)}</span>
+        <span class="company-public-job-card-location">${esc(job.cidade || company.cidade || 'Local não informado')}${job.modalidade ? ' · ' + esc(job.modalidade) : ''}</span>
+        <span class="company-public-job-card-date">Publicada em ${esc(dateLabel(job.criado_em))}</span>
+      </a>`;
+  };
+
   function emptyState(title, message) {
     return `
       <div class="company-public-empty-state">
@@ -89,14 +111,19 @@
     }
 
     if (section === 'vagas') {
+      const allJobsUrl = companyJobsUrl(company.id);
       return `<section class="company-public-panel company-public-jobs-panel">
         <div class="company-public-jobs-heading">
-          <div><span class="company-public-section-kicker">OPORTUNIDADES</span><h2>Vagas disponíveis</h2></div>
-          <span class="company-public-jobs-count">${jobs.length}</span>
+          <div><span class="company-public-section-kicker">OPORTUNIDADES</span><h2>Vagas anunciadas recentemente</h2></div>
+          <div class="company-public-carousel-controls">
+            <button type="button" data-job-scroll="prev" aria-label="Vagas anteriores">‹</button>
+            <button type="button" data-job-scroll="next" aria-label="Próximas vagas">›</button>
+          </div>
         </div>
         ${jobs.length
-          ? `<div class="company-public-jobs">${jobs.map(jobCard).join('')}</div>`
-          : '<p class="company-public-empty">Esta empresa não possui vagas abertas no momento. Volte em breve para conferir novas oportunidades.</p>'}
+          ? `<div class="company-public-jobs-carousel" id="company-public-jobs-carousel">${jobs.map(job => companyJobCard(job, company)).join('')}</div>`
+          : emptyState('Nenhuma vaga disponível', 'Esta empresa não possui vagas abertas no momento. Volte em breve para conferir novas oportunidades.')}
+        <div class="company-public-all-jobs"><a href="${allJobsUrl}">Exibir todas as vagas <span aria-hidden="true">→</span></a></div>
       </section>`;
     }
 
@@ -121,7 +148,7 @@
           <section class="company-public-panel">
             <div class="company-public-jobs-heading">
               <div><span class="company-public-section-kicker">OPORTUNIDADES</span><h2>Vagas recentes</h2></div>
-              <button class="company-public-text-action" type="button" data-open-section="vagas">Ver todas <span aria-hidden="true">→</span></button>
+              <a class="company-public-text-action" href="${companyJobsUrl(company.id)}">Exibir todas as vagas <span aria-hidden="true">→</span></a>
             </div>
             ${jobs.length
               ? `<div class="company-public-jobs">${jobs.slice(0, 3).map(jobCard).join('')}</div>`
@@ -212,6 +239,11 @@
       tabContent.addEventListener('click', event => {
         const action = event.target.closest('[data-open-section]');
         if (action) showSection(action.dataset.openSection);
+        const scrollButton = event.target.closest('[data-job-scroll]');
+        if (scrollButton) {
+          const carousel = tabContent.querySelector('#company-public-jobs-carousel');
+          if (carousel) carousel.scrollBy({ left: (scrollButton.dataset.jobScroll === 'next' ? 1 : -1) * carousel.clientWidth * 0.8, behavior: 'smooth' });
+        }
       });
       root.querySelector('.company-public-hero').addEventListener('click', event => {
         const action = event.target.closest('[data-open-section]');
