@@ -821,26 +821,38 @@
     if (!form) return;
     const feedback = document.getElementById('company-profile-feedback');
     const editButton = document.getElementById('company-profile-edit');
+    const editModal = document.getElementById('company-profile-edit-modal');
     const cancelButton = document.getElementById('company-profile-cancel');
-    const saveButton = form.querySelector('button[type="submit"]');
+    const closeButton = document.getElementById('company-profile-edit-close');
+    const closeEditor = () => {
+      editModal.classList.remove('is-open');
+      editModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('company-profile-editor-open');
+    };
     const setEditMode = editing => {
       form.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !editing; });
-      editButton.hidden = editing;
-      cancelButton.hidden = !editing;
-      saveButton.hidden = !editing;
       form.classList.toggle('is-editing', editing);
-      if (!editing) {
+      if (editing) {
+        editModal.classList.add('is-open');
+        editModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('company-profile-editor-open');
+        setTimeout(() => form.elements.nome_empresa?.focus(), 0);
+      } else {
+        closeEditor();
         feedback.textContent = '';
         feedback.classList.remove('success');
       }
     };
     companyProfileEditModeSetter = setEditMode;
     editButton.addEventListener('click', () => setEditMode(true));
-    cancelButton.addEventListener('click', () => {
+    [cancelButton, closeButton].forEach(button => button.addEventListener('click', () => {
       ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
         if (form.elements[key]) form.elements[key].value = companyProfileCache[key] || '';
       });
       setEditMode(false);
+    }));
+    editModal.addEventListener('click', event => {
+      if (event.target.closest('[data-close-company-editor]')) cancelButton.click();
     });
     setEditMode(false);
     form.addEventListener('submit', async event => {
