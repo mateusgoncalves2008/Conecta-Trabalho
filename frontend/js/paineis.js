@@ -1148,11 +1148,16 @@
     const galleryFeedback = document.getElementById('company-gallery-feedback');
     const renderCompanyGallery = async () => {
       const data = await Conecta.api('/api/empresa/fotos');
-      galleryGrid.innerHTML = data.fotos.length ? data.fotos.map(photo => `
-        <figure class="company-gallery-item">
-          <img src="${escapeHTML(photo.url)}" alt="Foto da empresa" loading="lazy">
-          <button type="button" data-remove-company-photo="${photo.id}" aria-label="Remover foto">Remover</button>
-        </figure>`).join('') : '<div class="dashboard-empty">Adicione fotos para apresentar sua empresa.</div>';
+      const photos = data.fotos.slice(0, 4);
+      galleryGrid.innerHTML = photos.length ? photos.map(photo => {
+        const date = new Date(photo.criada_em);
+        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+        return `<figure class="company-gallery-item"><img src="${escapeHTML(photo.url)}" alt="Foto da empresa" loading="lazy"><span class="company-gallery-date">${escapeHTML(dateLabel)}</span><button type="button" data-remove-company-photo="${photo.id}" aria-label="Remover foto">Remover</button></figure>`;
+      }).join('') : '<div class="dashboard-empty">Adicione fotos para apresentar sua empresa.</div>';
+      const remaining = Math.max(0, 4 - data.fotos.length);
+      galleryInput.disabled = remaining === 0;
+      const addLabel = document.querySelector('label[for="company-gallery-input"]');
+      if (addLabel) { addLabel.classList.toggle('is-disabled', remaining === 0); addLabel.textContent = remaining === 0 ? 'Limite de 4 fotos atingido' : 'Adicionar fotos (' + remaining + ' restantes)'; }
       galleryGrid.querySelectorAll('[data-remove-company-photo]').forEach(button => button.addEventListener('click', async () => {
         if (!window.confirm('Deseja remover esta foto da galeria?')) return;
         button.disabled = true;
@@ -1164,6 +1169,10 @@
       galleryInput.addEventListener('change', async () => {
         const files = Array.from(galleryInput.files || []);
         galleryInput.value = '';
+        const current = await Conecta.api('/api/empresa/fotos');
+        const remaining = Math.max(0, 4 - current.fotos.length);
+        if (!remaining) { galleryFeedback.textContent = 'Sua empresa já publicou as 4 fotos permitidas.'; return; }
+        if (files.length > remaining) { galleryFeedback.textContent = 'Você pode adicionar mais ' + remaining + ' foto(s).'; files.splice(remaining); }
         for (const file of files) {
           try {
             const image = await prepareCompanyImage(file, 1200, 900);
