@@ -877,7 +877,7 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   const profile = result.rows[0];
   const jobs = await pool.query(
     `SELECT id,titulo,descricao,requisitos,cidade,modalidade,tipo_contrato,salario,criado_em
-     FROM vagas WHERE empresa_id=$1 AND status='aberta' ORDER BY criado_em DESC LIMIT 60`,
+     FROM vagas WHERE empresa_id=$1 AND status='aberta' ORDER BY criado_em DESC`,
     [companyId]
   );
   profile.foto_perfil = imageReference(profile.id, 'foto_perfil', profile.foto_perfil);
