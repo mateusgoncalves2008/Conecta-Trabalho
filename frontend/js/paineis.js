@@ -20,7 +20,10 @@
       const welcomeName = document.getElementById('welcome-name');
       if (welcomeName) welcomeName.textContent = session.usuario.nomeEmpresa || session.usuario.nome.split(' ')[0];
       const userName = document.getElementById('user-name');
-      if (userName) userName.textContent = session.usuario.nomeEmpresa || session.usuario.nome;
+      if (userName) {
+        userName.textContent = session.usuario.tipo === 'empresa' ? '' : session.usuario.nome;
+        userName.hidden = session.usuario.tipo === 'empresa';
+      }
       if (page === 'empresa') { await loadCompanyProfile(); await loadCompany(); }
       else await loadCandidate();
     } catch (error) {
