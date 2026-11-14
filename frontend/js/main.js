@@ -320,13 +320,26 @@
         link.href = user.tipo === 'empresa' ? '/pages/empresa.html#company-profile-heading' : '/pages/candidato.html#meu-perfil';
         link.setAttribute('aria-label', 'Abrir meu perfil');
         link.title = 'Meu perfil';
-        if (user.fotoPerfil) {
+        let profilePhoto = user.fotoPerfil || '';
+        if (user.tipo === 'empresa') {
+          try {
+            const companyData = await api('/api/empresa/perfil');
+            profilePhoto = companyData.perfil?.foto_perfil || profilePhoto;
+          } catch (error) {
+            console.warn('Não foi possível carregar a foto da empresa no menu:', error);
+          }
+        }
+
+        if (profilePhoto) {
           const photo = document.createElement('img');
-          photo.src = user.fotoPerfil;
+          photo.src = profilePhoto;
           photo.alt = '';
+          photo.loading = 'eager';
+          photo.decoding = 'async';
           link.appendChild(photo);
         } else {
-          const initials = String(user.nomeEmpresa || user.nome || 'CT').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          const initials = String(user.tipo === 'empresa' ? (user.nomeEmpresa || user.nome) : user.nome || 'CT')
+            .trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
           link.textContent = initials;
         }
         publicHeaderActions.prepend(link);
