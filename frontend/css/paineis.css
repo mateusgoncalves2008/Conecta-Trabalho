@@ -802,3 +802,20 @@ html[data-theme="dark"] .company-cover-modal-preview{border-color:#40536a;backgr
 .company-profile-form-actions{display:flex;align-items:center;gap:10px}
 .company-profile-form-footer{display:flex;align-items:center;justify-content:space-between;gap:14px}
 @media(max-width:600px){.company-profile-form-heading{align-items:flex-start}.company-profile-form-footer{align-items:stretch;flex-direction:column}.company-profile-form-actions{justify-content:flex-end}}
+
+
+/* Janela frontal para edição das informações institucionais */
+.company-profile-edit-modal{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:24px}
+.company-profile-edit-modal.is-open{display:flex}
+.company-profile-edit-backdrop{position:absolute;inset:0;background:rgba(12,20,32,.62)}
+.company-profile-edit-dialog{position:relative;z-index:1;width:min(760px,100%);max-height:min(88vh,900px);overflow:auto;background:var(--surface,#fff);border:1px solid var(--line,#e2e8f0);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.company-profile-edit-dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 28px 0}
+.company-profile-edit-dialog-heading h3{margin:0;color:var(--navy);font-size:20px}
+.company-profile-edit-dialog-heading p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.company-profile-edit-close{width:36px;height:36px;flex:0 0 36px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink);font-size:25px;line-height:1;cursor:pointer}
+.company-profile-edit-dialog .company-profile-form{padding:22px 28px 26px}
+.company-profile-edit-dialog .company-profile-form-footer{margin-top:4px}
+body.company-profile-editor-open{overflow:hidden}
+html[data-theme="dark"] .company-profile-edit-dialog{background:#172538;border-color:#34465a}
+html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
+@media(max-width:650px){.company-profile-edit-modal{padding:12px}.company-profile-edit-dialog{max-height:94vh;border-radius:13px}.company-profile-edit-dialog-heading{padding:20px 18px 0}.company-profile-edit-dialog .company-profile-form{padding:20px 18px}.company-profile-edit-dialog .company-profile-form-footer{flex-direction:column-reverse}.company-profile-edit-dialog .company-profile-form-actions{width:100%;display:flex}.company-profile-edit-dialog .company-profile-form-actions button{flex:1}}
