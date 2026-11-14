@@ -911,3 +911,90 @@ html[data-theme="dark"] .company-public-secondary-action{color:#78b7ff;border-co
  .company-public-nav{gap:24px;padding:0 16px}
  .company-public-nav button{min-height:52px;font-size:13px}
 }
+
+
+
+/* Vagas públicas da empresa: cards horizontais e visualização em duas colunas */
+.company-public-carousel-controls{display:flex;gap:8px}
+.company-public-carousel-controls button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font-size:23px;line-height:1;cursor:pointer}
+.company-public-carousel-controls button:hover{border-color:var(--orange);color:var(--orange-dark)}
+.company-public-jobs-carousel{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 36px)/3);gap:18px;overflow-x:auto;padding:6px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.company-public-job-card{display:flex;flex-direction:column;min-width:0;min-height:258px;padding:16px 15px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-decoration:none;scroll-snap-align:start;transition:border-color .15s}
+.company-public-job-card:hover{border-color:var(--orange)}
+.company-public-job-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:13px}
+.company-public-job-card-logo{display:grid;place-items:center;width:66px;height:66px;overflow:hidden;background:#111;border-radius:2px;color:#fff;font-size:15px;font-weight:800}
+.company-public-job-card-logo img{width:100%;height:100%;object-fit:contain}
+.company-public-job-card-open{color:var(--muted);font-size:18px}
+.company-public-job-card-title{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;min-height:44px;color:var(--ink);font-size:15px;line-height:1.45}
+.company-public-job-card-company{margin-top:5px;color:var(--ink);font-size:12px}
+.company-public-job-card-location{margin-top:3px;color:var(--muted);font-size:12px;line-height:1.4}
+.company-public-job-card-date{margin-top:auto;padding-top:15px;color:#16845b;font-size:12px;font-weight:700}
+.company-public-all-jobs{display:flex;justify-content:center;margin:14px -22px -22px;padding:16px 12px;border-top:1px solid var(--line)}
+.company-public-all-jobs a{display:inline-flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-weight:700;text-decoration:none}
+.company-public-all-jobs a:hover{color:var(--orange-dark)}
+.company-jobs-main{width:min(1400px,calc(100% - 40px));margin:18px auto 48px}
+.company-jobs-main>.job-detail-back{display:inline-flex;margin:0 0 14px}
+.company-jobs-loading,.company-jobs-empty{padding:32px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted)}
+.company-jobs-split{display:grid;grid-template-columns:minmax(300px, .78fr) minmax(0,1.35fr);gap:14px;align-items:stretch}
+.company-jobs-list-pane,.company-jobs-detail-pane{min-width:0;max-height:calc(100vh - 170px);overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.company-jobs-list-heading{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 16px;border-bottom:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;font-weight:750}
+.company-jobs-list-heading a{color:var(--orange-dark);font-size:12px;text-decoration:none}
+.company-jobs-list{display:grid;padding:0 12px}
+.company-jobs-list-item{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;width:100%;padding:13px 9px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
+.company-jobs-list-item:hover{background:var(--page)}
+.company-jobs-list-item.is-selected{background:var(--soft);box-shadow:inset 3px 0 var(--orange)}
+.company-jobs-list-logo{display:grid;place-items:center;width:54px;height:54px;overflow:hidden;border-radius:5px;background:#111;color:#fff;font-size:12px;font-weight:800}
+.company-jobs-list-logo img{width:100%;height:100%;object-fit:contain}
+.company-jobs-list-copy{display:grid;gap:4px;min-width:0}
+.company-jobs-list-copy strong{color:var(--ink);font-size:13px;line-height:1.4}
+.company-jobs-list-copy>span{color:var(--ink);font-size:12px}
+.company-jobs-list-copy small{color:var(--muted);font-size:11px;line-height:1.4}
+.company-jobs-detail-pane{padding:22px 24px}
+.company-jobs-detail{max-width:850px;margin:0 auto}
+.company-jobs-detail-company{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.company-jobs-detail-logo{display:grid;place-items:center;width:50px;height:50px;overflow:hidden;border-radius:5px;background:#111;color:#fff;font-size:12px;font-weight:800}
+.company-jobs-detail-logo img{width:100%;height:100%;object-fit:contain}
+.company-jobs-detail-company>div{display:grid;gap:4px}
+.company-jobs-detail-company strong{color:var(--ink);font-size:14px}
+.company-jobs-detail-company>div span{color:var(--muted);font-size:12px}
+.company-jobs-detail h1{margin:0;color:var(--ink);font-size:clamp(22px,3vw,29px);line-height:1.3}
+.company-jobs-detail-meta{margin:9px 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
+.company-jobs-detail-tags{display:flex;flex-wrap:wrap;gap:8px}
+.company-jobs-detail-tags span{padding:7px 12px;border:1px solid var(--line);border-radius:20px;color:var(--ink);font-size:12px}
+.company-jobs-detail-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 24px}
+.company-jobs-apply,.company-jobs-company-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:1px solid var(--orange);border-radius:22px;color:var(--orange-dark);font-size:13px;font-weight:750;text-decoration:none}
+.company-jobs-apply{background:var(--orange);color:#fff}
+.company-jobs-apply:hover{background:var(--orange-dark)}
+.company-jobs-detail-section{padding:20px 0;border-top:1px solid var(--line)}
+.company-jobs-detail-section h2{margin:0 0 12px;color:var(--ink);font-size:18px}
+.company-jobs-detail-section p{margin:0;color:var(--ink);font-size:13px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+.company-jobs-facts dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0}
+.company-jobs-facts dl div{display:grid;gap:4px}
+.company-jobs-facts dt{color:var(--muted);font-size:11px}
+.company-jobs-facts dd{margin:0;color:var(--ink);font-size:13px;font-weight:650}
+.company-jobs-detail-section .company-jobs-company-link{margin-top:14px}
+.company-jobs-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.company-jobs-photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:var(--page)}
+.company-jobs-muted{color:var(--muted)!important}
+html[data-theme="dark"] .company-public-job-card,html[data-theme="dark"] .company-public-carousel-controls button,html[data-theme="dark"] .company-jobs-list-pane,html[data-theme="dark"] .company-jobs-detail-pane,html[data-theme="dark"] .company-jobs-loading,html[data-theme="dark"] .company-jobs-empty{background:#172538;border-color:#34465a}
+html[data-theme="dark"] .company-public-job-card-title,html[data-theme="dark"] .company-jobs-list-copy strong,html[data-theme="dark"] .company-jobs-detail h1,html[data-theme="dark"] .company-jobs-detail-section h2{color:#f3f7fb}
+html[data-theme="dark"] .company-jobs-list-item.is-selected,html[data-theme="dark"] .company-jobs-list-item:hover{background:#22364d}
+@media(max-width:850px){
+ .company-public-jobs-carousel{grid-auto-columns:calc((100% - 18px)/2)}
+ .company-jobs-main{width:calc(100% - 24px);margin:14px auto 36px}
+ .company-jobs-split{grid-template-columns:1fr}
+ .company-jobs-list-pane{max-height:320px}
+ .company-jobs-detail-pane{max-height:none;padding:19px 17px}
+}
+@media(max-width:560px){
+ .company-public-jobs-carousel{grid-auto-columns: minmax(230px, 82%)}
+ .company-public-all-jobs{margin-left:-15px;margin-right:-15px;margin-bottom:-18px}
+ .company-jobs-list-pane{max-height:280px}
+ .company-jobs-list-item{grid-template-columns:48px minmax(0,1fr);padding:11px 6px}
+ .company-jobs-list-logo{width:46px;height:46px}
+ .company-jobs-detail-pane{padding:17px 14px}
+ .company-jobs-facts dl{grid-template-columns:1fr}
+ .company-jobs-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .company-public-carousel-controls button{width:31px;height:31px}
+}
+@media(prefers-reduced-motion:reduce){.company-public-job-card{transition:none}}
