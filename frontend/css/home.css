@@ -800,11 +800,11 @@ html[data-theme="dark"] .company-public-logo-fallback,html[data-theme="dark"] .c
 .company-public-nav button:hover,.company-public-nav button[aria-current="page"]{border-bottom-color:var(--orange);color:var(--navy)}
 .company-public-tab-content{min-width:0}
 .company-public-home-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;align-items:start}
-.company-public-home-main,.company-public-home-side,.company-public-section-grid{display:grid;gap:12px;min-width:0}
-.company-public-section-grid{grid-template-columns:minmax(0,1fr) 310px;align-items:start}
-.company-public-section-grid>.company-public-panel:first-child{grid-column:1}
+.company-public-home-main,.company-public-home-side{display:grid;gap:12px;min-width:0}
+.company-public-section-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;column-gap:20px;row-gap:20px;align-items:start;min-width:0}
+.company-public-section-grid>.company-public-panel:first-child{grid-column:1;grid-row:1}
 .company-public-section-grid>.company-public-panel:nth-child(2){grid-column:2;grid-row:1}
-.company-public-section-grid>.company-public-panel:nth-child(3){grid-column:1/-1}
+.company-public-section-grid>.company-public-panel:nth-child(3){grid-column:1;grid-row:2;width:100%;min-width:0;box-sizing:border-box}
 .company-public-panel{padding:22px}
 .company-public-panel h2{margin:3px 0 13px;color:var(--navy);font-size:19px;letter-spacing:-.25px}
 .company-public-section-kicker{display:block;color:var(--orange-dark);font-size:10px;font-weight:800;letter-spacing:1.1px}
@@ -1029,21 +1029,3 @@ body.company-photo-lightbox-open{overflow:hidden}
 @media(max-width:600px){.company-photo-lightbox{padding:58px 48px}.company-photo-lightbox-arrow{width:36px;height:46px;font-size:20px}.company-photo-lightbox-arrow.is-prev{left:7px}.company-photo-lightbox-arrow.is-next{right:7px}.company-photo-lightbox-close{top:10px;right:10px}}
 
 
-/* Perfil público: galeria alinhada à coluna Sobre a empresa */
-.company-public-section-grid{
-  column-gap:20px;
-  row-gap:20px;
-}
-.company-public-section-grid>.company-public-panel:nth-child(3){
-  grid-column:1;
-  grid-row:2;
-  width:100%;
-  min-width:0;
-  box-sizing:border-box;
-}
-@media(max-width:700px){
-  .company-public-section-grid>.company-public-panel:nth-child(3){
-    grid-column:1;
-    grid-row:auto;
-  }
-}
