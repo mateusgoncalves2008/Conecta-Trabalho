@@ -789,3 +789,5 @@ html[data-theme="dark"] .company-cover-modal-preview{border-color:#40536a;backgr
   .company-cover-image-editor .candidate-image-editor-stage canvas{width:min(100%,90vw);max-height:100%;aspect-ratio:8/3}
   .company-cover-image-editor .company-cover-crop-guide{width:min(100%,90vw);aspect-ratio:8/3}
 }
+
+.company-cover-image-editor .candidate-editor-transform svg{display:block;width:21px;height:21px}
