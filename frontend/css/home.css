@@ -998,3 +998,17 @@ html[data-theme="dark"] .company-jobs-list-item.is-selected,html[data-theme="dar
  .company-public-carousel-controls button{width:31px;height:31px}
 }
 @media(prefers-reduced-motion:reduce){.company-public-job-card{transition:none}}
+
+
+/* Texto institucional expansível, sem barra de rolagem interna */
+.company-public-description.is-collapsed{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:6;
+  line-clamp:6;
+  overflow:hidden;
+}
+.company-public-description.is-expanded{
+  display:block;
+  overflow:visible;
+}
