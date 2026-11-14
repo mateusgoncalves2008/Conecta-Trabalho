@@ -926,17 +926,17 @@
       coverEditorContext.translate(width / 2, height / 2);
       coverEditorContext.rotate(radians);
       coverEditorContext.scale(coverEditorState.flipX * scale, coverEditorState.flipY * scale);
-      const brightness = Math.max(0, 100 + (coverEditorState.brightness - 100) * 1.8);
-      const contrast = Math.max(0, 100 + (coverEditorState.contrast - 100) * 1.8);
-      const saturation = Math.max(0, 100 + (coverEditorState.saturation - 100) * 1.8);
+      const brightness = Math.max(0, 100 + (coverEditorState.brightness - 100) * 3.2);
+      const contrast = Math.max(0, 100 + (coverEditorState.contrast - 100) * 3.2);
+      const saturation = Math.max(0, 100 + (coverEditorState.saturation - 100) * 3.0);
       coverEditorContext.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) ${coverEditorState.filter}`;
       coverEditorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
       coverEditorContext.restore();
       if (coverEditorState.vignette > 0) {
         const radius = Math.max(width, height) * .72;
-        const gradient = coverEditorContext.createRadialGradient(width / 2, height / 2, radius * .18, width / 2, height / 2, radius);
+        const gradient = coverEditorContext.createRadialGradient(width / 2, height / 2, radius * .08, width / 2, height / 2, radius);
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
-        gradient.addColorStop(1, `rgba(0,0,0,${Math.min(.95, coverEditorState.vignette / 100 * 1.25)})`);
+        gradient.addColorStop(1, `rgba(0,0,0,${Math.min(.98, coverEditorState.vignette / 100 * 1.45)})`);
         coverEditorContext.save();
         coverEditorContext.fillStyle = gradient;
         coverEditorContext.fillRect(0, 0, width, height);
