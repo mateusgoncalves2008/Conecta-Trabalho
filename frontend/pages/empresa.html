@@ -106,19 +106,31 @@
           </div>
           <div class="company-profile-heading-copy"><strong id="company-profile-name">Sua empresa</strong><span id="company-profile-location">Localização não informada</span></div>
         </div>
-        <form id="company-profile-form" class="company-profile-form" novalidate>
-          <div class="company-profile-form-heading"><div><h3>Informações institucionais</h3><p>Esses dados poderão ser vistos por pessoas interessadas nas vagas.</p></div><button class="button button-secondary company-profile-edit" id="company-profile-edit" type="button"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</button></div>
-          <div class="company-profile-fields">
-            <label class="field">Nome público da empresa<input name="nome_empresa" required maxlength="160" placeholder="Nome pelo qual sua empresa é conhecida"></label>
-            <label class="field">Cidade<input name="cidade" required maxlength="100" placeholder="Cidade e estado"></label>
-            <label class="field">Setor de atuação<input name="empresa_setor" maxlength="100" placeholder="Ex.: Comércio, Tecnologia, Saúde"></label>
-            <label class="field">Porte da empresa<select name="empresa_porte"><option value="">Selecione (opcional)</option><option>MEI</option><option>Microempresa</option><option>Pequena empresa</option><option>Média empresa</option><option>Grande empresa</option></select></label>
-            <label class="field">Telefone comercial<input name="telefone" maxlength="30" placeholder="Telefone para contato"></label>
-            <label class="field">Site oficial <span class="field-optional">(opcional)</span><input name="empresa_site" type="url" maxlength="300" placeholder="https://www.suaempresa.com.br"></label>
-            <label class="field field-wide">Sobre a empresa<textarea name="descricao" maxlength="4000" rows="5" placeholder="Conte a história da empresa, o que ela faz, seus valores e o que oferece à comunidade."></textarea></label>
-          </div>
-          <div class="company-profile-form-footer"><p id="company-profile-feedback" class="form-feedback" aria-live="polite"></p><div class="company-profile-form-actions"><button class="button button-secondary" id="company-profile-cancel" type="button" hidden>Cancelar</button><button class="button button-primary" type="submit" hidden>Salvar alterações</button></div></div>
-        </form>
+        <div class="company-profile-form-heading">
+          <div><h3>Informações institucionais</h3><p>Esses dados poderão ser vistos por pessoas interessadas nas vagas.</p></div>
+          <button class="button button-secondary company-profile-edit" id="company-profile-edit" type="button"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</button>
+        </div>
+        <div class="company-profile-edit-modal" id="company-profile-edit-modal" aria-hidden="true">
+          <div class="company-profile-edit-backdrop" data-close-company-editor></div>
+          <section class="company-profile-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="company-profile-edit-title">
+            <header class="company-profile-edit-dialog-heading">
+              <div><h3 id="company-profile-edit-title">Editar informações institucionais</h3><p>Atualize os dados que aparecem no perfil público da empresa.</p></div>
+              <button type="button" class="company-profile-edit-close" id="company-profile-edit-close" aria-label="Fechar edição">&times;</button>
+            </header>
+            <form id="company-profile-form" class="company-profile-form" novalidate>
+              <div class="company-profile-fields">
+                <label class="field">Nome público da empresa<input name="nome_empresa" required maxlength="160" placeholder="Nome pelo qual sua empresa é conhecida"></label>
+                <label class="field">Cidade<input name="cidade" required maxlength="100" placeholder="Cidade e estado"></label>
+                <label class="field">Setor de atuação<input name="empresa_setor" maxlength="100" placeholder="Ex.: Comércio, Tecnologia, Saúde"></label>
+                <label class="field">Porte da empresa<select name="empresa_porte"><option value="">Selecione (opcional)</option><option>MEI</option><option>Microempresa</option><option>Pequena empresa</option><option>Média empresa</option><option>Grande empresa</option></select></label>
+                <label class="field">Telefone comercial<input name="telefone" maxlength="30" placeholder="Telefone para contato"></label>
+                <label class="field">Site oficial <span class="field-optional">(opcional)</span><input name="empresa_site" type="url" maxlength="300" placeholder="https://www.suaempresa.com.br"></label>
+                <label class="field field-wide">Sobre a empresa<textarea name="descricao" maxlength="4000" rows="5" placeholder="Conte a história da empresa, o que ela faz, seus valores e o que oferece à comunidade."></textarea></label>
+              </div>
+              <div class="company-profile-form-footer"><p id="company-profile-feedback" class="form-feedback" aria-live="polite"></p><div class="company-profile-form-actions"><button class="button button-secondary" id="company-profile-cancel" type="button">Cancelar</button><button class="button button-primary" type="submit">Salvar alterações</button></div></div>
+            </form>
+          </section>
+        </div>
         <p class="company-image-hint">Dica: use o logotipo quadrado e uma imagem de capa horizontal. As imagens serão ajustadas automaticamente.</p>
       </div>
     </section>
