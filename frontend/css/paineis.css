@@ -791,3 +791,14 @@ html[data-theme="dark"] .company-cover-modal-preview{border-color:#40536a;backgr
 }
 
 .company-cover-image-editor .candidate-editor-transform svg{display:block;width:21px;height:21px}
+
+
+/* Informações institucionais: modo de visualização e edição */
+.company-profile-form-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.company-profile-edit{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px}
+.company-profile-form:not(.is-editing) .company-profile-fields input:disabled,
+.company-profile-form:not(.is-editing) .company-profile-fields select:disabled,
+.company-profile-form:not(.is-editing) .company-profile-fields textarea:disabled{background:#f8f9fb;border-color:#e5e9ef;color:#35445a;opacity:1;cursor:default}
+.company-profile-form-actions{display:flex;align-items:center;gap:10px}
+.company-profile-form-footer{display:flex;align-items:center;justify-content:space-between;gap:14px}
+@media(max-width:600px){.company-profile-form-heading{align-items:flex-start}.company-profile-form-footer{align-items:stretch;flex-direction:column}.company-profile-form-actions{justify-content:flex-end}}
