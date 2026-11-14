@@ -844,3 +844,34 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
   .company-profile-form-heading{padding:22px 18px 0}
   .company-institutional-display{padding:22px 18px 24px}
 }
+
+
+/* Cada informação institucional em seu próprio campo visual */
+.company-institutional-display{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding:20px 30px 26px;
+}
+.company-institutional-item{
+  min-height:68px;
+  justify-content:center;
+  gap:5px;
+  padding:12px 15px;
+  border:1px solid var(--line,#e2e8f0);
+  border-radius:10px;
+  background:var(--surface-soft,#f8fafc);
+  box-sizing:border-box;
+}
+.company-institutional-item>span{font-size:12px;line-height:1.35}
+.company-institutional-item strong,
+.company-institutional-item p{font-size:14px;line-height:1.5}
+.company-institutional-item-wide{
+  grid-column:1/-1;
+  min-height:unset;
+  padding:14px 15px;
+}
+@media(max-width:650px){
+  .company-institutional-display{grid-template-columns:1fr;gap:10px;padding:18px}
+  .company-institutional-item-wide{grid-column:auto}
+}
