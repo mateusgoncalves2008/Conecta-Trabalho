@@ -707,6 +707,7 @@
     });
   }
   let companyProfileCache = {};
+  let companyProfileEditModeSetter = null;
   const companyInitials = name => String(name || 'EMP').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase() || 'EMP';
 
   async function loadCompanyProfile() {
@@ -719,7 +720,7 @@
     ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
       if (form.elements[key]) form.elements[key].value = profile[key] || '';
     });
-    setCompanyProfileEditMode(false);
+    companyProfileEditModeSetter?.(false);
     document.getElementById('company-profile-name').textContent = profile.nome_empresa || 'Sua empresa';
     document.getElementById('company-profile-location').textContent = profile.cidade || 'Localização não informada';
     document.getElementById('company-logo-initials').textContent = companyInitials(profile.nome_empresa);
@@ -833,7 +834,7 @@
         feedback.classList.remove('success');
       }
     };
-    window.setCompanyProfileEditMode = setEditMode;
+    companyProfileEditModeSetter = setEditMode;
     editButton.addEventListener('click', () => setEditMode(true));
     cancelButton.addEventListener('click', () => {
       ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
