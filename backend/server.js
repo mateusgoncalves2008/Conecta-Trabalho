@@ -551,7 +551,27 @@ app.post('/api/logout', (req, res) => {
     res.json({ sucesso: true });
   });
 });
-app.get('/api/me', (req, res) => res.json({ usuario: req.session.user || null }));
+app.get('/api/me', asyncRoute(async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.json({ usuario: null });
+
+  // Mantém a foto da empresa sincronizada com o banco, mesmo em sessões
+  // iniciadas antes da inclusão ou substituição do logotipo.
+  if (user.tipo === 'empresa') {
+    await profileSchemaReady;
+    const result = await pool.query(
+      "SELECT foto_perfil FROM usuarios WHERE id=$1 AND tipo='empresa'",
+      [user.id]
+    );
+    if (result.rowCount) {
+      user.fotoPerfil = imageReference(user.id, 'foto_perfil', result.rows[0].foto_perfil);
+    } else {
+      user.fotoPerfil = null;
+    }
+  }
+
+  res.json({ usuario: user });
+}));
 app.get('/api/imagens/empresa/:empresaId/:fotoId', asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const result = await pool.query('SELECT imagem FROM fotos_empresa WHERE id=$1 AND empresa_id=$2', [req.params.fotoId, req.params.empresaId]);
@@ -834,7 +854,9 @@ app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, re
       return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
     }
     await deleteStoredImage(current.rows[0][field]);
-    res.json({ sucesso: true, imagem: imageReference(req.session.user.id, field, result.rows[0][field]) });
+    const imageUrl = imageReference(req.session.user.id, field, result.rows[0][field]);
+    if (field === 'foto_perfil') req.session.user.fotoPerfil = imageUrl;
+    res.json({ sucesso: true, imagem: imageUrl });
   } catch (error) {
     await deleteStoredImage(uploadedValue);
     throw error;
