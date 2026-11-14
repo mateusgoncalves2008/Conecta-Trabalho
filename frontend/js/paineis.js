@@ -719,6 +719,7 @@
     ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
       if (form.elements[key]) form.elements[key].value = profile[key] || '';
     });
+    setCompanyProfileEditMode(false);
     document.getElementById('company-profile-name').textContent = profile.nome_empresa || 'Sua empresa';
     document.getElementById('company-profile-location').textContent = profile.cidade || 'Localização não informada';
     document.getElementById('company-logo-initials').textContent = companyInitials(profile.nome_empresa);
@@ -818,6 +819,29 @@
     const form = document.getElementById('company-profile-form');
     if (!form) return;
     const feedback = document.getElementById('company-profile-feedback');
+    const editButton = document.getElementById('company-profile-edit');
+    const cancelButton = document.getElementById('company-profile-cancel');
+    const saveButton = form.querySelector('button[type="submit"]');
+    const setEditMode = editing => {
+      form.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !editing; });
+      editButton.hidden = editing;
+      cancelButton.hidden = !editing;
+      saveButton.hidden = !editing;
+      form.classList.toggle('is-editing', editing);
+      if (!editing) {
+        feedback.textContent = '';
+        feedback.classList.remove('success');
+      }
+    };
+    window.setCompanyProfileEditMode = setEditMode;
+    editButton.addEventListener('click', () => setEditMode(true));
+    cancelButton.addEventListener('click', () => {
+      ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
+        if (form.elements[key]) form.elements[key].value = companyProfileCache[key] || '';
+      });
+      setEditMode(false);
+    });
+    setEditMode(false);
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!form.reportValidity()) return;
@@ -835,8 +859,9 @@
         if (user) user.textContent = profile.perfil.nome_empresa;
         feedback.textContent = 'Perfil atualizado com sucesso.';
         feedback.classList.add('success');
+        setEditMode(false);
       } catch (error) { feedback.textContent = error.message; feedback.classList.remove('success'); }
-      finally { button.disabled = false; button.textContent = 'Salvar perfil'; }
+      finally { button.disabled = false; button.textContent = 'Salvar alterações'; }
     });
     const bindImage = (buttonId,inputId,field,width,height,label) => {
       const button = document.getElementById(buttonId);
