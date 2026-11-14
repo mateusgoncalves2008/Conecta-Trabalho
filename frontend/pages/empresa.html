@@ -31,6 +31,23 @@
           <button class="company-image-edit company-cover-edit" type="button" id="company-cover-edit" aria-label="Alterar imagem de capa" title="Alterar imagem de capa"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" /></svg></button>
           <input type="file" id="company-cover-input" accept="image/png,image/jpeg,image/webp" hidden>
         </div>
+        <div class="company-cover-modal" id="company-cover-modal" aria-hidden="true">
+          <div class="company-cover-modal-backdrop" data-close-cover-modal></div>
+          <section class="company-cover-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="company-cover-modal-title">
+            <header class="company-cover-modal-header"><h2 id="company-cover-modal-title">Foto de capa</h2><button type="button" class="company-cover-modal-close" data-close-cover-modal aria-label="Fechar">×</button></header>
+            <div class="company-cover-modal-preview"><img id="company-cover-modal-image" alt="Pré-visualização da foto de capa"></div>
+            <div class="company-cover-editor" id="company-cover-editor" hidden>
+              <label for="company-cover-zoom">Ajustar enquadramento <input type="range" id="company-cover-zoom" min="100" max="160" value="100" step="1"></label>
+              <p>Arraste a imagem para ajustar a posição.</p>
+            </div>
+            <div class="company-cover-modal-actions">
+              <button type="button" class="company-cover-action company-cover-action-edit" id="company-cover-edit-image">Editar</button>
+              <button type="button" class="company-cover-action company-cover-action-change" id="company-cover-change-image">Alterar foto</button>
+              <button type="button" class="company-cover-action company-cover-action-delete" id="company-cover-delete-image">Excluir</button>
+            </div>
+            <div class="company-cover-modal-footer" id="company-cover-modal-feedback" aria-live="polite"></div>
+          </section>
+        </div>
         <div class="company-profile-identity">
           <div class="company-logo-wrap">
             <img id="company-logo-preview" alt="Logotipo da empresa" hidden>
