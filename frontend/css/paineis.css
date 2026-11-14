@@ -829,3 +829,18 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .company-institutional-item p{margin:0;color:var(--ink,#263548);font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
 .company-institutional-item-wide{grid-column:1/-1;padding-top:4px}
 @media(max-width:600px){.company-institutional-display{grid-template-columns:1fr;gap:15px}.company-institutional-item-wide{grid-column:auto}}
+
+
+/* Corrige o espaçamento interno da seção de informações institucionais */
+.company-profile-form-heading{
+  padding:26px 30px 0;
+}
+.company-institutional-display{
+  margin:0;
+  padding:24px 30px 30px;
+  box-sizing:border-box;
+}
+@media(max-width:650px){
+  .company-profile-form-heading{padding:22px 18px 0}
+  .company-institutional-display{padding:22px 18px 24px}
+}
