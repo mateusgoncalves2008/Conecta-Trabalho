@@ -67,9 +67,11 @@
   function renderSection(section, company, jobs, info, website) {
     const photos = Array.isArray(company.fotos) ? company.fotos : [];
     const photoGallery = photos.length
-      ? `<div class="company-public-gallery-grid">${photos.map((photo, index) =>
-          `<img src="${esc(photo.url)}" alt="Foto ${index + 1} de ${esc(company.nome_empresa)}" loading="lazy">`
-        ).join('')}</div>`
+      ? `<div class="company-public-gallery-grid">${photos.slice(0, 4).map((photo, index) => {
+          const date = new Date(photo.criada_em);
+          const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+          return `<button class="company-public-photo" type="button" data-company-photo-index="${index}" aria-label="Ampliar foto ${index + 1}"><img src="${esc(photo.url)}" alt="Foto ${index + 1} de ${esc(company.nome_empresa)}" loading="lazy"><span class="company-public-photo-date">${esc(dateLabel)}</span></button>`;
+        }).join('')}</div>`
       : emptyState('Nenhuma foto publicada', 'Esta empresa ainda não adicionou fotos ao perfil.');
 
     const details = `
@@ -162,9 +164,11 @@
           <section class="company-public-panel">
             <span class="company-public-section-kicker">NOSSO ESPAÇO</span>
             <h2>Fotos da empresa</h2>
-            ${photos.length ? `<div class="company-public-gallery-grid">${photos.slice(0, 4).map((photo, index) =>
-              `<img src="${esc(photo.url)}" alt="Foto ${index + 1} de ${esc(company.nome_empresa)}" loading="lazy">`
-            ).join('')}</div>` : '<p class="company-public-empty">Esta empresa ainda não adicionou fotos.</p>'}
+            ${photos.length ? `<div class="company-public-gallery-grid">${photos.slice(0, 4).map((photo, index) => {
+              const date = new Date(photo.criada_em);
+              const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+              return `<button class="company-public-photo" type="button" data-company-photo-index="${index}" aria-label="Ampliar foto ${index + 1}"><img src="${esc(photo.url)}" alt="Foto ${index + 1} de ${esc(company.nome_empresa)}" loading="lazy"><span class="company-public-photo-date">${esc(dateLabel)}</span></button>`;
+            }).join('')}</div>` : '<p class="company-public-empty">Esta empresa ainda não adicionou fotos.</p>'}
           </section>
           ${details}
         </aside>
@@ -224,6 +228,36 @@
           ${renderSection('inicio', company, jobs, info, website)}
         </div>`;
 
+      const lightbox = document.createElement('div');
+      lightbox.className = 'company-photo-lightbox';
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightbox.innerHTML = `<button type="button" class="company-photo-lightbox-close" aria-label="Fechar">&times;</button><button type="button" class="company-photo-lightbox-arrow is-prev" aria-label="Foto anterior">&#10094;</button><img class="company-photo-lightbox-image" alt=""><button type="button" class="company-photo-lightbox-arrow is-next" aria-label="Próxima foto">&#10095;</button><span class="company-photo-lightbox-counter"></span>`;
+      document.body.appendChild(lightbox);
+      let activePhotoIndex = 0;
+      const openPhoto = index => {
+        const galleryPhotos = (company.fotos || []).slice(0, 4);
+        if (!galleryPhotos.length) return;
+        activePhotoIndex = (index + galleryPhotos.length) % galleryPhotos.length;
+        const photo = galleryPhotos[activePhotoIndex];
+        const image = lightbox.querySelector('.company-photo-lightbox-image');
+        image.src = photo.url; image.alt = 'Foto ' + (activePhotoIndex + 1) + ' de ' + name;
+        lightbox.querySelector('.company-photo-lightbox-counter').textContent = (activePhotoIndex + 1) + ' / ' + galleryPhotos.length;
+        lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('company-photo-lightbox-open');
+      };
+      const closePhoto = () => { lightbox.classList.remove('is-open'); lightbox.setAttribute('aria-hidden', 'true'); document.body.classList.remove('company-photo-lightbox-open'); };
+      const movePhoto = direction => openPhoto(activePhotoIndex + direction);
+      lightbox.addEventListener('click', event => {
+        if (event.target === lightbox || event.target.closest('.company-photo-lightbox-close')) closePhoto();
+        if (event.target.closest('.company-photo-lightbox-arrow.is-prev')) movePhoto(-1);
+        if (event.target.closest('.company-photo-lightbox-arrow.is-next')) movePhoto(1);
+      });
+      document.addEventListener('keydown', event => {
+        if (!lightbox.classList.contains('is-open')) return;
+        if (event.key === 'Escape') closePhoto();
+        if (event.key === 'ArrowLeft') movePhoto(-1);
+        if (event.key === 'ArrowRight') movePhoto(1);
+      });
       const tabContent = root.querySelector('#company-public-tab-content');
       const tabs = [...root.querySelectorAll('[data-company-section]')];
       function showSection(section) {
@@ -240,6 +274,8 @@
         if (tab) showSection(tab.dataset.companySection);
       });
       tabContent.addEventListener('click', event => {
+        const photoButton = event.target.closest('[data-company-photo-index]');
+        if (photoButton) { openPhoto(Number(photoButton.dataset.companyPhotoIndex)); return; }
         const descriptionToggle = event.target.closest('[data-toggle-description]');
         if (descriptionToggle) {
           const description = tabContent.querySelector('#company-public-full-description');
