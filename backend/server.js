@@ -873,7 +873,7 @@ app.post('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
   const image = req.body.imagem;
   if (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) return res.status(400).json({ erro: 'Imagem inválida ou muito grande.' });
   const count = await pool.query('SELECT COUNT(*)::int AS total FROM fotos_empresa WHERE empresa_id=$1', [req.session.user.id]);
-  if (count.rows[0].total >= 12) return res.status(400).json({ erro: 'Você pode adicionar até 12 fotos à galeria.' });
+  if (count.rows[0].total >= 4) return res.status(400).json({ erro: 'Cada empresa pode publicar no máximo 4 fotos.' });
   const stored = await uploadProfileImage(req.session.user.id, 'galeria-' + crypto.randomUUID(), image);
   try {
     const result = await pool.query('INSERT INTO fotos_empresa (empresa_id,imagem) VALUES ($1,$2) RETURNING id,criada_em', [req.session.user.id, stored]);
@@ -908,8 +908,8 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   );
   profile.foto_perfil = imageReference(profile.id, 'foto_perfil', profile.foto_perfil);
   profile.banner_perfil = imageReference(profile.id, 'banner_perfil', profile.banner_perfil);
-  const gallery = await pool.query('SELECT id FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC', [profile.id]);
-  profile.fotos = gallery.rows.map(photo => ({ id: photo.id, url: '/api/imagens/empresa/' + profile.id + '/' + photo.id }));
+  const gallery = await pool.query('SELECT id,criada_em FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC LIMIT 4', [profile.id]);
+  profile.fotos = gallery.rows.map(photo => ({ id: photo.id, criada_em: photo.criada_em, url: '/api/imagens/empresa/' + profile.id + '/' + photo.id }));
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
