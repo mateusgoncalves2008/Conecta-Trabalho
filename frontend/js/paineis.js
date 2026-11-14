@@ -853,7 +853,141 @@
       });
     };
     bindImage('company-logo-edit','company-logo-input','foto_perfil',600,600,'Logotipo');
-    bindImage('company-cover-edit','company-cover-input','banner_perfil',1600,600,'Imagem de capa');
+    const coverButton = document.getElementById('company-cover-edit');
+    const coverInput = document.getElementById('company-cover-input');
+    const coverModal = document.getElementById('company-cover-modal');
+    const coverModalImage = document.getElementById('company-cover-modal-image');
+    const coverEditor = document.getElementById('company-cover-editor');
+    const coverZoom = document.getElementById('company-cover-zoom');
+    const coverFeedback = document.getElementById('company-cover-modal-feedback');
+    const coverEditAction = document.getElementById('company-cover-edit-image');
+    const coverChangeAction = document.getElementById('company-cover-change-image');
+    const coverDeleteAction = document.getElementById('company-cover-delete-image');
+    let coverEditing = false;
+    const closeCoverModal = () => {
+      coverModal.classList.remove('is-open');
+      coverModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('company-cover-modal-open');
+      coverEditor.hidden = true;
+      coverEditing = false;
+      coverZoom.value = '100';
+      coverModalImage.style.transform = '';
+      coverFeedback.textContent = '';
+    };
+    const openCoverModal = () => {
+      const image = companyProfileCache.banner_perfil;
+      if (image) {
+        coverModalImage.src = image;
+        coverModalImage.hidden = false;
+        coverEditAction.disabled = false;
+        coverDeleteAction.disabled = false;
+      } else {
+        coverModalImage.removeAttribute('src');
+        coverModalImage.hidden = true;
+        coverEditAction.disabled = true;
+        coverDeleteAction.disabled = true;
+      }
+      coverModal.classList.add('is-open');
+      coverModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('company-cover-modal-open');
+    };
+    coverButton.addEventListener('click', openCoverModal);
+    coverModal.querySelectorAll('[data-close-cover-modal]').forEach(button => button.addEventListener('click', closeCoverModal));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && coverModal.classList.contains('is-open')) closeCoverModal();
+    });
+    coverEditAction.addEventListener('click', () => {
+      if (!coverModalImage.src) return;
+      coverEditing = !coverEditing;
+      coverEditor.hidden = !coverEditing;
+      coverEditAction.textContent = coverEditing ? 'Salvar edição' : 'Editar';
+      coverFeedback.textContent = coverEditing ? 'Ajuste o zoom da imagem e salve quando estiver pronto.' : '';
+    });
+    coverZoom.addEventListener('input', () => {
+      coverModalImage.style.transform = 'scale(' + (Number(coverZoom.value) / 100) + ')';
+    });
+    coverChangeAction.addEventListener('click', () => coverInput.click());
+    coverInput.addEventListener('change', async () => {
+      const file = coverInput.files[0];
+      if (!file) return;
+      coverChangeAction.disabled = true;
+      coverFeedback.textContent = 'Preparando imagem...';
+      try {
+        const image = await prepareCompanyProfileImage(file,1600,600);
+        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:image})});
+        await loadCompanyProfile();
+        coverModalImage.src = companyProfileCache.banner_perfil;
+        coverModalImage.hidden = false;
+        coverEditAction.disabled = false;
+        coverDeleteAction.disabled = false;
+        coverEditor.hidden = true;
+        coverEditing = false;
+        coverEditAction.textContent = 'Editar';
+        coverFeedback.textContent = 'Foto de capa atualizada com sucesso.';
+        Conecta.toast('Imagem de capa atualizada com sucesso.');
+      } catch (error) {
+        coverFeedback.textContent = error.message;
+      } finally {
+        coverChangeAction.disabled = false;
+        coverInput.value = '';
+      }
+    });
+    coverDeleteAction.addEventListener('click', async () => {
+      if (!companyProfileCache.banner_perfil) return;
+      if (!window.confirm('Tem certeza de que deseja excluir a foto de capa da empresa?')) return;
+      coverDeleteAction.disabled = true;
+      coverFeedback.textContent = 'Excluindo imagem...';
+      try {
+        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:null})});
+        await loadCompanyProfile();
+        coverModalImage.removeAttribute('src');
+        coverModalImage.hidden = true;
+        coverEditAction.disabled = true;
+        coverDeleteAction.disabled = true;
+        coverEditor.hidden = true;
+        coverEditing = false;
+        coverEditAction.textContent = 'Editar';
+        coverFeedback.textContent = 'Foto de capa excluída.';
+      } catch (error) {
+        coverFeedback.textContent = error.message;
+        coverDeleteAction.disabled = false;
+      }
+    });
+    coverEditAction.addEventListener('click', async () => {
+      if (!coverEditing) return;
+      if (!coverModalImage.complete || !coverModalImage.naturalWidth) {
+        coverFeedback.textContent = 'Aguarde a imagem terminar de carregar.';
+        return;
+      }
+      coverEditAction.disabled = true;
+      coverFeedback.textContent = 'Salvando ajuste...';
+      try {
+        const width = 1600, height = 600;
+        const image = coverModalImage;
+        const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * (Number(coverZoom.value) / 100);
+        const cropWidth = width / scale, cropHeight = height / scale;
+        const sx = (image.naturalWidth - cropWidth) / 2;
+        const sy = (image.naturalHeight - cropHeight) / 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(image,sx,sy,cropWidth,cropHeight,0,0,width,height);
+        const editedImage = canvas.toDataURL('image/jpeg',.88);
+        if (editedImage.length > 1400000) throw new Error('A imagem ajustada ficou grande demais.');
+        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:editedImage})});
+        await loadCompanyProfile();
+        coverModalImage.src = companyProfileCache.banner_perfil;
+        coverEditor.hidden = true;
+        coverEditing = false;
+        coverZoom.value = '100';
+        coverModalImage.style.transform = '';
+        coverEditAction.textContent = 'Editar';
+        coverFeedback.textContent = 'Ajuste salvo com sucesso.';
+      } catch (error) {
+        coverFeedback.textContent = error.message;
+      } finally {
+        coverEditAction.disabled = false;
+      }
+    });
     const galleryInput = document.getElementById('company-gallery-input');
     const galleryGrid = document.getElementById('company-gallery-grid');
     const galleryFeedback = document.getElementById('company-gallery-feedback');
