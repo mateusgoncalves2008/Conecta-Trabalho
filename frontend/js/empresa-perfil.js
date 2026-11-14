@@ -86,12 +86,15 @@
       </section>`;
 
     if (section === 'sobre') {
+      const description = company.descricao || 'Esta empresa ainda não adicionou uma apresentação institucional.';
+      const canExpandDescription = description.length > 420;
       return `
         <div class="company-public-section-grid">
           <section class="company-public-panel">
             <span class="company-public-section-kicker">QUEM SOMOS</span>
             <h2>Sobre a empresa</h2>
-            <p class="company-public-description">${esc(company.descricao || 'Esta empresa ainda não adicionou uma apresentação institucional.')}</p>
+            <p class="company-public-description${canExpandDescription ? ' is-collapsed' : ''}" id="company-public-full-description">${esc(description)}</p>
+            ${canExpandDescription ? '<button class="company-public-text-action" type="button" data-toggle-description aria-expanded="false" aria-controls="company-public-full-description">Ver mais</button>' : ''}
           </section>
           ${details}
           <section class="company-public-panel">
@@ -237,6 +240,16 @@
         if (tab) showSection(tab.dataset.companySection);
       });
       tabContent.addEventListener('click', event => {
+        const descriptionToggle = event.target.closest('[data-toggle-description]');
+        if (descriptionToggle) {
+          const description = tabContent.querySelector('#company-public-full-description');
+          if (description) {
+            const expanded = description.classList.toggle('is-expanded');
+            description.classList.toggle('is-collapsed', !expanded);
+            descriptionToggle.textContent = expanded ? 'Ver menos' : 'Ver mais';
+            descriptionToggle.setAttribute('aria-expanded', String(expanded));
+          }
+        }
         const action = event.target.closest('[data-open-section]');
         if (action) showSection(action.dataset.openSection);
         const scrollButton = event.target.closest('[data-job-scroll]');
