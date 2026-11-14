@@ -896,12 +896,47 @@
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && coverModal.classList.contains('is-open')) closeCoverModal();
     });
-    coverEditAction.addEventListener('click', () => {
+    coverEditAction.addEventListener('click', async () => {
       if (!coverModalImage.src) return;
-      coverEditing = !coverEditing;
-      coverEditor.hidden = !coverEditing;
-      coverEditAction.textContent = coverEditing ? 'Salvar edição' : 'Editar';
-      coverFeedback.textContent = coverEditing ? 'Ajuste o zoom da imagem e salve quando estiver pronto.' : '';
+      if (!coverEditing) {
+        coverEditing = true;
+        coverEditor.hidden = false;
+        coverEditAction.textContent = 'Salvar edição';
+        coverFeedback.textContent = 'Ajuste o zoom da imagem e salve quando estiver pronto.';
+        return;
+      }
+      if (!coverModalImage.complete || !coverModalImage.naturalWidth) {
+        coverFeedback.textContent = 'Aguarde a imagem terminar de carregar.';
+        return;
+      }
+      coverEditAction.disabled = true;
+      coverFeedback.textContent = 'Salvando ajuste...';
+      try {
+        const width = 1600, height = 600;
+        const image = coverModalImage;
+        const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * (Number(coverZoom.value) / 100);
+        const cropWidth = width / scale, cropHeight = height / scale;
+        const sx = (image.naturalWidth - cropWidth) / 2;
+        const sy = (image.naturalHeight - cropHeight) / 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(image,sx,sy,cropWidth,cropHeight,0,0,width,height);
+        const editedImage = canvas.toDataURL('image/jpeg',.88);
+        if (editedImage.length > 1400000) throw new Error('A imagem ajustada ficou grande demais.');
+        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:editedImage})});
+        await loadCompanyProfile();
+        coverModalImage.src = companyProfileCache.banner_perfil;
+        coverEditor.hidden = true;
+        coverEditing = false;
+        coverZoom.value = '100';
+        coverModalImage.style.transform = '';
+        coverEditAction.textContent = 'Editar';
+        coverFeedback.textContent = 'Ajuste salvo com sucesso.';
+      } catch (error) {
+        coverFeedback.textContent = error.message;
+      } finally {
+        coverEditAction.disabled = false;
+      }
     });
     coverZoom.addEventListener('input', () => {
       coverModalImage.style.transform = 'scale(' + (Number(coverZoom.value) / 100) + ')';
@@ -953,41 +988,7 @@
         coverDeleteAction.disabled = false;
       }
     });
-    coverEditAction.addEventListener('click', async () => {
-      if (!coverEditing) return;
-      if (!coverModalImage.complete || !coverModalImage.naturalWidth) {
-        coverFeedback.textContent = 'Aguarde a imagem terminar de carregar.';
-        return;
-      }
-      coverEditAction.disabled = true;
-      coverFeedback.textContent = 'Salvando ajuste...';
-      try {
-        const width = 1600, height = 600;
-        const image = coverModalImage;
-        const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * (Number(coverZoom.value) / 100);
-        const cropWidth = width / scale, cropHeight = height / scale;
-        const sx = (image.naturalWidth - cropWidth) / 2;
-        const sy = (image.naturalHeight - cropHeight) / 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d').drawImage(image,sx,sy,cropWidth,cropHeight,0,0,width,height);
-        const editedImage = canvas.toDataURL('image/jpeg',.88);
-        if (editedImage.length > 1400000) throw new Error('A imagem ajustada ficou grande demais.');
-        await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'banner_perfil',imagem:editedImage})});
-        await loadCompanyProfile();
-        coverModalImage.src = companyProfileCache.banner_perfil;
-        coverEditor.hidden = true;
-        coverEditing = false;
-        coverZoom.value = '100';
-        coverModalImage.style.transform = '';
-        coverEditAction.textContent = 'Editar';
-        coverFeedback.textContent = 'Ajuste salvo com sucesso.';
-      } catch (error) {
-        coverFeedback.textContent = error.message;
-      } finally {
-        coverEditAction.disabled = false;
-      }
-    });
+
     const galleryInput = document.getElementById('company-gallery-input');
     const galleryGrid = document.getElementById('company-gallery-grid');
     const galleryFeedback = document.getElementById('company-gallery-feedback');
