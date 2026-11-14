@@ -819,3 +819,13 @@ body.company-profile-editor-open{overflow:hidden}
 html[data-theme="dark"] .company-profile-edit-dialog{background:#172538;border-color:#34465a}
 html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 @media(max-width:650px){.company-profile-edit-modal{padding:12px}.company-profile-edit-dialog{max-height:94vh;border-radius:13px}.company-profile-edit-dialog-heading{padding:20px 18px 0}.company-profile-edit-dialog .company-profile-form{padding:20px 18px}.company-profile-edit-dialog .company-profile-form-footer{flex-direction:column-reverse}.company-profile-edit-dialog .company-profile-form-actions{width:100%;display:flex}.company-profile-edit-dialog .company-profile-form-actions button{flex:1}}
+
+
+/* Informações institucionais em modo de visualização */
+.company-institutional-display{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px;margin-top:24px}
+.company-institutional-item{display:flex;flex-direction:column;gap:6px;min-width:0}
+.company-institutional-item>span{font-size:12px;font-weight:600;color:var(--muted,#718096)}
+.company-institutional-item strong{font-size:14px;font-weight:600;color:var(--ink,#263548);overflow-wrap:anywhere}
+.company-institutional-item p{margin:0;color:var(--ink,#263548);font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.company-institutional-item-wide{grid-column:1/-1;padding-top:4px}
+@media(max-width:600px){.company-institutional-display{grid-template-columns:1fr;gap:15px}.company-institutional-item-wide{grid-column:auto}}
