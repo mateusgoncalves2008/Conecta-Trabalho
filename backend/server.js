@@ -86,7 +86,9 @@ const s3 = storageConfigured ? new S3Client({
 const imageReference = (userId, field, value) => {
   if (!value) return null;
   if (typeof value === 'string' && value.startsWith('s3:')) {
-    return '/api/imagens/perfil/' + encodeURIComponent(userId) + '/' + (field === 'foto_perfil' ? 'foto' : 'banner');
+    // A versão muda quando a imagem é substituída, permitindo cache longo sem exibir imagem antiga.
+    const version = crypto.createHash('sha256').update(value).digest('hex').slice(0, 16);
+    return '/api/imagens/perfil/' + encodeURIComponent(userId) + '/' + (field === 'foto_perfil' ? 'foto' : 'banner') + '?v=' + version;
   }
   return value;
 };
@@ -583,7 +585,9 @@ app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
   }
   const value = profile[field];
   if (!value) return res.status(404).end();
-  res.set('Cache-Control', 'private, no-store');
+  res.set('Cache-Control', profile.tipo === 'empresa'
+    ? 'private, max-age=31536000, immutable'
+    : 'private, max-age=300');
   if (typeof value === 'string' && value.startsWith('data:image/jpeg;base64,')) {
     return res.type('image/jpeg').send(Buffer.from(value.slice(value.indexOf(',') + 1), 'base64'));
   }
