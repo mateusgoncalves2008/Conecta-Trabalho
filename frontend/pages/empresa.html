@@ -48,7 +48,7 @@
           <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="company-cover-image-editor-title">
             <header class="candidate-image-editor-header">
               <h2 id="company-cover-image-editor-title">Editar foto de capa</h2>
-              <button type="button" id="company-cover-image-editor-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+              <button type="button" id="company-cover-image-editor-close" aria-label="Fechar">×</button>
             </header>
             <div class="candidate-image-editor-main">
               <div class="candidate-image-editor-stage">
@@ -63,10 +63,10 @@
                 </nav>
                 <div class="candidate-editor-panel active" data-cover-editor-panel="crop">
                   <div class="candidate-editor-transform">
-                    <button type="button" id="company-cover-rotate-left" aria-label="Girar para a esquerda"><i class="fa-solid fa-rotate-left"></i></button>
-                    <button type="button" id="company-cover-rotate-right" aria-label="Girar para a direita"><i class="fa-solid fa-rotate-right"></i></button>
-                    <button type="button" id="company-cover-flip-horizontal" aria-label="Inverter horizontalmente"><i class="fa-solid fa-arrows-left-right"></i></button>
-                    <button type="button" id="company-cover-flip-vertical" aria-label="Inverter verticalmente"><i class="fa-solid fa-arrows-up-down"></i></button>
+                    <button type="button" id="company-cover-rotate-left" aria-label="Girar para a esquerda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V4m0 6h6M4.8 9a8 8 0 1 1-1 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" id="company-cover-rotate-right" aria-label="Girar para a direita"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10V4m0 6h-6m5.2-1a8 8 0 1 0 1 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" id="company-cover-flip-horizontal" aria-label="Inverter horizontalmente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M7 8l-4 4 4 4m10-8 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" id="company-cover-flip-vertical" aria-label="Inverter verticalmente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M8 7l4-4 4 4m-8 10 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                   </div>
                   <label>Zoom<input id="company-cover-image-zoom" type="range" min="1" max="3" step="0.01" value="1"></label>
                   <label>Girar<input id="company-cover-image-angle" type="range" min="-180" max="180" step="1" value="0"></label>
