@@ -36,16 +36,65 @@
           <section class="company-cover-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="company-cover-modal-title">
             <header class="company-cover-modal-header"><h2 id="company-cover-modal-title">Foto de capa</h2><button type="button" class="company-cover-modal-close" data-close-cover-modal aria-label="Fechar">×</button></header>
             <div class="company-cover-modal-preview"><img id="company-cover-modal-image" alt="Pré-visualização da foto de capa"></div>
-            <div class="company-cover-editor" id="company-cover-editor" hidden>
-              <label for="company-cover-zoom">Ajustar enquadramento <input type="range" id="company-cover-zoom" min="100" max="160" value="100" step="1"></label>
-              <p>Arraste a imagem para ajustar a posição.</p>
-            </div>
             <div class="company-cover-modal-actions">
               <button type="button" class="company-cover-action company-cover-action-edit" id="company-cover-edit-image">Editar</button>
               <button type="button" class="company-cover-action company-cover-action-change" id="company-cover-change-image">Alterar foto</button>
               <button type="button" class="company-cover-action company-cover-action-delete" id="company-cover-delete-image">Excluir</button>
             </div>
             <div class="company-cover-modal-footer" id="company-cover-modal-feedback" aria-live="polite"></div>
+          </section>
+        </div>
+        <div class="candidate-image-editor company-cover-image-editor" id="company-cover-image-editor" aria-hidden="true">
+          <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="company-cover-image-editor-title">
+            <header class="candidate-image-editor-header">
+              <h2 id="company-cover-image-editor-title">Editar foto de capa</h2>
+              <button type="button" id="company-cover-image-editor-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div class="candidate-image-editor-main">
+              <div class="candidate-image-editor-stage">
+                <canvas id="company-cover-editor-canvas" width="1600" height="600"></canvas>
+                <div class="candidate-image-crop-guide company-cover-crop-guide" aria-hidden="true"></div>
+              </div>
+              <aside class="candidate-image-editor-tools">
+                <nav class="candidate-image-editor-tabs" aria-label="Ferramentas de edição da capa">
+                  <button type="button" class="active" data-cover-editor-tab="crop">Recortar</button>
+                  <button type="button" data-cover-editor-tab="filter">Filtrar</button>
+                  <button type="button" data-cover-editor-tab="change">Alterar</button>
+                </nav>
+                <div class="candidate-editor-panel active" data-cover-editor-panel="crop">
+                  <div class="candidate-editor-transform">
+                    <button type="button" id="company-cover-rotate-left" aria-label="Girar para a esquerda"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button type="button" id="company-cover-rotate-right" aria-label="Girar para a direita"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button type="button" id="company-cover-flip-horizontal" aria-label="Inverter horizontalmente"><i class="fa-solid fa-arrows-left-right"></i></button>
+                    <button type="button" id="company-cover-flip-vertical" aria-label="Inverter verticalmente"><i class="fa-solid fa-arrows-up-down"></i></button>
+                  </div>
+                  <label>Zoom<input id="company-cover-image-zoom" type="range" min="1" max="3" step="0.01" value="1"></label>
+                  <label>Girar<input id="company-cover-image-angle" type="range" min="-180" max="180" step="1" value="0"></label>
+                </div>
+                <div class="candidate-editor-panel" data-cover-editor-panel="filter">
+                  <p>Escolha um filtro e ajuste a aparência da imagem.</p>
+                  <div class="candidate-editor-filters">
+                    <button type="button" data-cover-image-filter="none" class="active"><img class="candidate-filter-preview" alt=""><span>Original</span></button>
+                    <button type="button" data-cover-image-filter="grayscale(1)"><img class="candidate-filter-preview" alt=""><span>Preto e branco</span></button>
+                    <button type="button" data-cover-image-filter="sepia(.75)"><img class="candidate-filter-preview" alt=""><span>Sépia</span></button>
+                    <button type="button" data-cover-image-filter="brightness(1.15) contrast(1.05)"><img class="candidate-filter-preview" alt=""><span>Claro</span></button>
+                    <button type="button" data-cover-image-filter="contrast(1.2) saturate(1.2)"><img class="candidate-filter-preview" alt=""><span>Vívido</span></button>
+                  </div>
+                </div>
+                <div class="candidate-editor-panel" data-cover-editor-panel="change">
+                  <div class="candidate-image-adjustments">
+                    <label for="company-cover-brightness"><span>Brilho <output id="company-cover-brightness-value">100%</output></span><input id="company-cover-brightness" type="range" min="50" max="150" value="100"></label>
+                    <label for="company-cover-contrast"><span>Contraste <output id="company-cover-contrast-value">100%</output></span><input id="company-cover-contrast" type="range" min="50" max="150" value="100"></label>
+                    <label for="company-cover-saturation"><span>Saturação <output id="company-cover-saturation-value">100%</output></span><input id="company-cover-saturation" type="range" min="0" max="200" value="100"></label>
+                    <label for="company-cover-vignette"><span>Vinheta <output id="company-cover-vignette-value">0%</output></span><input id="company-cover-vignette" type="range" min="0" max="80" value="0"></label>
+                  </div>
+                </div>
+              </aside>
+            </div>
+            <footer class="candidate-image-editor-footer">
+              <span id="company-cover-image-editor-feedback" role="status"></span>
+              <button type="button" class="button button-primary" id="company-cover-image-editor-save">Salvar alterações</button>
+            </footer>
           </section>
         </div>
         <div class="company-profile-identity">
