@@ -875,3 +875,7 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
   .company-institutional-display{grid-template-columns:1fr;gap:10px;padding:18px}
   .company-institutional-item-wide{grid-column:auto}
 }
+
+.company-gallery-item .company-gallery-date{position:absolute;inset:0;display:flex;align-items:flex-start;padding:14px;background:linear-gradient(180deg,rgba(0,0,0,.62),transparent 58%);color:#fff;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s ease;pointer-events:none}
+.company-gallery-item:hover .company-gallery-date,.company-gallery-item:focus-within .company-gallery-date{opacity:1}
+.company-gallery-add.is-disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
