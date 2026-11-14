@@ -637,7 +637,12 @@ body.candidate-camera-open{overflow:hidden}
 .company-logo-wrap{position:relative;width:116px;height:116px;flex:0 0 116px;margin-top:-48px;display:grid;place-items:center;overflow:visible;border:5px solid #fff;border-radius:18px;background:#edf2f7;color:var(--navy);font-size:26px;font-weight:800}
 .company-logo-wrap img{width:100%;height:100%;border-radius:13px;object-fit:cover}
 .company-logo-wrap>span{display:grid;place-items:center;width:100%;height:100%}
-.company-logo-edit{position:absolute;right:-8px;bottom:-8px;width:34px;height:34px;border:2px solid #fff;border-radius:50%;background:var(--orange);color:#fff;cursor:pointer}
+.company-logo-wrap>span[hidden]{display:none}
+.company-logo-edit{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;height:100%;padding:8px;border:0;border-radius:13px;background:rgba(20,43,73,.78);color:#fff;font-size:11px;font-weight:650;cursor:pointer;opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
+.company-logo-edit i{font-size:19px}
+.company-logo-wrap:hover .company-logo-edit,.company-logo-edit:focus-visible{opacity:1;visibility:visible}
+.company-logo-edit:disabled{opacity:.65;cursor:wait}
+@media(hover:none){.company-logo-edit{opacity:1;visibility:visible;inset:auto 0 0;height:34px;border-radius:0 0 13px 13px;font-size:9px}.company-logo-edit i{font-size:14px}}
 .company-profile-heading-copy{display:grid;gap:3px;padding:0 0 5px}
 .company-profile-heading-copy strong{color:var(--navy);font-size:22px;line-height:1.25}
 .company-profile-heading-copy span{color:var(--muted);font-size:13px}
