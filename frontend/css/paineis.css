@@ -634,6 +634,7 @@ body.candidate-camera-open{overflow:hidden}
 .company-image-edit{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border:1px solid rgba(255,255,255,.7);border-radius:7px;background:rgba(20,43,73,.82);color:#fff;font-size:12px;font-weight:650;cursor:pointer}
 .company-cover-edit{position:absolute;top:16px;right:18px;display:grid;place-items:center;width:38px;height:38px;padding:0;border:1px solid rgba(255,255,255,.8);border-radius:50%;background:rgba(20,43,73,.78);color:#fff;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.16)}
 .company-cover-edit:hover,.company-cover-edit:focus-visible{background:rgba(20,43,73,.96);outline:2px solid rgba(255,255,255,.85);outline-offset:2px}
+.company-cover-edit svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .company-profile-identity{display:flex;align-items:flex-end;gap:18px;padding:0 30px 22px;border-bottom:1px solid var(--line)}
 .company-logo-wrap{position:relative;width:116px;height:116px;flex:0 0 116px;margin-top:-48px;display:grid;place-items:center;overflow:visible;border:5px solid #fff;border-radius:18px;background:#edf2f7;color:var(--navy);font-size:26px;font-weight:800}
 .company-logo-wrap img{width:100%;height:100%;border-radius:13px;object-fit:cover}
