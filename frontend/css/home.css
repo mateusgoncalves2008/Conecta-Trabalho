@@ -1027,3 +1027,23 @@ html[data-theme="dark"] .company-jobs-list-item.is-selected,html[data-theme="dar
 .company-photo-lightbox-counter{position:absolute;bottom:20px;color:#fff;font-size:13px}
 body.company-photo-lightbox-open{overflow:hidden}
 @media(max-width:600px){.company-photo-lightbox{padding:58px 48px}.company-photo-lightbox-arrow{width:36px;height:46px;font-size:20px}.company-photo-lightbox-arrow.is-prev{left:7px}.company-photo-lightbox-arrow.is-next{right:7px}.company-photo-lightbox-close{top:10px;right:10px}}
+
+
+/* Perfil público: galeria alinhada à coluna Sobre a empresa */
+.company-public-section-grid{
+  column-gap:20px;
+  row-gap:20px;
+}
+.company-public-section-grid>.company-public-panel:nth-child(3){
+  grid-column:1;
+  grid-row:2;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+@media(max-width:700px){
+  .company-public-section-grid>.company-public-panel:nth-child(3){
+    grid-column:1;
+    grid-row:auto;
+  }
+}
