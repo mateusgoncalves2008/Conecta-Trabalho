@@ -181,10 +181,10 @@
       const jobs = Array.isArray(data.vagas) ? data.vagas : [];
       const name = company.nome_empresa || company.nome_fantasia || 'Empresa';
       const logo = company.foto_perfil
-        ? `<img class="company-public-logo" src="${esc(company.foto_perfil)}" alt="Logotipo de ${esc(name)}">`
+        ? `<img class="company-public-logo" src="${esc(company.foto_perfil)}" alt="Logotipo de ${esc(name)}" loading="eager" fetchpriority="high" decoding="async">`
         : `<div class="company-public-logo company-public-logo-fallback" aria-hidden="true">${esc(initials(name))}</div>`;
       const banner = company.banner_perfil
-        ? `<img class="company-public-cover-image" src="${esc(company.banner_perfil)}" alt="" aria-hidden="true">`
+        ? `<img class="company-public-cover-image" src="${esc(company.banner_perfil)}" alt="" aria-hidden="true" loading="eager" fetchpriority="high" decoding="async">`
         : '';
       const website = safeWebsite(company.empresa_site);
       const info = [
