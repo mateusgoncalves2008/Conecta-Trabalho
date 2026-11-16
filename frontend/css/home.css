@@ -801,10 +801,10 @@ html[data-theme="dark"] .company-public-logo-fallback,html[data-theme="dark"] .c
 .company-public-tab-content{min-width:0}
 .company-public-home-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;align-items:start}
 .company-public-home-main,.company-public-home-side{display:grid;gap:12px;min-width:0}
-.company-public-section-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;column-gap:20px;row-gap:20px;align-items:start;min-width:0}
-.company-public-section-grid>.company-public-panel:first-child{grid-column:1;grid-row:1}
-.company-public-section-grid>.company-public-panel:nth-child(2){grid-column:2;grid-row:1}
-.company-public-section-grid>.company-public-panel:nth-child(3){grid-column:1;grid-row:2;width:100%;min-width:0;box-sizing:border-box}
+.company-public-section-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;column-gap:20px;align-items:start;min-width:0}
+.company-public-about-column{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-content:start;min-width:0}
+.company-public-about-column>.company-public-panel{width:100%;min-width:0;box-sizing:border-box}
+.company-public-section-grid>.company-public-panel{grid-column:2;grid-row:1}
 .company-public-panel{padding:22px}
 .company-public-panel h2{margin:3px 0 13px;color:var(--navy);font-size:19px;letter-spacing:-.25px}
 .company-public-section-kicker{display:block;color:var(--orange-dark);font-size:10px;font-weight:800;letter-spacing:1.1px}
@@ -859,7 +859,8 @@ html[data-theme="dark"] .company-public-nav button:hover,html[data-theme="dark"]
   .company-public-nav::-webkit-scrollbar{display:none}
   .company-public-nav button{min-height:44px;font-size:12px}
   .company-public-home-grid,.company-public-section-grid{grid-template-columns:1fr;gap:10px}
-  .company-public-section-grid>.company-public-panel:first-child,.company-public-section-grid>.company-public-panel:nth-child(2),.company-public-section-grid>.company-public-panel:nth-child(3){grid-column:1;grid-row:auto}
+  .company-public-about-column{gap:10px}
+  .company-public-section-grid>.company-public-panel{grid-column:1;grid-row:auto}
   .company-public-home-main,.company-public-home-side{gap:10px}
   .company-public-panel{padding:18px 15px}
   .company-public-panel h2{font-size:17px}
