@@ -92,18 +92,20 @@
       const canExpandDescription = description.length > 420;
       return `
         <div class="company-public-section-grid">
-          <section class="company-public-panel">
-            <span class="company-public-section-kicker">QUEM SOMOS</span>
-            <h2>Sobre a empresa</h2>
-            <p class="company-public-description${canExpandDescription ? ' is-collapsed' : ''}" id="company-public-full-description">${esc(description)}</p>
-            ${canExpandDescription ? '<button class="company-public-text-action" type="button" data-toggle-description aria-expanded="false" aria-controls="company-public-full-description">Ver mais</button>' : ''}
-          </section>
+          <div class="company-public-about-column">
+            <section class="company-public-panel">
+              <span class="company-public-section-kicker">QUEM SOMOS</span>
+              <h2>Sobre a empresa</h2>
+              <p class="company-public-description${canExpandDescription ? ' is-collapsed' : ''}" id="company-public-full-description">${esc(description)}</p>
+              ${canExpandDescription ? '<button class="company-public-text-action" type="button" data-toggle-description aria-expanded="false" aria-controls="company-public-full-description">Ver mais</button>' : ''}
+            </section>
+            <section class="company-public-panel">
+              <span class="company-public-section-kicker">NOSSO ESPAÇO</span>
+              <h2>Fotos da empresa</h2>
+              ${photoGallery}
+            </section>
+          </div>
           ${details}
-          <section class="company-public-panel">
-            <span class="company-public-section-kicker">NOSSO ESPAÇO</span>
-            <h2>Fotos da empresa</h2>
-            ${photoGallery}
-          </section>
         </div>`;
     }
 
