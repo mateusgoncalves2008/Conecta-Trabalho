@@ -11,8 +11,12 @@ permissions:
 
 jobs:
   verificar:
-    name: Verificar código, testes e dependências
-    runs-on: ubuntu-latest
+    name: Verificar em ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Baixar código
         uses: actions/checkout@v5

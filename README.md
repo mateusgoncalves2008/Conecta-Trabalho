@@ -51,7 +51,8 @@ No `.env` local, mantenha `NODE_ENV=development` e defina `COMPANY_CNPJ_TEST_MOD
 - `PORT`: porta HTTP (padrão 3000).
 - `NODE_ENV`: use `production` no ambiente publicado.
 - `DATABASE_URL`: string de conexão PostgreSQL.
-- `SESSION_SECRET`: segredo usado para assinar a sessão.
+- `SESSION_SECRET`: segredo aleatório usado para assinar a sessão; mantenha-o privado e nunca reutilize o valor de exemplo.
+  Gere uma chave localmente com `node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"` e configure o resultado somente no `.env` ou nas variáveis protegidas da hospedagem.
 - `GMAIL_USER`: endereço Gmail usado para enviar os códigos de confirmação.
 - `GMAIL_APP_PASSWORD`: senha de app do Google usada pelo Nodemailer. Mantenha-a somente no `.env` local ou nas variáveis protegidas da hospedagem.
 - `APP_ORIGINS`: origens completas do frontend autorizadas a enviar operações que alteram dados, separadas por vírgula. Em produção, informe o domínio real do site publicado (por exemplo, `https://seu-site.netlify.app`).
