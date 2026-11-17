@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS candidaturas (
 );
 
 CREATE INDEX IF NOT EXISTS idx_vagas_status_data ON vagas(status, criado_em DESC);
+CREATE INDEX IF NOT EXISTS idx_vagas_empresa_data ON vagas(empresa_id, criado_em DESC);
 CREATE INDEX IF NOT EXISTS idx_vagas_cidade ON vagas(cidade);
 CREATE INDEX IF NOT EXISTS idx_candidaturas_candidato ON candidaturas(candidato_id, criada_em DESC);
 CREATE INDEX IF NOT EXISTS idx_candidaturas_vaga ON candidaturas(vaga_id, criada_em DESC);
@@ -51,6 +52,15 @@ CREATE TABLE IF NOT EXISTS vagas_salvas (
 CREATE INDEX IF NOT EXISTS idx_vagas_salvas_candidato_data
   ON vagas_salvas (candidato_id, salva_em DESC);
 
+CREATE TABLE IF NOT EXISTS fotos_empresa (
+  id BIGSERIAL PRIMARY KEY,
+  empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  imagem TEXT NOT NULL,
+  criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_fotos_empresa_empresa_data
+  ON fotos_empresa (empresa_id, criada_em DESC);
+
 
 -- Dados adicionais para contas empresariais.
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cnpj VARCHAR(14);
@@ -58,6 +68,7 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS razao_social VARCHAR(160);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS nome_fantasia VARCHAR(160);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS email_verificado BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;

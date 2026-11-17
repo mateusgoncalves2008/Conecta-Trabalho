@@ -82,3 +82,9 @@ test('Candidatura valida vaga e estados permitidos', () => {
   assert.equal(Candidatura.statusValido('cancelada'), false);
   assert.equal(Candidatura.fromRequest('abc', '').validarNova(), 'Vaga inválida.');
 });
+
+
+test('Candidatura rejeita identificadores em notação científica ou hexadecimal', () => {
+  assert.equal(Candidatura.fromRequest('1e2', '').validarNova(), 'Vaga inválida.');
+  assert.equal(Candidatura.fromRequest('0x10', '').validarNova(), 'Vaga inválida.');
+});

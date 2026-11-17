@@ -14,6 +14,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = re
 const Usuario = require('./models/Usuario');
 const Vaga = require('./models/Vaga');
 const Candidatura = require('./models/Candidatura');
+const { passwordWithinBcryptLimit, parsePositiveId } = require('./validation');
 const { csrfProtection } = require('./security');
 
 const app = express();
@@ -22,7 +23,10 @@ const companyCnpjTestMode = process.env.NODE_ENV === 'development' && process.en
 const port = Number(process.env.PORT) || 3000;
 
 if (!process.env.DATABASE_URL) throw new Error('Configure DATABASE_URL no arquivo .env.');
-if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) throw new Error('SESSION_SECRET deve ter pelo menos 32 caracteres.');
+const sessionSecret = process.env.SESSION_SECRET || '';
+if (sessionSecret.length < 32 || sessionSecret.toLowerCase() === 'troque-por-uma-chave-aleatoria-longa') {
+  throw new Error('SESSION_SECRET deve ser uma chave aleatória com pelo menos 32 caracteres. Gere uma chave nova; não use o valor de exemplo.');
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -50,7 +54,7 @@ app.use((req, _res, next) => {
 app.use(session({
   store: new pgSession({ pool, tableName: 'sessoes', createTableIfMissing: true }),
   name: 'conecta.sid',
-  secret: process.env.SESSION_SECRET,
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: { httpOnly: true, secure: production, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
@@ -77,10 +81,21 @@ const limitCompanySignup = rateLimit({
   standardHeaders: 'draft-7', legacyHeaders: false,
   message: { erro: 'Muitas tentativas de cadastro empresarial. Aguarde alguns minutos.' }
 });
+const userRateLimitKey = req => 'user:' + req.session.user.id;
 const limitImageUpload = rateLimit({
-  windowMs: 15 * 60 * 1000, limit: 20,
+  windowMs: 15 * 60 * 1000, limit: 20, keyGenerator: userRateLimitKey,
   standardHeaders: 'draft-7', legacyHeaders: false,
   message: { erro: 'Muitas alterações de imagem. Aguarde alguns minutos.' }
+});
+const limitJobCreation = rateLimit({
+  windowMs: 60 * 60 * 1000, limit: 20, keyGenerator: userRateLimitKey,
+  standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { erro: 'Limite de publicações atingido. Tente novamente mais tarde.' }
+});
+const limitApplications = rateLimit({
+  windowMs: 60 * 60 * 1000, limit: 60, keyGenerator: userRateLimitKey,
+  standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { erro: 'Limite de candidaturas por hora atingido. Tente novamente mais tarde.' }
 });
 const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -89,7 +104,6 @@ const normalizeEmail = value => {
   return email && !email.includes('@') ? email + '@gmail.com' : email;
 };
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const passwordWithinBcryptLimit = value => Buffer.byteLength(value, 'utf8') <= 72;
 const storageBucket = 'conecta-trabalho-imagens';
 const storageConfigured = [
   process.env.AWS_ENDPOINT_URL_S3, process.env.AWS_ACCESS_KEY_ID,
@@ -199,6 +213,8 @@ const profileSchemaReady = pool.query(`
   );
   CREATE INDEX IF NOT EXISTS idx_fotos_empresa_empresa_data
     ON fotos_empresa (empresa_id, criada_em DESC);
+  CREATE INDEX IF NOT EXISTS idx_vagas_empresa_data
+    ON vagas (empresa_id, criado_em DESC);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS resumo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS objetivo_profissional TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_oportunidade VARCHAR(80);
@@ -598,7 +614,10 @@ app.get('/api/me', asyncRoute(async (req, res) => {
 }));
 app.get('/api/imagens/empresa/:empresaId/:fotoId', asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const result = await pool.query('SELECT imagem FROM fotos_empresa WHERE id=$1 AND empresa_id=$2', [req.params.fotoId, req.params.empresaId]);
+  const fotoId = parsePositiveId(req.params.fotoId);
+  const empresaId = parsePositiveId(req.params.empresaId);
+  if (!fotoId || !empresaId) return res.status(404).end();
+  const result = await pool.query('SELECT imagem FROM fotos_empresa WHERE id=$1 AND empresa_id=$2', [fotoId, empresaId]);
   if (!result.rowCount) return res.status(404).end();
   const value = result.rows[0].imagem;
   if (typeof value !== 'string' || !value.startsWith('s3:') || !s3) return res.status(404).end();
@@ -613,9 +632,11 @@ app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
   const field = req.params.tipo === 'foto' ? 'foto_perfil'
     : req.params.tipo === 'banner' ? 'banner_perfil' : null;
   if (!field) return res.status(404).end();
+  const userId = parsePositiveId(req.params.id);
+  if (!userId) return res.status(404).end();
   const result = await pool.query(
     "SELECT id,tipo,foto_perfil,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo IN ('candidato','empresa')",
-    [req.params.id]
+    [userId]
   );
   if (!result.rowCount) return res.status(404).end();
   const profile = result.rows[0];
@@ -789,8 +810,8 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
 }));
 
 app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
-  const vagaId = Number(req.params.id);
-  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const vagaId = parsePositiveId(req.params.id);
+  if (!vagaId) return res.status(400).json({ erro: 'Vaga inválida.' });
   const result = await pool.query(
     `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,
       u.id AS empresa_id,u.nome_empresa,u.cidade AS empresa_cidade,u.descricao AS empresa_descricao,
@@ -939,15 +960,17 @@ app.post('/api/empresa/fotos', role('empresa'), limitImageUpload, asyncRoute(asy
 }));
 app.delete('/api/empresa/fotos/:id', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const result = await pool.query('DELETE FROM fotos_empresa WHERE id=$1 AND empresa_id=$2 RETURNING imagem', [req.params.id, req.session.user.id]);
+  const fotoId = parsePositiveId(req.params.id);
+  if (!fotoId) return res.status(404).json({ erro: 'Foto não encontrada.' });
+  const result = await pool.query('DELETE FROM fotos_empresa WHERE id=$1 AND empresa_id=$2 RETURNING imagem', [fotoId, req.session.user.id]);
   if (!result.rowCount) return res.status(404).json({ erro: 'Foto não encontrada.' });
   await deleteStoredImage(result.rows[0].imagem);
   res.json({ sucesso: true });
 }));
 app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const companyId = Number(req.params.id);
-  if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
+  const companyId = parsePositiveId(req.params.id);
+  if (!companyId) return res.status(400).json({ erro: 'Empresa inválida.' });
   const result = await pool.query(
     `SELECT u.id,u.nome_empresa,u.nome_fantasia,u.cidade,u.descricao,u.empresa_site,u.empresa_setor,
       u.empresa_porte,u.foto_perfil,u.banner_perfil,u.criado_em,
@@ -970,7 +993,7 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
-app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
+app.post('/api/vagas', role('empresa'), limitJobCreation, asyncRoute(async (req, res) => {
   const vaga = Vaga.fromRequest(req.body);
   const erroValidacao = vaga.validarCadastro();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
@@ -1024,8 +1047,8 @@ app.get('/api/vagas-salvas', role('candidato'), asyncRoute(async (req, res) => {
 
 app.post('/api/vagas-salvas/importar', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const ids = [...new Set((Array.isArray(req.body.ids) ? req.body.ids : [])
-    .map(Number).filter(id => Number.isSafeInteger(id) && id > 0))].slice(0, 100);
+  const ids = [...new Set((Array.isArray(req.body.ids) ? req.body.ids.slice(0, 100) : [])
+    .map(Number).filter(id => Number.isSafeInteger(id) && id > 0))];
   if (ids.length) {
     await pool.query(
       `INSERT INTO vagas_salvas (candidato_id,vaga_id)
@@ -1039,8 +1062,8 @@ app.post('/api/vagas-salvas/importar', role('candidato'), asyncRoute(async (req,
 
 app.post('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const vagaId = Number(req.params.id);
-  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const vagaId = parsePositiveId(req.params.id);
+  if (!vagaId) return res.status(400).json({ erro: 'Vaga inválida.' });
   const vaga = await pool.query('SELECT id FROM vagas WHERE id=$1', [vagaId]);
   if (!vaga.rowCount) return res.status(404).json({ erro: 'Esta vaga não foi encontrada.' });
   await pool.query(
@@ -1052,8 +1075,8 @@ app.post('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, res)
 
 app.delete('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const vagaId = Number(req.params.id);
-  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const vagaId = parsePositiveId(req.params.id);
+  if (!vagaId) return res.status(400).json({ erro: 'Vaga inválida.' });
   await pool.query(
     'DELETE FROM vagas_salvas WHERE candidato_id=$1 AND vaga_id=$2',
     [req.session.user.id, vagaId]
@@ -1061,7 +1084,7 @@ app.delete('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, re
   res.json({ sucesso: true });
 }));
 
-app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, res) => {
+app.post('/api/vagas/:id/candidatar', role('candidato'), limitApplications, asyncRoute(async (req, res) => {
   const candidatura = Candidatura.fromRequest(req.params.id, req.body.mensagem);
   const erroValidacao = candidatura.validarNova();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
@@ -1081,9 +1104,9 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
 }));
 
 app.patch('/api/candidaturas/:id/status', role('empresa'), asyncRoute(async (req, res) => {
-  const id = Number(req.params.id);
+  const id = parsePositiveId(req.params.id);
   const status = clean(req.body.status, 30);
-  if (!Candidatura.idValido(id) || !Candidatura.statusValido(status)) {
+  if (!id || !Candidatura.statusValido(status)) {
     return res.status(400).json({ erro: 'Dados inválidos.' });
   }
   const result = await pool.query(
@@ -1095,9 +1118,9 @@ app.patch('/api/candidaturas/:id/status', role('empresa'), asyncRoute(async (req
 }));
 
 app.patch('/api/vagas/:id/status', role('empresa'), asyncRoute(async (req, res) => {
-  const id = Number(req.params.id);
+  const id = parsePositiveId(req.params.id);
   const status = clean(req.body.status, 20);
-  if (!Vaga.idValido(id) || !Vaga.statusValido(status)) return res.status(400).json({ erro: 'Dados inválidos.' });
+  if (!id || !Vaga.statusValido(status)) return res.status(400).json({ erro: 'Dados inválidos.' });
   const result = await pool.query('UPDATE vagas SET status=$1 WHERE id=$2 AND empresa_id=$3 RETURNING id,status', [status,id,req.session.user.id]);
   if (!result.rowCount) return res.status(404).json({ erro: 'Vaga não encontrada.' });
   res.json({ sucesso: true, vaga: result.rows[0] });
