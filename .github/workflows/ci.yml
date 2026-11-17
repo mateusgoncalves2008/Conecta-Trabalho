@@ -6,20 +6,36 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   verificar:
-    name: Instalar dependências e verificar JavaScript
+    name: Verificar código, testes e dependências
     runs-on: ubuntu-latest
     steps:
       - name: Baixar código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - name: Instalar dependências
+          node-version: 24
+      - name: Instalar dependências e atualizar lockfile
         run: npm install
-      - name: Verificar sintaxe
+      - name: Verificar sintaxe JavaScript
         run: npm run check
       - name: Executar testes automatizados
         run: npm test
+      - name: Gerar relatório da auditoria de dependências
+        run: npm audit --json > npm-audit.json || true
+      - name: Bloquear dependências com vulnerabilidades conhecidas
+        run: npm audit --audit-level=low
+      - name: Exportar lockfile para revisão
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lockfile-auditoria
+          path: |
+            package-lock.json
+            npm-audit.json
+          if-no-files-found: ignore

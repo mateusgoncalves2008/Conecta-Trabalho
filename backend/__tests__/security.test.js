@@ -60,3 +60,32 @@ test('bloqueia POST sem origem confiável', () => {
   assert.equal(response.statusCode, 403);
   assert.equal(response.body.erro.includes('proteção de segurança'), true);
 });
+
+
+test('aceita a origem pública configurada mesmo quando o proxy altera o Host', () => {
+  const previous = process.env.APP_ORIGINS;
+  process.env.APP_ORIGINS = 'https://conecta-exemplo.netlify.app, https://www.exemplo.com/';
+  try {
+    assert.equal(isSameOriginRequest(createRequest({
+      origin: 'https://conecta-exemplo.netlify.app',
+      host: 'conecta-trabalho.onrender.com'
+    })), true);
+  } finally {
+    if (previous === undefined) delete process.env.APP_ORIGINS;
+    else process.env.APP_ORIGINS = previous;
+  }
+});
+
+test('rejeita origens que não estão na lista configurada', () => {
+  const previous = process.env.APP_ORIGINS;
+  process.env.APP_ORIGINS = 'https://conecta-exemplo.netlify.app';
+  try {
+    assert.equal(isSameOriginRequest(createRequest({
+      origin: 'https://site-malicioso.test',
+      host: 'conecta-trabalho.onrender.com'
+    })), false);
+  } finally {
+    if (previous === undefined) delete process.env.APP_ORIGINS;
+    else process.env.APP_ORIGINS = previous;
+  }
+});

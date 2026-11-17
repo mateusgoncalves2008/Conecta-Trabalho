@@ -43,6 +43,10 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.use(express.json({ limit: '3mb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
+app.use((req, _res, next) => {
+  if (!req.body || typeof req.body !== 'object') req.body = {};
+  next();
+});
 app.use(session({
   store: new pgSession({ pool, tableName: 'sessoes', createTableIfMissing: true }),
   name: 'conecta.sid',
@@ -51,6 +55,10 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, secure: production, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use('/api', csrfProtection);
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'index.html')));
 
@@ -69,6 +77,11 @@ const limitCompanySignup = rateLimit({
   standardHeaders: 'draft-7', legacyHeaders: false,
   message: { erro: 'Muitas tentativas de cadastro empresarial. Aguarde alguns minutos.' }
 });
+const limitImageUpload = rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 20,
+  standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { erro: 'Muitas alterações de imagem. Aguarde alguns minutos.' }
+});
 const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const normalizeEmail = value => {
@@ -76,6 +89,7 @@ const normalizeEmail = value => {
   return email && !email.includes('@') ? email + '@gmail.com' : email;
 };
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const passwordWithinBcryptLimit = value => Buffer.byteLength(value, 'utf8') <= 72;
 const storageBucket = 'conecta-trabalho-imagens';
 const storageConfigured = [
   process.env.AWS_ENDPOINT_URL_S3, process.env.AWS_ACCESS_KEY_ID,
@@ -272,7 +286,7 @@ const sendCompanyVerificationEmail = async (email, code, companyName) => {
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD.replace(/\\s/g, '')
+      pass: process.env.GMAIL_APP_PASSWORD.replace(/\s/g, '')
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -344,6 +358,7 @@ app.get('/api/config', (_req, res) => {
 });
 
 app.get('/api/health', asyncRoute(async (_req, res) => {
+  await profileSchemaReady;
   await pool.query('SELECT 1');
   res.json({ sucesso: true, banco: 'conectado' });
 }));
@@ -378,13 +393,14 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   let cnpj = normalizeCnpj(req.body.cnpj);
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe o nome completo do responsável.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
-  if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
+  if (senha.length < 8 || !passwordWithinBcryptLimit(senha)) return res.status(400).json({ erro: 'A senha deve ter pelo menos 8 caracteres e no máximo 72 bytes.' });
   if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
   if (!companyCnpjTestMode && !validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
   }
 
+  await pool.query('DELETE FROM cadastros_empresa_pendentes WHERE expira_em <= NOW()');
   const existing = await pool.query('SELECT id FROM usuarios WHERE email=$1 OR cnpj=$2', [email, cnpj]);
   if (existing.rowCount) return res.status(409).json({ erro: 'Este e-mail ou CNPJ já está cadastrado.' });
 
@@ -510,7 +526,7 @@ app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
   const nomeEmpresa = clean(req.body.nomeEmpresa, 160);
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe seu nome completo.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
-  if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
+  if (senha.length < 8 || !passwordWithinBcryptLimit(senha)) return res.status(400).json({ erro: 'A senha deve ter pelo menos 8 caracteres e no máximo 72 bytes.' });
   if (!['candidato', 'empresa'].includes(tipo)) return res.status(400).json({ erro: 'Tipo de cadastro inválido.' });
   if (tipo === 'empresa') return res.status(400).json({ erro: 'Use a confirmação de CNPJ e e-mail para criar uma conta empresarial.' });
   const hash = await bcrypt.hash(senha, 12);
@@ -645,7 +661,7 @@ app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   res.json({ perfil: profile });
 }));
 
-app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
+app.put('/api/perfil', role('candidato'), limitImageUpload, asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const fields = {
     telefone: clean(req.body.telefone, 30), cidade: clean(req.body.cidade, 100) || 'Capelinha',
@@ -707,18 +723,15 @@ app.put('/api/perfil/visibilidade-foto', role('candidato'), asyncRoute(async (re
   res.json({ sucesso: true, visibilidade: visibility });
 }));
 
-app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => {
+app.put('/api/perfil/imagem', role('candidato'), limitImageUpload, asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const field = req.body.campo;
   const image = req.body.imagem;
   if (!['foto_perfil', 'banner_perfil'].includes(field)) {
     return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
   }
-  const supportedCompanyImage = typeof image === 'string' && (
-    image.startsWith('data:image/png;base64,') ||
-    image.startsWith('data:image/jpeg;base64,') ||
-    image.startsWith('data:image/webp;base64,')
-  );
+  const supportedCompanyImage = typeof image === 'string' &&
+    /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image);
   if (image !== null && (!supportedCompanyImage || image.length > 1400000)) {
     return res.status(400).json({ erro: 'Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.' });
   }
@@ -728,7 +741,7 @@ app.put('/api/perfil/imagem', role('candidato'), asyncRoute(async (req, res) => 
   let newValue = null;
   let uploadedValue = null;
   if (image !== null) {
-    uploadedValue = await uploadProfileImage(req.session.user.id, field, image);
+    uploadedValue = await uploadCompanyProfileImage(req.session.user.id, field, image);
     newValue = uploadedValue;
   }
   try {
@@ -840,7 +853,7 @@ app.put('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   res.json({ sucesso: true, perfil: result.rows[0] });
 }));
 
-app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, res) => {
+app.put('/api/empresa/perfil/imagem', role('empresa'), limitImageUpload, asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const field = req.body.campo;
   const image = req.body.imagem;
@@ -876,17 +889,53 @@ app.get('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
   const result = await pool.query('SELECT id,criada_em FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC', [req.session.user.id]);
   res.json({ fotos: result.rows.map(photo => ({ ...photo, url: '/api/imagens/empresa/' + req.session.user.id + '/' + photo.id })) });
 }));
-app.post('/api/empresa/fotos', role('empresa'), asyncRoute(async (req, res) => {
+app.post('/api/empresa/fotos', role('empresa'), limitImageUpload, asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const image = req.body.imagem;
   if (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000) return res.status(400).json({ erro: 'Imagem inválida ou muito grande.' });
-  const count = await pool.query('SELECT COUNT(*)::int AS total FROM fotos_empresa WHERE empresa_id=$1', [req.session.user.id]);
-  if (count.rows[0].total >= 4) return res.status(400).json({ erro: 'Cada empresa pode publicar no máximo 4 fotos.' });
-  const stored = await uploadProfileImage(req.session.user.id, 'galeria-' + crypto.randomUUID(), image);
+
+  const client = await pool.connect();
+  let stored = null;
   try {
-    const result = await pool.query('INSERT INTO fotos_empresa (empresa_id,imagem) VALUES ($1,$2) RETURNING id,criada_em', [req.session.user.id, stored]);
-    res.status(201).json({ sucesso: true, foto: { ...result.rows[0], url: '/api/imagens/empresa/' + req.session.user.id + '/' + result.rows[0].id } });
-  } catch (error) { await deleteStoredImage(stored); throw error; }
+    await client.query('BEGIN');
+    const company = await client.query(
+      "SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa' FOR UPDATE",
+      [req.session.user.id]
+    );
+    if (!company.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+    }
+
+    const count = await client.query(
+      'SELECT COUNT(*)::int AS total FROM fotos_empresa WHERE empresa_id=$1',
+      [req.session.user.id]
+    );
+    if (count.rows[0].total >= 4) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ erro: 'Cada empresa pode publicar no máximo 4 fotos.' });
+    }
+
+    stored = await uploadProfileImage(req.session.user.id, 'galeria-' + crypto.randomUUID(), image);
+    const result = await client.query(
+      'INSERT INTO fotos_empresa (empresa_id,imagem) VALUES ($1,$2) RETURNING id,criada_em',
+      [req.session.user.id, stored]
+    );
+    await client.query('COMMIT');
+    res.status(201).json({
+      sucesso: true,
+      foto: {
+        ...result.rows[0],
+        url: '/api/imagens/empresa/' + req.session.user.id + '/' + result.rows[0].id
+      }
+    });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    await deleteStoredImage(stored);
+    throw error;
+  } finally {
+    client.release();
+  }
 }));
 app.delete('/api/empresa/fotos/:id', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
@@ -1055,8 +1104,48 @@ app.patch('/api/vagas/:id/status', role('empresa'), asyncRoute(async (req, res) 
 }));
 
 app.use('/api', (_req, res) => res.status(404).json({ erro: 'Rota não encontrada.' }));
-app.use((error, _req, res, _next) => {
-  console.error(error);
-  if (!res.headersSent) res.status(500).json({ erro: 'Ocorreu um erro interno. Tente novamente.' });
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+
+  const status = error.type === 'entity.parse.failed' ? 400
+    : error.type === 'entity.too.large' ? 413
+    : Number.isInteger(error.statusCode) ? error.statusCode
+    : Number.isInteger(error.status) ? error.status : 500;
+  const safeStatus = status >= 400 && status <= 599 ? status : 500;
+
+  if (safeStatus >= 500) {
+    console.error('Erro interno na API:', req.method, req.path, error.message);
+  }
+
+  const message = error.type === 'entity.parse.failed'
+    ? 'O corpo da solicitação não contém JSON válido.'
+    : error.type === 'entity.too.large'
+      ? 'A solicitação ultrapassa o limite de tamanho permitido.'
+      : safeStatus >= 500
+        ? 'Ocorreu um erro interno. Tente novamente.'
+        : (error.message || 'Solicitação inválida.');
+
+  res.status(safeStatus).json({ erro: message });
 });
-app.listen(port, () => console.log(`ConectaTrabalho rodando na porta ${port}`));
+
+async function startServer() {
+  try {
+    await profileSchemaReady;
+    const server = app.listen(port, () => console.log(`ConectaTrabalho rodando na porta ${port}`));
+
+    const shutdown = signal => {
+      console.log(`Encerrando o servidor após ${signal}...`);
+      server.close(() => {
+        pool.end().catch(error => console.error('Erro ao encerrar o PostgreSQL:', error.message));
+      });
+    };
+    process.once('SIGTERM', () => shutdown('SIGTERM'));
+    process.once('SIGINT', () => shutdown('SIGINT'));
+  } catch (error) {
+    console.error('Não foi possível preparar o banco de dados:', error.message);
+    await pool.end().catch(() => {});
+    process.exitCode = 1;
+  }
+}
+
+startServer();

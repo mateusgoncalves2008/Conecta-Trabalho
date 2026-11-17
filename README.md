@@ -17,7 +17,7 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
 
 ## Requisitos
 
-- Node.js 20 ou superior.
+- Node.js 24 ou superior.
 - PostgreSQL (Neon ou outra hospedagem compatível).
 
 ## Configuração local
@@ -29,7 +29,7 @@ Plataforma para aproximar candidatos e empresas de Capelinha e cidades próximas
    ```
 2. Instale as dependências:
    ```bash
-   npm install
+   npm ci
    ```
 3. Crie um banco PostgreSQL e execute todo o conteúdo de `database/schema.sql` nele.
 4. Copie `.env.example` para um arquivo chamado `.env`.
@@ -54,14 +54,17 @@ No `.env` local, mantenha `NODE_ENV=development` e defina `COMPANY_CNPJ_TEST_MOD
 - `SESSION_SECRET`: segredo usado para assinar a sessão.
 - `GMAIL_USER`: endereço Gmail usado para enviar os códigos de confirmação.
 - `GMAIL_APP_PASSWORD`: senha de app do Google usada pelo Nodemailer. Mantenha-a somente no `.env` local ou nas variáveis protegidas da hospedagem.
+- `APP_ORIGINS`: origens completas do frontend autorizadas a enviar operações que alteram dados, separadas por vírgula. Em produção, informe o domínio real do site publicado (por exemplo, `https://seu-site.netlify.app`).
+- `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` e `AWS_REGION`: credenciais e endereço do Neon Object Storage, necessárias para enviar e exibir fotos e banners.
 - `COMPANY_CNPJ_TEST_MODE`: use `true` somente no `.env` local, junto de `NODE_ENV=development`, para testar o cadastro empresarial sem consultar um CNPJ real. O modo é automaticamente desativado quando `NODE_ENV=production`.
 
 ## Publicação
 
 Configure no serviço de hospedagem:
-- Build command: `npm install`
+- Build command: `npm ci`
 - Start command: `npm start`
-- Variáveis `DATABASE_URL`, `SESSION_SECRET` e `NODE_ENV=production`.
+- Variáveis `DATABASE_URL`, `SESSION_SECRET`, `NODE_ENV=production` e `APP_ORIGINS` com o domínio real do frontend.
+- Para habilitar fotos e banners, configure também as quatro variáveis `AWS_*` do Neon Object Storage.
 
 Antes de abrir o site, execute `database/schema.sql` no banco de produção. Nunca envie o arquivo `.env` ao GitHub.
 
