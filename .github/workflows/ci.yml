@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verificar:
@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: 24
       - name: Instalar dependências e atualizar lockfile
+        id: install
         run: npm install
       - name: Verificar sintaxe JavaScript
         run: npm run check
@@ -30,12 +31,15 @@ jobs:
         run: npm audit --json > npm-audit.json || true
       - name: Bloquear dependências com vulnerabilidades conhecidas
         run: npm audit --audit-level=low
-      - name: Exportar lockfile para revisão
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lockfile-auditoria
-          path: |
-            package-lock.json
-            npm-audit.json
-          if-no-files-found: ignore
+      - name: Salvar lockfile atualizado na branch de trabalho
+        if: always() && github.event_name == 'pull_request' && steps.install.outcome == 'success'
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "O lockfile já está atualizado."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Atualiza lockfile das dependências"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
