@@ -517,8 +517,14 @@ app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
       'INSERT INTO usuarios (nome,email,senha_hash,tipo,telefone,cidade,nome_empresa) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
       [nome,email,hash,tipo,telefone || null,cidade,tipo === 'empresa' ? nomeEmpresa : null]
     );
-    req.session.user = publicUser(result.rows[0]);
-    res.status(201).json({ sucesso: true, usuario: req.session.user });
+    req.session.regenerate(error => {
+      if (error) return res.status(500).json({ erro: 'Conta criada, mas não foi possível iniciar sua sessão. Faça login.' });
+      req.session.user = publicUser(result.rows[0]);
+      req.session.save(saveError => {
+        if (saveError) return res.status(500).json({ erro: 'Conta criada, mas não foi possível salvar sua sessão. Faça login.' });
+        res.status(201).json({ sucesso: true, usuario: req.session.user });
+      });
+    });
   } catch (error) {
     if (error.code === '23505') return res.status(409).json({ erro: 'Este e-mail já está cadastrado.' });
     throw error;
