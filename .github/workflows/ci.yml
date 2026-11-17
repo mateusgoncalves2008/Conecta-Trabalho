@@ -21,3 +21,5 @@ jobs:
         run: npm install
       - name: Verificar sintaxe
         run: npm run check
+      - name: Executar testes automatizados
+        run: npm test
