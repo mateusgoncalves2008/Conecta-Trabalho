@@ -385,7 +385,7 @@
     // Ações da conta no menu superior, em todas as páginas com cabeçalho.
     const publicHeaderActions = document.querySelector('.site-header .header-actions');
     if (publicHeaderActions) {
-      api('/api/me').then(session => {
+      api('/api/me').then(async session => {
         const user = session.usuario;
         if (!user) return;
 
