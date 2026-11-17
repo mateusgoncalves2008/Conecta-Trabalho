@@ -145,48 +145,57 @@
       });
       applyAccessibility();
 
-      // Exibe o botão de voltar ao topo após três etapas de rolagem.
-      const backToTop = document.getElementById('back-to-top');
-      if (backToTop) {
-        let countedScrollY = window.scrollY;
-        let scrollSteps = 0;
-        const scrollStepDistance = 120;
-
-        window.addEventListener('scroll', () => {
-          const currentScrollY = window.scrollY;
-
-          if (currentScrollY <= 0) {
-            scrollSteps = 0;
-            countedScrollY = 0;
-            backToTop.classList.remove('is-visible');
-            return;
-          }
-
-          if (currentScrollY > countedScrollY) {
-            const distance = currentScrollY - countedScrollY;
-            const completedSteps = Math.floor(distance / scrollStepDistance);
-            if (completedSteps > 0) {
-              scrollSteps += completedSteps;
-              countedScrollY += completedSteps * scrollStepDistance;
-            }
-          } else if (currentScrollY < countedScrollY) {
-            countedScrollY = currentScrollY;
-          }
-
-          if (scrollSteps >= 3) backToTop.classList.add('is-visible');
-        }, { passive: true });
-
-        backToTop.addEventListener('click', () => {
-          const reduceMotion = document.body.classList.contains('a11y-motion') ||
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          window.scrollTo({
-            top: 0,
-            behavior: reduceMotion ? 'auto' : 'smooth'
-          });
-        });
-      }
     }
 
+
+    // Botão de voltar ao topo compartilhado por todas as páginas.
+    const backToTop = document.getElementById('back-to-top');
+    if (backToTop) {
+      let countedScrollY = window.scrollY;
+      let scrollSteps = 0;
+      const scrollStepDistance = 100;
+
+      const pageCanScroll = () =>
+        document.documentElement.scrollHeight > window.innerHeight + 160;
+
+      const updateBackToTop = () => {
+        const currentScrollY = window.scrollY;
+        const canScroll = pageCanScroll();
+
+        if (!canScroll || currentScrollY <= 0) {
+          if (currentScrollY <= 0) scrollSteps = 0;
+          countedScrollY = currentScrollY;
+          backToTop.classList.remove('is-visible');
+          return;
+        }
+
+        if (currentScrollY > countedScrollY) {
+          const distance = currentScrollY - countedScrollY;
+          const completedSteps = Math.floor(distance / scrollStepDistance);
+          if (completedSteps > 0) {
+            scrollSteps += completedSteps;
+            countedScrollY += completedSteps * scrollStepDistance;
+          }
+        } else {
+          countedScrollY = currentScrollY;
+        }
+
+        backToTop.classList.toggle('is-visible', scrollSteps >= 3);
+      };
+
+      window.addEventListener('scroll', updateBackToTop, { passive: true });
+      window.addEventListener('resize', updateBackToTop);
+      updateBackToTop();
+
+      backToTop.addEventListener('click', () => {
+        const reduceMotion = document.body.classList.contains('a11y-motion') ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({
+          top: 0,
+          behavior: reduceMotion ? 'auto' : 'smooth'
+        });
+      });
+    }
 
     // Troca as cores de hover usando a cor original guardada antes da interação.
     const buttonSelector = 'button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), input[type="submit"], input[type="button"], input[type="reset"]';
