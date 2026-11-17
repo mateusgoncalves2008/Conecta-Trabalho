@@ -1,4 +1,5 @@
 const STATUS = ['recebida', 'em_analise', 'entrevista', 'aprovada', 'rejeitada'];
+const { parsePositiveId } = require('../validation');
 
 class Candidatura {
   constructor({ vagaId, mensagem = '' } = {}) {
@@ -7,7 +8,7 @@ class Candidatura {
   }
 
   static fromRequest(vagaId, mensagem) {
-    const id = Number(vagaId);
+    const id = parsePositiveId(vagaId);
     const texto = typeof mensagem === 'string' ? mensagem.trim().slice(0, 1000) : '';
     return new Candidatura({ vagaId: id, mensagem: texto });
   }
