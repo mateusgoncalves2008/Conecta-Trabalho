@@ -1,3 +1,4 @@
+# Auditoria: atualiza lockfile no branch de trabalho antes da validação final.
 name: Verificação do projeto
 
 on:
