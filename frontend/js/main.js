@@ -100,6 +100,44 @@
     const accessibilityDefaults = { font: 'normal', contrast: false, links: false, readable: false, spacing: false, motion: false, focus: false };
     let accessibilitySettings = { ...accessibilityDefaults };
     try { accessibilitySettings = { ...accessibilityDefaults, ...JSON.parse(localStorage.getItem('conecta-accessibility') || '{}') }; } catch {}
+    // Disponibiliza a central de acessibilidade em todas as páginas do site.
+    if (!document.getElementById('accessibility-open')) {
+      const launcher = document.createElement('button');
+      launcher.className = 'accessibility-launcher';
+      launcher.type = 'button';
+      launcher.id = 'accessibility-open';
+      launcher.setAttribute('aria-label', 'Abrir opções de acessibilidade');
+      launcher.setAttribute('aria-haspopup', 'dialog');
+      launcher.setAttribute('aria-controls', 'accessibility-modal');
+      launcher.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="13" cy="4.5" r="2.5"></circle><path d="M12 9l-2 8h7l3 6h5M12 10l7 2 2 5M10 17l-2 6"></path><circle cx="13" cy="21" r="8" stroke-dasharray="39 12" transform="rotate(25 13 21)"></circle><circle cx="24.5" cy="26" r="2"></circle></svg>';
+      document.body.appendChild(launcher);
+    }
+
+    if (!document.getElementById('accessibility-modal')) {
+      const modal = document.createElement('div');
+      modal.className = 'accessibility-backdrop';
+      modal.id = 'accessibility-modal';
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <section class="accessibility-dialog" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" aria-describedby="accessibility-description">
+          <div class="accessibility-dialog-header">
+            <div><span class="eyebrow">PERSONALIZE SUA EXPERIÊNCIA</span><h2 id="accessibility-title">Acessibilidade</h2><p id="accessibility-description">Ajuste a página para facilitar a leitura e a navegação.</p></div>
+            <button type="button" class="accessibility-close" id="accessibility-close" aria-label="Fechar acessibilidade">×</button>
+          </div>
+          <div class="accessibility-options">
+            <div class="accessibility-option"><div><strong>Tamanho do texto</strong><span>Aumente ou diminua os textos da página.</span></div><div class="accessibility-font-controls" role="group" aria-label="Tamanho do texto"><button type="button" data-a11y-font="normal" aria-pressed="true">Padrão</button><button type="button" data-a11y-font="large" aria-pressed="false">Maior</button><button type="button" data-a11y-font="larger" aria-pressed="false">Muito maior</button></div></div>
+            <label class="accessibility-option"><span><strong>Alto contraste</strong><span>Reforce a diferença entre textos e fundos.</span></span><input type="checkbox" data-a11y-toggle="contrast"></label>
+            <label class="accessibility-option"><span><strong>Destacar links</strong><span>Adicione sublinhado aos links para identificá-los melhor.</span></span><input type="checkbox" data-a11y-toggle="links"></label>
+            <label class="accessibility-option"><span><strong>Fonte de leitura</strong><span>Use uma fonte simples e mais legível.</span></span><input type="checkbox" data-a11y-toggle="readable"></label>
+            <label class="accessibility-option"><span><strong>Espaçamento do texto</strong><span>Aumente o espaço entre linhas e letras.</span></span><input type="checkbox" data-a11y-toggle="spacing"></label>
+            <label class="accessibility-option"><span><strong>Reduzir animações</strong><span>Desative movimentos e transições da interface.</span></span><input type="checkbox" data-a11y-toggle="motion"></label>
+            <label class="accessibility-option"><span><strong>Realçar foco do teclado</strong><span>Deixe mais visível o elemento selecionado ao navegar com Tab.</span></span><input type="checkbox" data-a11y-toggle="focus"></label>
+          </div>
+          <div class="accessibility-dialog-footer"><button type="button" class="accessibility-reset" id="accessibility-reset">Restaurar configurações</button><button type="button" class="button button-primary" id="accessibility-done">Concluir</button></div>
+        </section>`;
+      document.body.appendChild(modal);
+    }
+
     const accessibilityModal = document.getElementById('accessibility-modal');
     const accessibilityOpen = document.getElementById('accessibility-open');
     if (accessibilityModal && accessibilityOpen) {
