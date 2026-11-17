@@ -11,6 +11,9 @@ const crypto = require('crypto');
 const { rateLimit } = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const Usuario = require('./models/Usuario');
+const Vaga = require('./models/Vaga');
+const Candidatura = require('./models/Candidatura');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
@@ -163,11 +166,8 @@ const deleteStoredImage = async value => {
   }
 };
 
-const publicUser = user => ({
-  id: user.id, nome: user.nome, email: user.email, tipo: user.tipo,
-  telefone: user.telefone, cidade: user.cidade, nomeEmpresa: user.nome_empresa,
-  fotoPerfil: imageReference(user.id, 'foto_perfil', user.foto_perfil),
-  emailVerificado: user.email_verificado === true
+const publicUser = user => Usuario.fromDatabase(user).toSessionUser({
+  fotoPerfil: imageReference(user.id, 'foto_perfil', user.foto_perfil)
 });
 
 const profileSchemaReady = pool.query(`
@@ -914,21 +914,13 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
 }));
 
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
-  const titulo = clean(req.body.titulo, 120);
-  const descricao = clean(req.body.descricao, 5000);
-  const requisitos = clean(req.body.requisitos, 3000);
-  const contrato = clean(req.body.tipoContrato, 40);
-  const modalidade = clean(req.body.modalidade, 30);
-  const cidade = clean(req.body.cidade, 100);
-  const salario = clean(req.body.salario, 80);
-  if (titulo.length < 4) return res.status(400).json({ erro: 'O título deve ter pelo menos 4 caracteres.' });
-  if (descricao.length < 20) return res.status(400).json({ erro: 'A descrição deve ter pelo menos 20 caracteres.' });
-  if (!['CLT','Estágio','Temporário','Jovem Aprendiz','Freelancer','Autônomo'].includes(contrato)) return res.status(400).json({ erro: 'Selecione um contrato válido.' });
-  if (!['Presencial','Híbrido','Remoto'].includes(modalidade)) return res.status(400).json({ erro: 'Selecione uma modalidade válida.' });
-  if (cidade.length < 2) return res.status(400).json({ erro: 'Informe a cidade da vaga.' });
+  const vaga = Vaga.fromRequest(req.body);
+  const erroValidacao = vaga.validarCadastro();
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
+
   const result = await pool.query(
     'INSERT INTO vagas (empresa_id,titulo,descricao,requisitos,tipo_contrato,modalidade,cidade,salario) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-    [req.session.user.id,titulo,descricao,requisitos || null,contrato,modalidade,cidade,salario || null]
+    vaga.paraInsercao(req.session.user.id)
   );
   res.status(201).json({ sucesso: true, vaga: result.rows[0] });
 }));
@@ -1013,13 +1005,17 @@ app.delete('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, re
 }));
 
 app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, res) => {
-  const vagaId = Number(req.params.id);
-  const mensagem = clean(req.body.mensagem, 1000);
-  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
-  const vaga = await pool.query("SELECT id FROM vagas WHERE id=$1 AND status='aberta'", [vagaId]);
+  const candidatura = Candidatura.fromRequest(req.params.id, req.body.mensagem);
+  const erroValidacao = candidatura.validarNova();
+  if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
+
+  const vaga = await pool.query("SELECT id FROM vagas WHERE id=$1 AND status='aberta'", [candidatura.vagaId]);
   if (!vaga.rowCount) return res.status(404).json({ erro: 'Esta vaga não está mais disponível.' });
   try {
-    await pool.query('INSERT INTO candidaturas (vaga_id,candidato_id,mensagem) VALUES ($1,$2,$3)', [vagaId,req.session.user.id,mensagem || null]);
+    await pool.query(
+      'INSERT INTO candidaturas (vaga_id,candidato_id,mensagem) VALUES ($1,$2,$3)',
+      [candidatura.vagaId,req.session.user.id,candidatura.mensagem || null]
+    );
     res.status(201).json({ sucesso: true, mensagem: 'Candidatura enviada com sucesso.' });
   } catch (error) {
     if (error.code === '23505') return res.status(409).json({ erro: 'Você já se candidatou a esta vaga.' });
@@ -1030,7 +1026,7 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
 app.patch('/api/candidaturas/:id/status', role('empresa'), asyncRoute(async (req, res) => {
   const id = Number(req.params.id);
   const status = clean(req.body.status, 30);
-  if (!Number.isSafeInteger(id) || id < 1 || !['recebida','em_analise','entrevista','aprovada','rejeitada'].includes(status)) {
+  if (!Candidatura.idValido(id) || !Candidatura.statusValido(status)) {
     return res.status(400).json({ erro: 'Dados inválidos.' });
   }
   const result = await pool.query(
@@ -1044,7 +1040,7 @@ app.patch('/api/candidaturas/:id/status', role('empresa'), asyncRoute(async (req
 app.patch('/api/vagas/:id/status', role('empresa'), asyncRoute(async (req, res) => {
   const id = Number(req.params.id);
   const status = clean(req.body.status, 20);
-  if (!Number.isSafeInteger(id) || id < 1 || !['aberta','pausada','encerrada'].includes(status)) return res.status(400).json({ erro: 'Dados inválidos.' });
+  if (!Vaga.idValido(id) || !Vaga.statusValido(status)) return res.status(400).json({ erro: 'Dados inválidos.' });
   const result = await pool.query('UPDATE vagas SET status=$1 WHERE id=$2 AND empresa_id=$3 RETURNING id,status', [status,id,req.session.user.id]);
   if (!result.rowCount) return res.status(404).json({ erro: 'Vaga não encontrada.' });
   res.json({ sucesso: true, vaga: result.rows[0] });
