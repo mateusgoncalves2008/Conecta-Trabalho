@@ -14,6 +14,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = re
 const Usuario = require('./models/Usuario');
 const Vaga = require('./models/Vaga');
 const Candidatura = require('./models/Candidatura');
+const { csrfProtection } = require('./security');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
@@ -25,7 +26,7 @@ if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) throw
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: production ? { rejectUnauthorized: false } : undefined,
+  ssl: production ? { rejectUnauthorized: true } : undefined,
   max: 10,
   connectionTimeoutMillis: 10000
 });
@@ -50,6 +51,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, secure: production, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
+app.use('/api', csrfProtection);
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'index.html')));
 
 const limitLogin = rateLimit({
