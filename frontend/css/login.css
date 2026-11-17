@@ -180,21 +180,6 @@ html[data-theme="dark"] .page-illustration{filter:none!important}
 }
 
 
-/* Botão Entrar: branco no repouso e azul-marinho no hover/foco */
-#login-form > button[type="submit"].button-primary {
-  background: #fff !important;
-  color: #142b49 !important;
-  border: 1px solid #d5dce5;
-}
-
-#login-form > button[type="submit"].button-primary:hover,
-#login-form > button[type="submit"].button-primary:focus-visible {
-  background: #142b49 !important;
-  border-color: #142b49 !important;
-  color: #fff !important;
-}
-
-
 /* Organização da área de apresentação do login */
 .auth-intro {
   justify-content: center;
