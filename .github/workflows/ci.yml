@@ -1,4 +1,3 @@
-# Auditoria: atualiza lockfile no branch de trabalho antes da validação final.
 name: Verificação do projeto
 
 on:
@@ -8,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verificar:
@@ -21,30 +20,12 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 24
-      - name: Instalar dependências e atualizar lockfile
-        id: install
-        run: npm install
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
       - name: Verificar sintaxe JavaScript
         run: npm run check
       - name: Executar testes automatizados
         run: npm test
-      - name: Gerar relatório da auditoria de dependências
-        run: npm audit --json > npm-audit.json || true
-      - name: Bloquear dependências com vulnerabilidades conhecidas
+      - name: Auditar dependências
         run: npm audit --audit-level=low
-      - name: Salvar lockfile atualizado na branch de trabalho
-        if: always() && github.event_name == 'pull_request' && steps.install.outcome == 'success'
-        run: |
-          if git diff --quiet -- package-lock.json; then
-            echo "O lockfile já está atualizado."
-            exit 0
-          fi
-          cp package-lock.json /tmp/package-lock-gerado.json
-          git fetch origin "${GITHUB_HEAD_REF}"
-          git checkout -B "${GITHUB_HEAD_REF}" "origin/${GITHUB_HEAD_REF}"
-          cp /tmp/package-lock-gerado.json package-lock.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "Atualiza lockfile das dependências"
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
