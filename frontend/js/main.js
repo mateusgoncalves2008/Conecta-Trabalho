@@ -148,54 +148,46 @@
     }
 
 
-    // Botão de voltar ao topo compartilhado por todas as páginas.
-    const backToTop = document.getElementById('back-to-top');
-    if (backToTop) {
-      let countedScrollY = window.scrollY;
-      let scrollSteps = 0;
-      const scrollStepDistance = 100;
+    // Botão global de voltar ao topo: existe em todas as páginas que carregam main.js.
+    let backToTop = document.getElementById('back-to-top');
 
-      const pageCanScroll = () =>
-        document.documentElement.scrollHeight > window.innerHeight + 160;
-
-      const updateBackToTop = () => {
-        const currentScrollY = window.scrollY;
-        const canScroll = pageCanScroll();
-
-        if (!canScroll || currentScrollY <= 0) {
-          if (currentScrollY <= 0) scrollSteps = 0;
-          countedScrollY = currentScrollY;
-          backToTop.classList.remove('is-visible');
-          return;
-        }
-
-        if (currentScrollY > countedScrollY) {
-          const distance = currentScrollY - countedScrollY;
-          const completedSteps = Math.floor(distance / scrollStepDistance);
-          if (completedSteps > 0) {
-            scrollSteps += completedSteps;
-            countedScrollY += completedSteps * scrollStepDistance;
-          }
-        } else {
-          countedScrollY = currentScrollY;
-        }
-
-        backToTop.classList.toggle('is-visible', scrollSteps >= 3);
-      };
-
-      window.addEventListener('scroll', updateBackToTop, { passive: true });
-      window.addEventListener('resize', updateBackToTop);
-      updateBackToTop();
-
-      backToTop.addEventListener('click', () => {
-        const reduceMotion = document.body.classList.contains('a11y-motion') ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        window.scrollTo({
-          top: 0,
-          behavior: reduceMotion ? 'auto' : 'smooth'
-        });
-      });
+    if (!backToTop) {
+      backToTop = document.createElement('button');
+      backToTop.type = 'button';
+      backToTop.id = 'back-to-top';
+      backToTop.className = 'back-to-top';
+      backToTop.setAttribute('aria-label', 'Voltar ao topo');
+      backToTop.title = 'Voltar ao topo';
+      backToTop.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg>';
+      document.body.appendChild(backToTop);
     }
+
+    // A página precisa permitir pelo menos 300 px de rolagem.
+    // A seta só aparece depois que o usuário desce aproximadamente três etapas.
+    const scrollThreshold = 300;
+    const pageCanScroll = () =>
+      document.documentElement.scrollHeight > window.innerHeight + scrollThreshold;
+
+    const updateBackToTop = () => {
+      const canScroll = pageCanScroll();
+      const shouldShow = canScroll && window.scrollY >= scrollThreshold;
+      backToTop.classList.toggle('is-visible', shouldShow);
+      backToTop.setAttribute('aria-hidden', String(!shouldShow));
+      backToTop.tabIndex = shouldShow ? 0 : -1;
+    };
+
+    window.addEventListener('scroll', updateBackToTop, { passive: true });
+    window.addEventListener('resize', updateBackToTop);
+    updateBackToTop();
+
+    backToTop.addEventListener('click', () => {
+      const reduceMotion = document.body.classList.contains('a11y-motion') ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({
+        top: 0,
+        behavior: reduceMotion ? 'auto' : 'smooth'
+      });
+    });
 
     // Troca as cores de hover usando a cor original guardada antes da interação.
     const buttonSelector = 'button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), .button:not(.menu-toggle):not(.accessibility-launcher):not(.password-toggle), input[type="submit"], input[type="button"], input[type="reset"]';
