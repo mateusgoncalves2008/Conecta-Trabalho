@@ -95,3 +95,18 @@ html[data-theme="dark"] .settings-demographics-field{border-color:#354255}
 html[data-theme="dark"] .settings-demographics-field label{color:#e7edf5}
 html[data-theme="dark"] .settings-demographics-field select{background:#172538;border-color:#52647a;color:#e7edf5}
 @media(max-width:650px){.settings-demographics-fields{padding:0 18px 18px}}
+
+/* Subpágina de aparência inspirada nas preferências de tema */
+.settings-theme-intro{padding:25px 26px 20px}
+.settings-theme-intro h3{margin:0 0 18px;color:var(--ink,#192b3e);font-size:19px}
+.settings-theme-intro p{margin:0 0 10px;color:var(--muted,#667487);font-size:14px;line-height:1.65}
+.settings-theme-options{margin:0;padding:0 26px 10px;border:0}
+.settings-theme-option{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid var(--line,#e1e5e9);cursor:pointer}
+.settings-theme-option>span{display:grid;gap:5px}
+.settings-theme-option strong{color:var(--ink,#24364b);font-size:14px}
+.settings-theme-option small{color:var(--muted,#667487);font-size:12px;line-height:1.5}
+.settings-theme-option input{width:19px;height:19px;flex:0 0 19px;accent-color:#c95730;cursor:pointer}
+.settings-theme-option input:focus-visible{outline:3px solid rgba(201,87,48,.25);outline-offset:3px}
+html[data-theme="dark"] .settings-theme-intro h3,html[data-theme="dark"] .settings-theme-option strong{color:#e7edf5}
+html[data-theme="dark"] .settings-theme-option{border-color:#354255}
+@media(max-width:650px){.settings-theme-intro{padding:21px 18px 17px}.settings-theme-options{padding:0 18px 8px}}
