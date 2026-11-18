@@ -60,8 +60,11 @@
     const authThemeSlot = document.querySelector('.auth-topbar .auth-theme-slot');
     const isMobileAuth = Boolean(authThemeSlot && window.matchMedia('(max-width: 760px)').matches);
     const themeButtonHost = isMobileAuth ? authThemeSlot : document.querySelector('.header-actions, .dashboard-user, .auth-intro');
-    const savedTheme = localStorage.getItem('conecta-theme');
-    const applyTheme = theme => {
+    const savedTheme = localStorage.getItem('conecta-theme') || 'light';
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const resolveTheme = preference => preference === 'system' ? (systemTheme.matches ? 'dark' : 'light') : preference;
+    const applyTheme = preference => {
+      const theme = resolveTheme(preference);
       document.documentElement.dataset.theme = theme;
       document.querySelectorAll('img[data-theme-light][data-theme-dark]').forEach(image => {
         image.src = theme === 'dark' ? image.dataset.themeDark : image.dataset.themeLight;
@@ -72,7 +75,7 @@
       themeButton.setAttribute('aria-pressed', String(dark));
       themeButton.innerHTML = dark
         ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path></svg>';
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 0 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path></svg>';
     };
     let themeButton = null;
     if (themeButtonHost) {
@@ -93,7 +96,11 @@
         guardarCoresOriginais();
       });
     }
-    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+    applyTheme(savedTheme);
+    systemTheme.addEventListener('change', () => {
+      if ((localStorage.getItem('conecta-theme') || 'light') === 'system') applyTheme('system');
+    });
+    window.addEventListener('conecta:theme-change', event => applyTheme(event.detail?.preference || localStorage.getItem('conecta-theme') || 'light'));
 
 
     // Central de acessibilidade compartilhada entre os painéis
