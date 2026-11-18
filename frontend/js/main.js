@@ -395,48 +395,137 @@
         // Usuário autenticado não precisa ver opções de entrar ou cadastrar.
         document.querySelectorAll('.site-header a[href*="login.html"], .site-header a[href*="cadastro.html"]').forEach(item => item.remove());
 
-        const link = document.createElement('a');
-        link.className = 'candidate-header-profile-link';
-        link.href = user.tipo === 'empresa' ? '/pages/empresa.html#company-profile-heading' : '/pages/candidato.html#meu-perfil';
-        link.setAttribute('aria-label', 'Abrir meu perfil');
-        link.title = 'Meu perfil';
+        const isCompany = user.tipo === 'empresa';
+        const profileUrl = isCompany
+          ? '/pages/empresa.html#company-profile-heading'
+          : '/pages/candidato.html#meu-perfil';
         let profilePhoto = user.fotoPerfil || '';
-        if (user.tipo === 'empresa') {
-          try {
+        let profileName = isCompany ? (user.nomeEmpresa || user.nome) : user.nome;
+        let profileSummary = isCompany ? 'Perfil da empresa no ConectaTrabalho' : 'Conheça meu perfil profissional';
+        let profileDetail = '';
+
+        try {
+          if (isCompany) {
             const companyData = await api('/api/empresa/perfil');
-            profilePhoto = companyData.perfil?.foto_perfil || profilePhoto;
-          } catch (error) {
-            console.warn('Não foi possível carregar a foto da empresa no menu:', error);
+            const profile = companyData.perfil || {};
+            profilePhoto = profile.foto_perfil || profilePhoto;
+            profileName = profile.nome_empresa || profileName;
+            profileSummary = profile.empresa_descricao_curta || profile.descricao || profile.empresa_setor || 'Conheça a empresa e suas oportunidades.';
+            profileDetail = profile.cidade || '';
+          } else {
+            const candidateData = await api('/api/perfil');
+            const profile = candidateData.perfil || {};
+            profilePhoto = profile.foto_perfil || profilePhoto;
+            profileName = profile.nome || profileName;
+            profileSummary = profile.titulo_profissional || profile.resumo_profissional || 'Complete seu perfil profissional.';
+            profileDetail = profile.cidade || '';
           }
+        } catch (error) {
+          console.warn('Não foi possível carregar o resumo do perfil no menu:', error);
         }
 
+        const initials = String(profileName || 'CT').trim()
+          .split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'account-menu';
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'account-menu-trigger';
+        trigger.setAttribute('aria-label', 'Abrir menu da conta');
+        trigger.setAttribute('aria-haspopup', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
         if (profilePhoto) {
           const photo = document.createElement('img');
           photo.src = profilePhoto;
           photo.alt = '';
           photo.loading = 'eager';
           photo.decoding = 'async';
-          link.appendChild(photo);
+          trigger.appendChild(photo);
         } else {
-          const initials = String(user.tipo === 'empresa' ? (user.nomeEmpresa || user.nome) : user.nome || 'CT')
-            .trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
-          link.textContent = initials;
+          trigger.textContent = initials;
         }
-        publicHeaderActions.prepend(link);
+        const chevron = document.createElement('i');
+        chevron.className = 'fa-solid fa-chevron-down';
+        chevron.setAttribute('aria-hidden', 'true');
+        trigger.appendChild(chevron);
 
-        if (!publicHeaderActions.querySelector('[data-logout]')) {
-          const logout = document.createElement('button');
-          logout.type = 'button';
-          logout.className = 'button button-outline button-small menu-logout';
-          logout.textContent = 'Sair da conta';
-          logout.addEventListener('click', async () => {
-            try {
-              await api('/api/logout', { method: 'POST' });
-              window.location.href = '/';
-            } catch (error) { toast(error.message); }
-          });
-          publicHeaderActions.appendChild(logout);
+        const dropdown = document.createElement('div');
+        dropdown.className = 'account-menu-popover';
+        dropdown.hidden = true;
+        const profileCard = document.createElement('a');
+        profileCard.className = 'account-menu-profile';
+        profileCard.href = profileUrl;
+        if (profilePhoto) {
+          const cardPhoto = document.createElement('img');
+          cardPhoto.src = profilePhoto;
+          cardPhoto.alt = '';
+          cardPhoto.loading = 'lazy';
+          profileCard.appendChild(cardPhoto);
+        } else {
+          const cardInitials = document.createElement('span');
+          cardInitials.className = 'account-menu-avatar-fallback';
+          cardInitials.textContent = initials;
+          profileCard.appendChild(cardInitials);
         }
+        const profileCopy = document.createElement('span');
+        profileCopy.className = 'account-menu-profile-copy';
+        const name = document.createElement('strong');
+        name.textContent = profileName || 'Minha conta';
+        const summary = document.createElement('small');
+        summary.textContent = profileSummary;
+        profileCopy.append(name, summary);
+        profileCard.appendChild(profileCopy);
+        const profileArrow = document.createElement('i');
+        profileArrow.className = 'fa-solid fa-arrow-up-right-from-square';
+        profileArrow.setAttribute('aria-hidden', 'true');
+        profileCard.appendChild(profileArrow);
+
+        const savedLink = document.createElement('a');
+        savedLink.className = 'account-menu-item';
+        savedLink.href = '/pages/publicacoes-salvas.html';
+        savedLink.innerHTML = '<i class="fa-regular fa-bookmark" aria-hidden="true"></i><span>Publicações salvas</span>';
+
+        const settingsLink = document.createElement('a');
+        settingsLink.className = 'account-menu-item';
+        settingsLink.href = '/pages/configuracoes.html';
+        settingsLink.innerHTML = '<i class="fa-solid fa-gear" aria-hidden="true"></i><span>Configurações e privacidade</span>';
+
+        const logout = document.createElement('button');
+        logout.type = 'button';
+        logout.className = 'account-menu-item account-menu-logout';
+        logout.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair da conta</span>';
+        logout.addEventListener('click', async () => {
+          logout.disabled = true;
+          try {
+            await api('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+          } catch (error) {
+            toast(error.message);
+            logout.disabled = false;
+          }
+        });
+
+        dropdown.append(profileCard, savedLink, settingsLink, logout);
+        trigger.addEventListener('click', () => {
+          const opening = dropdown.hidden;
+          dropdown.hidden = !opening;
+          trigger.setAttribute('aria-expanded', String(opening));
+        });
+        document.addEventListener('click', event => {
+          if (!wrapper.contains(event.target)) {
+            dropdown.hidden = true;
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+        document.addEventListener('keydown', event => {
+          if (event.key === 'Escape') {
+            dropdown.hidden = true;
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.focus();
+          }
+        });
+        wrapper.append(trigger, dropdown);
+        publicHeaderActions.prepend(wrapper);
       }).catch(() => {}).finally(() => {
         publicHeaderActions.classList.remove('auth-checking');
       });
