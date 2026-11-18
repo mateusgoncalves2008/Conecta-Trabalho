@@ -47,43 +47,29 @@
         <p id="settings-section-description">Gerencie as informações e preferências da sua conta.</p>
       </div>
 
-      <section class="settings-subpage" id="settings-demographics-page" hidden aria-labelledby="settings-demographics-title">
-        <button class="settings-subpage-back" id="settings-demographics-back" type="button"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar</button>
-        <article class="settings-card settings-demographics-card">
-          <div class="settings-demographics-intro">
-            <h3 id="settings-demographics-title">Informações demográficas</h3>
-            <p>Essas informações não são exibidas no seu perfil público.</p>
-            <p>Os campos abaixo são apenas demonstrativos. As respostas não são enviadas nem armazenadas pelo ConectaTrabalho.</p>
-            <button class="settings-demographics-remove" type="button" disabled>Remover</button>
-            <small>Não há dados demográficos cadastrados para remover.</small>
+      <section class="settings-subpage" id="settings-dark-mode-page" hidden aria-labelledby="settings-dark-mode-title">
+        <button class="settings-subpage-back" id="settings-dark-mode-back" type="button"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar</button>
+        <article class="settings-card settings-theme-card">
+          <div class="settings-theme-intro">
+            <h3 id="settings-dark-mode-title">Modo escuro</h3>
+            <p>Selecione como o ConectaTrabalho será exibido neste dispositivo.</p>
+            <p>Se você selecionar as configurações do dispositivo, a plataforma usará o tema que já estiver definido nele.</p>
           </div>
-          <div class="settings-demographics-fields">
-            <div class="settings-demographics-field">
-              <label for="demographics-gender">Gênero</label>
-              <span id="demographics-gender-help">Selecione o seu gênero</span>
-              <select id="demographics-gender" aria-describedby="demographics-gender-help">
-                <option value="" selected>Selecionar</option>
-                <option value="feminino">Feminino</option>
-                <option value="masculino">Masculino</option>
-                <option value="outra-identidade">Outra identidade de gênero</option>
-                <option value="prefiro-nao-dizer">Prefiro não dizer</option>
-              </select>
-            </div>
-            <div class="settings-demographics-field">
-              <label for="demographics-disability">Deficiência</label>
-              <span id="demographics-disability-help">Você é uma pessoa com alguma deficiência que restringe de modo substancial uma atividade importante da vida cotidiana ou tem histórico de alguma deficiência?</span>
-              <select id="demographics-disability" aria-describedby="demographics-disability-help">
-                <option value="" selected>Selecionar</option>
-                <option value="sim">Sim, sou ou fui uma pessoa com alguma deficiência</option>
-                <option value="nao">Não sou uma pessoa com alguma deficiência</option>
-                <option value="prefiro-nao-dizer">Prefiro não dizer</option>
-              </select>
-            </div>
-          </div>
-          <div class="settings-demographics-notice">
-            <strong>Sobre seus dados</strong>
-            <p>O ConectaTrabalho utiliza apenas as informações necessárias para oferecer os recursos da plataforma. Nenhum dado sobre gênero ou deficiência é solicitado nesta seção.</p>
-          </div>
+          <fieldset class="settings-theme-options">
+            <legend class="sr-only">Escolha a aparência</legend>
+            <label class="settings-theme-option" for="settings-theme-light">
+              <span><strong>Claro</strong><small>Usar a aparência clara.</small></span>
+              <input type="radio" id="settings-theme-light" name="settings-theme" value="light">
+            </label>
+            <label class="settings-theme-option" for="settings-theme-dark">
+              <span><strong>Escuro</strong><small>Usar a aparência escura.</small></span>
+              <input type="radio" id="settings-theme-dark" name="settings-theme" value="dark">
+            </label>
+            <label class="settings-theme-option" for="settings-theme-system">
+              <span><strong>Configurações do dispositivo</strong><small>Usar a preferência de aparência do seu dispositivo.</small></span>
+              <input type="radio" id="settings-theme-system" name="settings-theme" value="system">
+            </label>
+          </fieldset>
         </article>
       </section>
 
@@ -95,8 +81,8 @@
 
         <article class="settings-card">
           <div class="settings-card-heading"><h3>Exibição</h3><p>Personalize a aparência do ConectaTrabalho.</p></div>
-          <button class="settings-row settings-row-action" id="settings-dark-mode" type="button" role="switch" aria-checked="false">
-            <span>Modo escuro</span><span class="settings-switch" aria-hidden="true"><span></span></span>
+          <button class="settings-row settings-row-action" id="settings-dark-mode" type="button">
+            <span>Modo escuro</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
         </article>
 
