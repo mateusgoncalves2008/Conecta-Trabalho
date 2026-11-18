@@ -63,3 +63,22 @@ html[data-theme="dark"] .settings-row-action:hover{background:#243348}
 html[data-theme="dark"] .settings-row-disabled{color:#aab7c7}
 html[data-theme="dark"] .settings-row-disabled small{color:#aab7c7}
 @media(prefers-reduced-motion:reduce){.settings-switch,.settings-switch>span{transition:none}}
+
+
+/* Subpágina de informações demográficas dentro das configurações */
+.settings-subpage[hidden]{display:none}
+.settings-subpage-back{display:inline-flex;align-items:center;gap:9px;margin:0 0 18px;padding:8px 0;border:0;background:transparent;color:var(--muted,#667487);font:inherit;font-size:13px;cursor:pointer}
+.settings-subpage-back:hover{color:var(--orange,#c95730)}
+.settings-demographics-card{padding:0}
+.settings-demographics-intro{padding:25px 26px 28px}
+.settings-demographics-intro h3{margin:0 0 22px;color:var(--ink,#192b3e);font-size:18px}
+.settings-demographics-intro p{margin:0 0 10px;color:var(--muted,#667487);font-size:14px;line-height:1.65}
+.settings-demographics-remove{margin:5px 0 8px;padding:8px 18px;border:1px solid var(--line,#d9e1e9);border-radius:20px;background:transparent;color:var(--muted,#667487);font:inherit;font-size:13px}
+.settings-demographics-remove:disabled{opacity:.65;cursor:not-allowed}
+.settings-demographics-intro small{display:block;color:var(--muted,#667487);font-size:11px}
+.settings-demographics-notice{margin:0 26px 26px;padding:17px;border-radius:9px;background:var(--surface-soft,#f5f7fa)}
+.settings-demographics-notice strong{display:block;margin-bottom:6px;color:var(--ink,#192b3e);font-size:13px}
+.settings-demographics-notice p{margin:0;color:var(--muted,#667487);font-size:12px;line-height:1.65}
+html[data-theme="dark"] .settings-demographics-intro h3,html[data-theme="dark"] .settings-demographics-notice strong{color:#e7edf5}
+html[data-theme="dark"] .settings-demographics-notice{background:#243348}
+@media(max-width:650px){.settings-demographics-intro{padding:21px 18px 23px}.settings-demographics-notice{margin:0 18px 18px}}
