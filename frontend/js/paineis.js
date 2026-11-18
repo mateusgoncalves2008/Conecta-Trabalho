@@ -86,6 +86,36 @@
     }
   }
 
+  async function loadFollowedCompanies() {
+    const container = document.getElementById('candidate-followed-companies');
+    if (!container) return;
+    try {
+      const data = await Conecta.api('/api/empresas-seguidas');
+      const companies = data.empresas || [];
+      if (!companies.length) {
+        container.innerHTML = '<div class="dashboard-empty">Você ainda não segue nenhuma empresa. Visite os perfis empresariais e selecione Seguir para acompanhá-los.</div>';
+        return;
+      }
+      container.innerHTML = companies.map(company => {
+        const name = company.nome_empresa || company.nome_fantasia || 'Empresa';
+        const logo = company.foto_perfil
+          ? '<img class="followed-company-logo" src="' + escapeHTML(company.foto_perfil) + '" alt="" loading="lazy">'
+          : '<span class="followed-company-logo followed-company-initials" aria-hidden="true">' + escapeHTML(name.trim().slice(0, 2).toUpperCase()) + '</span>';
+        const description = company.empresa_descricao_curta || company.empresa_setor || company.cidade || 'Perfil empresarial';
+        return '<article class="dashboard-item followed-company-item"><div class="followed-company-identity">' + logo + '<div><h3>' + escapeHTML(name) + '</h3><p>' + escapeHTML(description) + '</p><small>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + ' seguidores · ' + Number(company.vagas_abertas || 0).toLocaleString('pt-BR') + ' vagas abertas</small></div></div><div class="dashboard-item-actions"><a class="button button-outline button-small" href="empresa-perfil.html?id=' + encodeURIComponent(company.id) + '">Ver perfil</a><button type="button" class="button button-outline button-small" data-unfollow-company="' + escapeHTML(company.id) + '">Deixar de seguir</button></div></article>';
+      }).join('');
+      container.querySelectorAll('[data-unfollow-company]').forEach(button => button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await Conecta.api('/api/empresas/' + encodeURIComponent(button.dataset.unfollowCompany) + '/seguir', { method: 'DELETE' });
+          await loadFollowedCompanies();
+        } catch (error) { Conecta.toast(error.message); button.disabled = false; }
+      }));
+    } catch (error) {
+      container.innerHTML = '<div class="dashboard-empty">' + escapeHTML(error.message) + '</div>';
+    }
+  }
+
   async function loadCandidate() {
     const container = document.getElementById('candidate-applications');
     const [data, profileData] = await Promise.all([
@@ -101,6 +131,7 @@
     renderCandidateProfile(profileData.perfil || {});
     await migrateLegacySavedJobs();
     await loadSavedJobs();
+    await loadFollowedCompanies();
     const photoVisibility = profileData.perfil?.visibilidade_foto || 'todos';
     const visibilityLabel = document.getElementById('candidate-photo-visibility-label');
     const visibilityNames = { conexoes: 'Conexões', rede: 'Sua rede', usuarios: 'Todos os usuários', todos: 'Todos' };
