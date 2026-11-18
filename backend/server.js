@@ -203,6 +203,15 @@ const profileSchemaReady = pool.query(`
   );
   CREATE INDEX IF NOT EXISTS idx_vagas_salvas_candidato_data
     ON vagas_salvas (candidato_id, salva_em DESC);
+  CREATE TABLE IF NOT EXISTS empresas_seguidoras (
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    data_seguimento TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (usuario_id, empresa_id),
+    CHECK (usuario_id <> empresa_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_empresa_data ON empresas_seguidoras (empresa_id, data_seguimento DESC);
+  CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_usuario_data ON empresas_seguidoras (usuario_id, data_seguimento DESC);
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
@@ -903,9 +912,11 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
     `SELECT u.id,u.nome_empresa,u.nome_fantasia,u.cidade,u.descricao,u.empresa_site,u.empresa_setor,
       u.empresa_porte,u.empresa_descricao_curta,u.foto_perfil,u.banner_perfil,u.criado_em,
       (SELECT COUNT(*)::int FROM vagas v WHERE v.empresa_id=u.id AND v.status='aberta') AS vagas_abertas,
-      (SELECT COUNT(*)::int FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id WHERE v.empresa_id=u.id) AS total_candidaturas
+      (SELECT COUNT(*)::int FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id WHERE v.empresa_id=u.id) AS total_candidaturas,
+      (SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,
+      EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$2) AS seguindo
      FROM usuarios u WHERE u.id=$1 AND u.tipo='empresa'`,
-    [companyId]
+    [companyId, req.session.user?.tipo === 'candidato' ? req.session.user.id : null]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
   const profile = result.rows[0];
