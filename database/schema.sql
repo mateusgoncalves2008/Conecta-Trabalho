@@ -71,6 +71,7 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS curriculo_url VARCHAR(500);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_site VARCHAR(300);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_setor VARCHAR(100);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_descricao_curta VARCHAR(240);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_cnpj_unico
   ON usuarios (cnpj) WHERE cnpj IS NOT NULL;
