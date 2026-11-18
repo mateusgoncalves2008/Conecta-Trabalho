@@ -158,6 +158,11 @@
     document.getElementById('candidate-active').textContent = active;
     document.getElementById('candidate-interviews').textContent = interviews;
     renderCandidateProfile(profileData.perfil || {});
+    const publicProfileToggle = document.getElementById('candidate-public-profile-toggle');
+    if (publicProfileToggle) {
+      publicProfileToggle.checked = Boolean(profileData.perfil?.perfil_publico);
+      updatePublicProfileStatus(publicProfileToggle.checked);
+    }
     await migrateLegacySavedJobs();
     await loadSavedJobs();
     await loadFollowedCompanies();
@@ -268,6 +273,37 @@
       if (profile.foto_perfil) { preview.src = profile.foto_perfil; preview.hidden = false; placeholder.hidden = true; }
       else { preview.removeAttribute('src'); preview.hidden = true; placeholder.hidden = false; }
     }
+  }
+
+  function updatePublicProfileStatus(isPublic) {
+    const status = document.getElementById('candidate-public-profile-status');
+    if (status) status.textContent = isPublic
+      ? 'Seu perfil pode aparecer nas pesquisas de pessoas e empresas.'
+      : 'Seu perfil não aparece nas pesquisas.';
+  }
+
+  function setupCandidatePrivacySettings() {
+    const toggle = document.getElementById('candidate-public-profile-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('change', async () => {
+      const requestedValue = toggle.checked;
+      toggle.disabled = true;
+      try {
+        const result = await Conecta.api('/api/perfil/visibilidade-publica', {
+          method: 'PUT',
+          body: JSON.stringify({ publico: requestedValue })
+        });
+        toggle.checked = Boolean(result.perfil_publico);
+        updatePublicProfileStatus(toggle.checked);
+        Conecta.toast(toggle.checked ? 'Seu perfil agora está público nas pesquisas.' : 'Seu perfil não aparece mais nas pesquisas.');
+      } catch (error) {
+        toggle.checked = !requestedValue;
+        updatePublicProfileStatus(toggle.checked);
+        Conecta.toast(error.message || 'Não foi possível salvar a configuração.');
+      } finally {
+        toggle.disabled = false;
+      }
+    });
   }
 
   function setupCandidateProfileEditor() {
@@ -1302,6 +1338,7 @@
       applyFontSize(['normal', 'large', 'larger'].includes(savedFontSize) ? savedFontSize : 'normal');
       fontButtons.forEach(button => button.addEventListener('click', () => applyFontSize(button.dataset.fontSize)));
     }
+    setupCandidatePrivacySettings();
     setupCandidateProfileEditor();
     setupCompanyProfileEditor();
     initPanel();
