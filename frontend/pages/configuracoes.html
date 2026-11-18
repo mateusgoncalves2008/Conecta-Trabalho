@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/img/logo-conectatrabalho.svg" type="image/svg+xml">
+  <title>Configurações e privacidade | ConectaTrabalho</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/paineis.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="../js/main.js" defer></script>
+  <script src="../js/configuracoes.js" defer></script>
+</head>
+<body class="dashboard-page">
+  <header class="dashboard-header site-header">
+    <a class="brand" href="../"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+      <a href="../">Início</a><a href="vagas.html">Vagas</a><a href="como-funciona.html">Como funciona</a><a href="sobre.html">Sobre</a>
+    </nav>
+    <div class="header-actions"></div>
+  </header>
+  <main class="dashboard-main account-settings-main">
+    <a class="text-link" id="settings-back-link" href="candidato.html">← Voltar ao painel</a>
+    <section class="dashboard-section">
+      <div class="section-heading"><div><span class="eyebrow">SUA CONTA</span><h1>Configurações e privacidade</h1><p>Gerencie como seu perfil aparece no ConectaTrabalho.</p></div></div>
+      <section class="dashboard-section candidate-profile-card account-settings-card" id="candidate-privacy-settings" hidden>
+        <div class="section-heading"><div><h2>Visibilidade do perfil</h2><p>Escolha se seu perfil profissional pode ser encontrado nas pesquisas.</p></div></div>
+        <label class="candidate-public-setting" for="candidate-public-profile-toggle">
+          <span><strong>Perfil público nas pesquisas</strong><small>Permitir que pessoas e empresas encontrem seu perfil na busca de pessoas.</small></span>
+          <input type="checkbox" id="candidate-public-profile-toggle" aria-describedby="candidate-public-profile-status">
+        </label>
+        <p class="candidate-public-status" id="candidate-public-profile-status" role="status">Carregando sua preferência...</p>
+      </section>
+      <section class="dashboard-section candidate-profile-card account-settings-card" id="company-settings-placeholder" hidden>
+        <h2>Configurações da empresa</h2>
+        <p>As preferências específicas da conta empresarial serão organizadas nesta área. Os dados e a visibilidade do perfil público da empresa continuam sendo gerenciados no painel da empresa.</p>
+        <a class="button button-outline" href="empresa.html#company-profile-heading">Gerenciar perfil da empresa</a>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <button class="back-to-top" type="button" id="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg></button>
+</body>
+</html>
