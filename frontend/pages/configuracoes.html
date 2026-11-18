@@ -47,11 +47,28 @@
         <p id="settings-section-description">Gerencie as informações e preferências da sua conta.</p>
       </div>
 
+      <section class="settings-subpage" id="settings-demographics-page" hidden aria-labelledby="settings-demographics-title">
+        <button class="settings-subpage-back" id="settings-demographics-back" type="button"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar</button>
+        <article class="settings-card settings-demographics-card">
+          <div class="settings-demographics-intro">
+            <h3 id="settings-demographics-title">Informações demográficas</h3>
+            <p>Essas informações não são exibidas no seu perfil público.</p>
+            <p>O ConectaTrabalho não solicita nem armazena informações demográficas nesta área.</p>
+            <button class="settings-demographics-remove" type="button" disabled>Remover</button>
+            <small>Não há dados demográficos cadastrados para remover.</small>
+          </div>
+          <div class="settings-demographics-notice">
+            <strong>Sobre seus dados</strong>
+            <p>O ConectaTrabalho utiliza apenas as informações necessárias para oferecer os recursos da plataforma. Nenhum dado sobre gênero ou deficiência é solicitado nesta seção.</p>
+          </div>
+        </article>
+      </section>
+
       <section class="settings-panel" data-settings-panel="account">
         <article class="settings-card">
           <div class="settings-card-heading"><h3>Informações do perfil</h3><p>Gerencie as informações apresentadas no seu perfil profissional ou empresarial.</p></div>
           <a class="settings-row" id="settings-profile-link" href="candidato.html#meu-perfil"><span>Nome, localidade e setor</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-          <div class="settings-row settings-row-disabled" aria-disabled="true"><span>Dados demográficos pessoais</span><small>Indisponível</small></div>
+          <button class="settings-row settings-row-action settings-subpage-trigger" type="button" data-settings-subpage="demographics"><span>Dados demográficos pessoais</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
           <div class="settings-row settings-row-disabled" aria-disabled="true"><span>Verificações</span><small>Indisponível</small></div>
         </article>
 
