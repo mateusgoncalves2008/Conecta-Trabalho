@@ -527,6 +527,7 @@ body.page-entry .job-card:nth-child(3) { animation-delay: 380ms; }
 
 /* Alternância global entre tema claro e escuro */
 .theme-toggle{
+  color:#142b49;
   width:36px;
   height:36px;
   flex:0 0 36px;
