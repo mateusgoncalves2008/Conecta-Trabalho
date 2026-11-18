@@ -634,8 +634,8 @@ app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
   const value = profile[field];
   if (!value) return res.status(404).end();
   res.set('Cache-Control', profile.tipo === 'empresa'
-    ? 'private, max-age=31536000, immutable'
-    : 'private, max-age=300');
+    ? 'private, max-age=3600, stale-while-revalidate=86400'
+    : 'private, max-age=300, stale-while-revalidate=1800');
   if (typeof value === 'string' && value.startsWith('data:image/jpeg;base64,')) {
     return res.type('image/jpeg').send(Buffer.from(value.slice(value.indexOf(',') + 1), 'base64'));
   }
