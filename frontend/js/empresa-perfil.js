@@ -210,7 +210,8 @@
             ${logo}
             <div class="company-public-heading">
               <h1 id="company-public-name">${esc(name)}</h1>
-              <p>${esc(company.empresa_setor || 'Empresa')}${company.cidade ? ' · ' + esc(company.cidade) : ''}${jobs.length ? ' · ' + jobs.length + (jobs.length === 1 ? ' vaga aberta' : ' vagas abertas') : ''}</p>
+              <p class="company-public-tagline">${esc(company.empresa_descricao_curta || company.empresa_setor || 'Empresa')}</p>
+              <p class="company-public-meta">${company.cidade ? esc(company.cidade) : 'Localização não informada'}${jobs.length ? ' · ' + jobs.length + (jobs.length === 1 ? ' vaga aberta' : ' vagas abertas') : ''}</p>
             </div>
             <div class="company-public-actions">
               <button class="company-public-primary-action" type="button" data-open-section="vagas">Ver vagas</button>
