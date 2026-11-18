@@ -548,7 +548,7 @@
     // Registro do PWA: permite instalar o site e disponibiliza o modo offline básico.
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/', updateViaCache: 'none' }).then(registration => registration.update())
           .catch(error => console.warn('Não foi possível registrar o PWA:', error));
       });
     }
