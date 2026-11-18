@@ -185,8 +185,13 @@
     }
 
     try {
-      const data = await Conecta.api('/api/empresas/' + encodeURIComponent(id));
+      const [data, sessionData] = await Promise.all([
+        Conecta.api('/api/empresas/' + encodeURIComponent(id)),
+        Conecta.api('/api/me').catch(() => ({ usuario: null }))
+      ]);
       const company = data.empresa;
+      const currentUser = sessionData.usuario || null;
+      const canFollow = !currentUser || currentUser.tipo === 'candidato';
       const jobs = Array.isArray(data.vagas) ? data.vagas : [];
       const name = company.nome_empresa || company.nome_fantasia || 'Empresa';
       const logo = company.foto_perfil
@@ -231,6 +236,24 @@
           ${renderSection('inicio', company, jobs, info, website)}
         </div>`;
 
+      const actions = root.querySelector('.company-public-actions');
+      if (actions && canFollow) {
+        const followButton = document.createElement('button');
+        followButton.type = 'button';
+        followButton.className = 'company-public-follow-action' + (company.seguindo ? ' is-following' : '');
+        followButton.dataset.followCompany = '';
+        followButton.setAttribute('aria-pressed', String(Boolean(company.seguindo)));
+        followButton.textContent = company.seguindo ? 'Seguindo' : 'Seguir';
+        actions.prepend(followButton);
+      }
+      if (actions) {
+        const followers = document.createElement('p');
+        followers.className = 'company-public-followers';
+        followers.setAttribute('aria-live', 'polite');
+        followers.innerHTML = '<strong data-followers-count>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + '</strong> seguidores';
+        actions.insertAdjacentElement('afterend', followers);
+      }
+
       const lightbox = document.createElement('div');
       lightbox.className = 'company-photo-lightbox';
       lightbox.setAttribute('aria-hidden', 'true');
@@ -270,6 +293,27 @@
           else tab.removeAttribute('aria-current');
         });
         tabContent.innerHTML = renderSection(section, company, jobs, info, website);
+      }
+
+      const followButton = root.querySelector('[data-follow-company]');
+      if (followButton) {
+        followButton.addEventListener('click', async () => {
+          if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+          if (currentUser.tipo !== 'candidato' || followButton.disabled) return;
+          followButton.disabled = true;
+          try {
+            const following = followButton.getAttribute('aria-pressed') === 'true';
+            const result = await Conecta.api('/api/empresas/' + encodeURIComponent(id) + '/seguir', { method: following ? 'DELETE' : 'POST' });
+            company.seguindo = result.seguindo;
+            company.total_seguidores = result.total_seguidores;
+            followButton.textContent = result.seguindo ? 'Seguindo' : 'Seguir';
+            followButton.classList.toggle('is-following', result.seguindo);
+            followButton.setAttribute('aria-pressed', String(result.seguindo));
+            const count = root.querySelector('[data-followers-count]');
+            if (count) count.textContent = Number(result.total_seguidores).toLocaleString('pt-BR');
+          } catch (error) { Conecta.toast(error.message); }
+          finally { followButton.disabled = false; }
+        });
       }
 
       root.querySelector('.company-public-nav').addEventListener('click', event => {
