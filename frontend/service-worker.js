@@ -1,4 +1,4 @@
-const CACHE_NAME = 'conectatrabalho-pwa-v23';
+const CACHE_NAME = 'conectatrabalho-pwa-v24';
 const APP_SHELL = [
   '/',
   '/pages/aplicativo.html',
@@ -58,7 +58,15 @@ self.addEventListener('fetch', event => {
 
   if (APP_SHELL.includes(url.pathname)) {
     event.respondWith(
-      caches.match(request).then(cached => cached || fetch(request))
+      fetch(request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+        }
+        return response;
+      }).catch(async () => {
+        return await caches.match(request) || Response.error();
+      })
     );
   }
 });
