@@ -863,7 +863,7 @@
     companyProfileEditModeSetter = setEditMode;
     editButton.addEventListener('click', () => setEditMode(true));
     [cancelButton, closeButton].forEach(button => button.addEventListener('click', () => {
-      ['nome_empresa','cidade','telefone','empresa_setor','empresa_porte','empresa_site','descricao'].forEach(key => {
+      ['nome_empresa','cidade','telefone','empresa_setor','empresa_descricao_curta','empresa_porte','empresa_site','descricao'].forEach(key => {
         if (form.elements[key]) form.elements[key].value = companyProfileCache[key] || '';
       });
       setEditMode(false);
