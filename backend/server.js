@@ -194,6 +194,7 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_site VARCHAR(300);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_setor VARCHAR(100);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_descricao_curta VARCHAR(240);
   CREATE TABLE IF NOT EXISTS vagas_salvas (
     candidato_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
@@ -796,7 +797,7 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
 app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const result = await pool.query(
-    `SELECT id,nome_empresa,nome_fantasia,razao_social,telefone,cidade,descricao,empresa_site,empresa_setor,empresa_porte,
+    `SELECT id,nome_empresa,nome_fantasia,razao_social,telefone,cidade,descricao,empresa_site,empresa_setor,empresa_porte,empresa_descricao_curta,
       foto_perfil,banner_perfil FROM usuarios WHERE id=$1 AND tipo='empresa'`,
     [req.session.user.id]
   );
@@ -816,7 +817,8 @@ app.put('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
     descricao: clean(req.body.descricao, 4000),
     empresa_site: clean(req.body.empresa_site, 300),
     empresa_setor: clean(req.body.empresa_setor, 100),
-    empresa_porte: clean(req.body.empresa_porte, 50)
+    empresa_porte: clean(req.body.empresa_porte, 50),
+    empresa_descricao_curta: clean(req.body.empresa_descricao_curta, 240)
   };
   if (fields.nome_empresa.length < 2) return res.status(400).json({ erro: 'Informe o nome da empresa.' });
   if (fields.cidade.length < 2) return res.status(400).json({ erro: 'Informe a cidade da empresa.' });
@@ -825,11 +827,11 @@ app.put('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   }
   const result = await pool.query(
     `UPDATE usuarios SET nome_empresa=$1,cidade=$2,telefone=$3,descricao=$4,
-      empresa_site=$5,empresa_setor=$6,empresa_porte=$7
-     WHERE id=$8 AND tipo='empresa'
-     RETURNING nome_empresa,cidade,telefone,descricao,empresa_site,empresa_setor,empresa_porte`,
+      empresa_site=$5,empresa_setor=$6,empresa_porte=$7,empresa_descricao_curta=$8
+     WHERE id=$9 AND tipo='empresa'
+     RETURNING nome_empresa,cidade,telefone,descricao,empresa_site,empresa_setor,empresa_porte,empresa_descricao_curta`,
     [fields.nome_empresa,fields.cidade,fields.telefone || null,fields.descricao || null,
-      fields.empresa_site || null,fields.empresa_setor || null,fields.empresa_porte || null,req.session.user.id]
+      fields.empresa_site || null,fields.empresa_setor || null,fields.empresa_porte || null,fields.empresa_descricao_curta || null,req.session.user.id]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
   req.session.user.nomeEmpresa = fields.nome_empresa;
@@ -899,7 +901,7 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
   const result = await pool.query(
     `SELECT u.id,u.nome_empresa,u.nome_fantasia,u.cidade,u.descricao,u.empresa_site,u.empresa_setor,
-      u.empresa_porte,u.foto_perfil,u.banner_perfil,u.criado_em,
+      u.empresa_porte,u.empresa_descricao_curta,u.foto_perfil,u.banner_perfil,u.criado_em,
       (SELECT COUNT(*)::int FROM vagas v WHERE v.empresa_id=u.id AND v.status='aberta') AS vagas_abertas,
       (SELECT COUNT(*)::int FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id WHERE v.empresa_id=u.id) AS total_candidaturas
      FROM usuarios u WHERE u.id=$1 AND u.tipo='empresa'`,
