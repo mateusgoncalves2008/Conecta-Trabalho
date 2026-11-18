@@ -904,3 +904,16 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .company-notification-item.is-read{opacity:.82}
 .company-notification-item small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
 @media(max-width:650px){.company-notification-item{align-items:flex-start}.company-notification-item .dashboard-item-actions{width:100%;flex-wrap:wrap}}
+
+/* Configuração de privacidade do perfil do candidato */
+.candidate-public-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;cursor:pointer}
+.candidate-public-setting>span{display:grid;gap:5px;min-width:0}
+.candidate-public-setting strong{font-size:14px;color:var(--ink)}
+.candidate-public-setting small{font-size:12px;line-height:1.5;color:var(--muted)}
+.candidate-public-setting input{appearance:none;position:relative;flex:0 0 46px;width:46px;height:26px;margin:0;border:1px solid var(--line);border-radius:20px;background:var(--surface-soft);cursor:pointer;transition:background .18s,border-color .18s}
+.candidate-public-setting input::before{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;transition:transform .18s}
+.candidate-public-setting input:checked{background:var(--orange);border-color:var(--orange)}
+.candidate-public-setting input:checked::before{transform:translateX(20px)}
+.candidate-public-setting input:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 35%,transparent);outline-offset:3px}
+.candidate-public-setting input:disabled{opacity:.6;cursor:wait}
+.candidate-public-status{margin:0;padding-top:10px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--muted)}
