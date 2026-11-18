@@ -43,6 +43,46 @@
     };
 
     const darkModeButton = document.getElementById('settings-dark-mode');
+    const darkModePage = document.getElementById('settings-dark-mode-page');
+    const themeOptions = document.querySelectorAll('input[name="settings-theme"]');
+    const settingsHeading = document.querySelector('.settings-content-heading');
+    const getThemePreference = () => localStorage.getItem('conecta-theme') || 'light';
+    const syncThemeOptions = () => {
+      const preference = getThemePreference();
+      themeOptions.forEach(option => { option.checked = option.value === preference; });
+    };
+    const showMainSettings = () => {
+      settingsHeading.hidden = false;
+      document.querySelectorAll('[data-settings-panel]').forEach(panel => { panel.hidden = panel.dataset.settingsPanel !== 'account'; });
+      darkModePage.hidden = true;
+      activateTab('account');
+    };
+
+    darkModeButton.addEventListener('click', () => {
+      settingsHeading.hidden = true;
+      document.querySelectorAll('[data-settings-panel]').forEach(panel => { panel.hidden = true; });
+      darkModePage.hidden = false;
+      syncThemeOptions();
+      document.getElementById('settings-dark-mode-back').focus();
+    });
+    document.getElementById('settings-dark-mode-back').addEventListener('click', showMainSettings);
+
+    nav.addEventListener('click', event => {
+      const button = event.target.closest('[data-settings-tab]');
+      if (button) {
+        darkModePage.hidden = true;
+        settingsHeading.hidden = false;
+        activateTab(button.dataset.settingsTab);
+      }
+    });
+
+    themeOptions.forEach(option => option.addEventListener('change', () => {
+      if (!option.checked) return;
+      localStorage.setItem('conecta-theme', option.value);
+      window.dispatchEvent(new CustomEvent('conecta:theme-change', { detail: { preference: option.value } }));
+      Conecta.toast('Preferência de aparência atualizada.');
+    }));
+
 
     try {
       const session = await Conecta.api('/api/me');
