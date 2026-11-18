@@ -59,6 +59,17 @@ CREATE TABLE IF NOT EXISTS empresas_seguidoras (
 );
 CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_empresa_data ON empresas_seguidoras (empresa_id, data_seguimento DESC);
 CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_usuario_data ON empresas_seguidoras (usuario_id, data_seguimento DESC);
+CREATE TABLE IF NOT EXISTS notificacoes_empresas (
+  id BIGSERIAL PRIMARY KEY,
+  usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
+  tipo VARCHAR(30) NOT NULL DEFAULT 'nova_vaga',
+  lida_em TIMESTAMPTZ,
+  criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (usuario_id, vaga_id, tipo)
+);
+CREATE INDEX IF NOT EXISTS idx_notificacoes_empresas_usuario_data ON notificacoes_empresas (usuario_id, criada_em DESC);
 
 
 -- Dados adicionais para contas empresariais.
