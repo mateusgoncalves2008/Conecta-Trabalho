@@ -607,7 +607,7 @@ app.get('/api/imagens/empresa/:empresaId/:fotoId', asyncRoute(async (req, res) =
   const value = result.rows[0].imagem;
   if (typeof value !== 'string' || !value.startsWith('s3:') || !s3) return res.status(404).end();
   const object = await s3.send(new GetObjectCommand({ Bucket: storageBucket, Key: value.slice(3) }));
-  res.type('image/jpeg').set('Cache-Control', 'private, max-age=300');
+  res.type('image/jpeg').set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
   if (object.Body && typeof object.Body.pipe === 'function') return object.Body.pipe(res);
   if (object.Body && typeof object.Body.transformToByteArray === 'function') return res.send(Buffer.from(await object.Body.transformToByteArray()));
   return res.status(502).end();
@@ -800,6 +800,7 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
   for (const vaga of result.rows) {
     vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
   }
+  res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
   res.json({ vagas: result.rows });
 }));
 
@@ -820,6 +821,7 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
   const vaga = result.rows[0];
   vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
   vaga.empresa_banner = imageReference(vaga.empresa_id, 'banner_perfil', vaga.empresa_banner);
+  res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
   res.json({ vaga });
 }));
 
