@@ -898,3 +898,9 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .followed-company-identity p{margin:0 0 4px;color:var(--muted);font-size:13px;line-height:1.45}
 .followed-company-identity small{color:var(--muted);font-size:11px}
 @media(max-width:650px){.followed-company-item{align-items:flex-start;gap:14px}.followed-company-item .dashboard-item-actions{width:100%;flex-wrap:wrap}.followed-company-logo{width:46px;height:46px;flex-basis:46px}}
+
+/* Notificações de vagas publicadas por empresas acompanhadas */
+.company-notification-item.is-unread{border-left:3px solid var(--orange);padding-left:16px}
+.company-notification-item.is-read{opacity:.82}
+.company-notification-item small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+@media(max-width:650px){.company-notification-item{align-items:flex-start}.company-notification-item .dashboard-item-actions{width:100%;flex-wrap:wrap}}
