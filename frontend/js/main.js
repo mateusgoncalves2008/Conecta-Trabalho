@@ -444,9 +444,10 @@
         } else {
           trigger.textContent = initials;
         }
-        const chevron = document.createElement('i');
-        chevron.className = 'fa-solid fa-chevron-down';
+        const chevron = document.createElement('span');
+        chevron.className = 'account-menu-chevron';
         chevron.setAttribute('aria-hidden', 'true');
+        chevron.innerHTML = '<svg viewBox="0 0 16 16" focusable="false"><path d="m3.5 6 4.5 4 4.5-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         trigger.appendChild(chevron);
 
         const dropdown = document.createElement('div');
@@ -475,25 +476,26 @@
         summary.textContent = profileSummary;
         profileCopy.append(name, summary);
         profileCard.appendChild(profileCopy);
-        const profileArrow = document.createElement('i');
-        profileArrow.className = 'fa-solid fa-arrow-up-right-from-square';
+        const profileArrow = document.createElement('span');
+        profileArrow.className = 'account-menu-profile-arrow';
         profileArrow.setAttribute('aria-hidden', 'true');
+        profileArrow.innerHTML = '<svg viewBox="0 0 16 16" focusable="false"><path d="M5 3h8v8M13 3 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         profileCard.appendChild(profileArrow);
 
         const savedLink = document.createElement('a');
         savedLink.className = 'account-menu-item';
         savedLink.href = '/pages/publicacoes-salvas.html';
-        savedLink.innerHTML = '<i class="fa-regular fa-bookmark" aria-hidden="true"></i><span>Publicações salvas</span>';
+        savedLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.7L6 21V4.75Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span>Publicações salvas</span>';
 
         const settingsLink = document.createElement('a');
         settingsLink.className = 'account-menu-item';
         settingsLink.href = '/pages/configuracoes.html';
-        settingsLink.innerHTML = '<i class="fa-solid fa-gear" aria-hidden="true"></i><span>Configurações e privacidade</span>';
+        settingsLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Configurações e privacidade</span>';
 
         const logout = document.createElement('button');
         logout.type = 'button';
         logout.className = 'account-menu-item account-menu-logout';
-        logout.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair da conta</span>';
+        logout.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5.75A1.75 1.75 0 0 0 4 5.75v12.5A1.75 1.75 0 0 0 5.75 20H10M14 8l4 4-4 4m4-4H9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair da conta</span>';
         logout.addEventListener('click', async () => {
           logout.disabled = true;
           try {
