@@ -425,7 +425,7 @@
         }
 
         const initials = String(profileName || 'CT').trim()
-          .split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          .split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
         const wrapper = document.createElement('div');
         wrapper.className = 'account-menu';
         const trigger = document.createElement('button');
