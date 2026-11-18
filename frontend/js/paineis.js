@@ -116,6 +116,35 @@
     }
   }
 
+  async function loadCompanyNotifications() {
+    const container = document.getElementById('candidate-company-notifications');
+    if (!container) return;
+    try {
+      const data = await Conecta.api('/api/notificacoes-empresas');
+      const notifications = data.notificacoes || [];
+      if (!notifications.length) {
+        container.innerHTML = '<div class="dashboard-empty">Ainda não há novas vagas das empresas que você segue.</div>';
+        return;
+      }
+      container.innerHTML = notifications.map(item => {
+        const companyName = item.nome_empresa || item.nome_fantasia || 'Empresa';
+        const readAction = item.lida_em
+          ? '<span class="status-label">Lida</span>'
+          : '<button type="button" class="button button-outline button-small" data-read-company-notification="' + escapeHTML(item.id) + '">Marcar como lida</button>';
+        return '<article class="dashboard-item company-notification-item ' + (item.lida_em ? 'is-read' : 'is-unread') + '"><div><h3>' + escapeHTML(item.vaga_titulo) + '</h3><p>' + escapeHTML(companyName) + ' publicou uma nova vaga.</p><small>' + escapeHTML(dateLabel(item.criada_em)) + '</small></div><div class="dashboard-item-actions"><a class="button button-primary button-small" href="vaga-detalhes.html?id=' + encodeURIComponent(item.vaga_id) + '">Ver vaga</a>' + readAction + '</div></article>';
+      }).join('');
+      container.querySelectorAll('[data-read-company-notification]').forEach(button => button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await Conecta.api('/api/notificacoes-empresas/' + encodeURIComponent(button.dataset.readCompanyNotification) + '/lida', { method: 'PATCH' });
+          await loadCompanyNotifications();
+        } catch (error) { Conecta.toast(error.message); button.disabled = false; }
+      }));
+    } catch (error) {
+      container.innerHTML = '<div class="dashboard-empty">' + escapeHTML(error.message) + '</div>';
+    }
+  }
+
   async function loadCandidate() {
     const container = document.getElementById('candidate-applications');
     const [data, profileData] = await Promise.all([
