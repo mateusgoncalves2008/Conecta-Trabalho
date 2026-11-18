@@ -173,6 +173,7 @@ const publicUser = user => Usuario.fromDatabase(user).toSessionUser({
 const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS perfil_publico BOOLEAN NOT NULL DEFAULT FALSE;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS banner_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS titulo_profissional VARCHAR(120);
   CREATE TABLE IF NOT EXISTS fotos_empresa (
@@ -653,7 +654,7 @@ app.get('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
   const result = await pool.query(
     `SELECT nome,email,telefone,cidade,foto_perfil,titulo_profissional,resumo_profissional,
       objetivo_profissional,tipo_oportunidade,modalidade_preferida,experiencias,formacao,
-      competencias,curriculo_url,banner_perfil,visibilidade_foto FROM usuarios WHERE id=$1 AND tipo='candidato'`,
+      competencias,curriculo_url,banner_perfil,visibilidade_foto,perfil_publico FROM usuarios WHERE id=$1 AND tipo='candidato'`,
     [req.session.user.id]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
@@ -714,6 +715,14 @@ app.put('/api/perfil', role('candidato'), asyncRoute(async (req, res) => {
     await deleteStoredImage(uploadedPhoto);
     throw error;
   }
+}));
+
+app.put('/api/perfil/visibilidade-publica', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  if (typeof req.body.publico !== 'boolean') return res.status(400).json({ erro: 'Informe se o perfil deve ser público.' });
+  const result = await pool.query('UPDATE usuarios SET perfil_publico=$1 WHERE id=$2 AND tipo=\'candidato\' RETURNING perfil_publico', [req.body.publico, req.session.user.id]);
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado.' });
+  res.json({ sucesso: true, perfil_publico: result.rows[0].perfil_publico });
 }));
 
 app.put('/api/perfil/visibilidade-foto', role('candidato'), asyncRoute(async (req, res) => {
