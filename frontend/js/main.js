@@ -492,6 +492,11 @@
         settingsLink.href = '/pages/configuracoes.html';
         settingsLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Configurações e privacidade</span>';
 
+        const helpLink = document.createElement('a');
+        helpLink.className = 'account-menu-item';
+        helpLink.href = '/pages/central-ajuda.html';
+        helpLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1 .9-1.8 1.1-1.8 2.3M12 16.5v.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Ajuda</span>';
+
         const logout = document.createElement('button');
         logout.type = 'button';
         logout.className = 'account-menu-item account-menu-logout';
@@ -507,7 +512,7 @@
           }
         });
 
-        dropdown.append(profileCard, savedLink, settingsLink, logout);
+        dropdown.append(profileCard, savedLink, settingsLink, helpLink, logout);
         trigger.addEventListener('click', () => {
           const opening = dropdown.hidden;
           dropdown.hidden = !opening;
