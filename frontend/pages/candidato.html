@@ -80,6 +80,14 @@
           <h2>Seu perfil</h2><p>Mantenha suas informações atualizadas para apresentar melhor seu potencial às empresas.</p>
           <button type="button" class="button button-primary" id="candidate-edit-profile-side">Atualizar perfil</button>
         </section>
+        <section class="dashboard-section candidate-profile-card candidate-privacy-settings" aria-labelledby="candidate-privacy-title">
+          <div class="section-heading"><div><h2 id="candidate-privacy-title">Configurações</h2><p>Controle quem pode encontrar seu perfil.</p></div></div>
+          <label class="candidate-public-setting" for="candidate-public-profile-toggle">
+            <span><strong>Perfil público nas pesquisas</strong><small>Permitir que outros usuários encontrem seu perfil na busca de pessoas.</small></span>
+            <input type="checkbox" id="candidate-public-profile-toggle" aria-describedby="candidate-public-profile-status">
+          </label>
+          <p class="candidate-public-status" id="candidate-public-profile-status" role="status">Seu perfil não aparece nas pesquisas.</p>
+        </section>
         <section class="dashboard-section candidate-profile-card">
           <h2>Encontre oportunidades</h2><p>Veja vagas compatíveis com seus objetivos.</p><a class="button button-outline" href="vagas.html">Explorar vagas</a>
         </section>
