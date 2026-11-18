@@ -932,6 +932,41 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
+app.post('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const companyId = Number(req.params.id);
+  if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
+  if (companyId === Number(req.session.user.id)) return res.status(400).json({ erro: 'Você não pode seguir sua própria conta.' });
+  const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
+  if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
+  await pool.query('INSERT INTO empresas_seguidoras (usuario_id,empresa_id) VALUES ($1,$2) ON CONFLICT (usuario_id,empresa_id) DO NOTHING', [req.session.user.id, companyId]);
+  const count = await pool.query('SELECT COUNT(*)::int AS total FROM empresas_seguidoras WHERE empresa_id=$1', [companyId]);
+  res.json({ sucesso: true, seguindo: true, total_seguidores: count.rows[0].total });
+}));
+
+app.delete('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const companyId = Number(req.params.id);
+  if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
+  const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
+  if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
+  await pool.query('DELETE FROM empresas_seguidoras WHERE usuario_id=$1 AND empresa_id=$2', [req.session.user.id, companyId]);
+  const count = await pool.query('SELECT COUNT(*)::int AS total FROM empresas_seguidoras WHERE empresa_id=$1', [companyId]);
+  res.json({ sucesso: true, seguindo: false, total_seguidores: count.rows[0].total });
+}));
+
+app.get('/api/empresas-seguidas', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    "SELECT u.id,u.nome_empresa,u.nome_fantasia,u.cidade,u.empresa_setor,u.empresa_descricao_curta,u.foto_perfil,es.data_seguimento," +
+    "(SELECT COUNT(*)::int FROM empresas_seguidoras es2 WHERE es2.empresa_id=u.id) AS total_seguidores," +
+    "(SELECT COUNT(*)::int FROM vagas v WHERE v.empresa_id=u.id AND v.status='aberta') AS vagas_abertas " +
+    "FROM empresas_seguidoras es JOIN usuarios u ON u.id=es.empresa_id AND u.tipo='empresa' " +
+    "WHERE es.usuario_id=$1 ORDER BY es.data_seguimento DESC",
+    [req.session.user.id]
+  );
+  res.json({ empresas: result.rows.map(company => ({ ...company, foto_perfil: imageReference(company.id, 'foto_perfil', company.foto_perfil) })) });
+}));
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
   const vaga = Vaga.fromRequest(req.body);
   const erroValidacao = vaga.validarCadastro();
