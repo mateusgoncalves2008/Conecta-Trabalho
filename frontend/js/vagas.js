@@ -46,37 +46,78 @@
     }
   }
 
+  const jobsCachePrefix = 'conecta-public-jobs-v1:';
+  const readJobsCache = key => {
+    try {
+      const value = localStorage.getItem(jobsCachePrefix + key);
+      const parsed = value ? JSON.parse(value) : null;
+      return Array.isArray(parsed?.vagas) ? parsed.vagas : null;
+    } catch {
+      return null;
+    }
+  };
+  const writeJobsCache = (key, vagas) => {
+    try {
+      const storageKey = jobsCachePrefix + key;
+      localStorage.setItem(storageKey, JSON.stringify({ vagas, savedAt: Date.now() }));
+      const keys = [];
+      for (let index = 0; index < localStorage.length; index++) {
+        const item = localStorage.key(index);
+        if (item && item.startsWith(jobsCachePrefix)) keys.push(item);
+      }
+      keys.filter(item => item !== storageKey).slice(0, Math.max(0, keys.length - 10))
+        .forEach(item => localStorage.removeItem(item));
+    } catch {}
+  };
+
+  function renderJobs(vagas, { homeContainer, listContainer, container, hasFilters }) {
+    if (listContainer) {
+      const count = document.getElementById('results-count');
+      if (count) count.textContent = vagas.length + (vagas.length === 1 ? ' vaga encontrada' : ' vagas encontradas');
+    }
+    if (homeContainer) {
+      const heading = document.querySelector('#vagas-destaque .section-heading h2');
+      const description = document.querySelector('#vagas-destaque .section-heading p');
+      if (heading) heading.textContent = hasFilters ? 'Resultados da busca' : 'Vagas recentes';
+      if (description) description.textContent = hasFilters
+        ? (vagas.length ? vagas.length + (vagas.length === 1 ? ' oportunidade encontrada.' : ' oportunidades encontradas.') : 'Não encontramos vagas com esses filtros. Tente outro cargo ou cidade.')
+        : 'Confira algumas das oportunidades disponíveis.';
+    }
+    const shown = listContainer ? vagas : (hasFilters ? vagas : vagas.slice(0, 3));
+    container.innerHTML = shown.length ? shown.map(card).join('') : '<div class="empty-state">Nenhuma vaga encontrada com esses filtros.</div>';
+    container.querySelectorAll('[data-apply]').forEach(button => {
+      button.addEventListener('click', () => applyToJob(button.dataset.apply, button));
+    });
+  }
+
   async function loadJobs({ busca = '', cidade = '' } = {}) {
     const homeContainer = document.getElementById('featured-jobs');
     const listContainer = document.getElementById('all-jobs');
     const container = listContainer || homeContainer;
     if (!container) return;
-    container.innerHTML = '<div class="empty-state">Buscando oportunidades...</div>';
     const params = new URLSearchParams();
     if (busca) params.set('busca', busca);
     if (cidade) params.set('cidade', cidade);
+    const query = params.toString();
+    const cacheKey = query || 'recentes';
+    const hasFilters = Boolean(busca.trim() || cidade.trim());
+    const cachedJobs = readJobsCache(cacheKey);
+
+    if (cachedJobs) {
+      renderJobs(cachedJobs, { homeContainer, listContainer, container, hasFilters });
+    } else {
+      container.innerHTML = '<div class="empty-state">Buscando oportunidades...</div>';
+    }
+
     try {
-      const result = await Conecta.api('/api/vagas?' + params.toString());
-      const vagas = result.vagas || [];
-      if (listContainer) {
-        document.getElementById('results-count').textContent = vagas.length + (vagas.length === 1 ? ' vaga encontrada' : ' vagas encontradas');
-      }
-      const hasFilters = Boolean(busca.trim() || cidade.trim());
-      if (homeContainer) {
-        const heading = document.querySelector('#vagas-destaque .section-heading h2');
-        const description = document.querySelector('#vagas-destaque .section-heading p');
-        if (heading) heading.textContent = hasFilters ? 'Resultados da busca' : 'Vagas recentes';
-        if (description) description.textContent = hasFilters
-          ? (vagas.length ? vagas.length + (vagas.length === 1 ? ' oportunidade encontrada.' : ' oportunidades encontradas.') : 'Não encontramos vagas com esses filtros. Tente outro cargo ou cidade.')
-          : 'Confira algumas das oportunidades disponíveis.';
-      }
-      const shown = listContainer ? vagas : (hasFilters ? vagas : vagas.slice(0, 3));
-      container.innerHTML = shown.length ? shown.map(card).join('') : '<div class="empty-state">Nenhuma vaga encontrada com esses filtros.</div>';
-      container.querySelectorAll('[data-apply]').forEach(button => {
-        button.addEventListener('click', () => applyToJob(button.dataset.apply, button));
-      });
+      const result = await Conecta.api('/api/vagas' + (query ? '?' + query : ''));
+      const vagas = Array.isArray(result.vagas) ? result.vagas : [];
+      writeJobsCache(cacheKey, vagas);
+      renderJobs(vagas, { homeContainer, listContainer, container, hasFilters });
     } catch (error) {
-      container.innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
+      if (!cachedJobs) {
+        container.innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
+      }
     }
   }
 
