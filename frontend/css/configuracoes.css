@@ -14,7 +14,7 @@
 .settings-nav-item.is-active{border-left-color:#c95730;background:rgba(201,87,48,.075);color:#a74627}
 .settings-back-link{display:flex;align-items:center;gap:10px;margin:auto 22px 0;padding:18px 0 0;border-top:1px solid var(--line,#e1e5e9);color:var(--muted,#667487);font-size:13px;text-decoration:none}
 .settings-back-link:hover{color:var(--orange,#c95730)}
-.settings-content{width:min(850px,calc(100% - 64px));margin:0 auto;padding:38px 0 80px}
+.settings-content{width:min(1000px,calc(100% - 48px));margin:0 0 0 32px;padding:38px 0 80px}
 .settings-content-heading{margin-bottom:22px}
 .settings-eyebrow{color:var(--orange,#c95730);font-size:10px;font-weight:750;letter-spacing:1.2px}
 .settings-content-heading h2{margin:8px 0 6px;color:var(--ink,#192b3e);font-size:27px;letter-spacing:-.5px}
@@ -45,7 +45,7 @@ html[data-theme="dark"] .settings-nav-item.is-active{color:#ffad83;background:rg
 html[data-theme="dark"] .settings-nav-item:hover,html[data-theme="dark"] .settings-row:hover{background:#243348}
 html[data-theme="dark"] .settings-avatar{background:#34465c;color:#f3f6fa}
 html[data-theme="dark"] .settings-row,html[data-theme="dark"] .settings-unavailable,html[data-theme="dark"] .settings-toggle-row{border-color:#354255}
-@media(max-width:850px){.settings-layout{grid-template-columns:245px minmax(0,1fr)}.settings-content{width:calc(100% - 42px)}.settings-user{padding-left:18px;padding-right:18px}.settings-nav-item{padding-left:16px;padding-right:12px;font-size:13px}}
+@media(max-width:850px){.settings-layout{grid-template-columns:245px minmax(0,1fr)}.settings-content{width:calc(100% - 42px);margin-left:21px}.settings-user{padding-left:18px;padding-right:18px}.settings-nav-item{padding-left:16px;padding-right:12px;font-size:13px}}
 @media(max-width:650px){.settings-layout{display:block;min-height:0}.settings-sidebar{position:relative;top:auto;min-height:0;padding:20px 0 0;border-right:0;border-bottom:1px solid var(--line,#e1e5e9)}.settings-user{align-items:center;padding:0 18px 16px}.settings-user-copy h1{font-size:22px}.settings-nav{display:flex;gap:0;overflow-x:auto;padding:0 10px;scrollbar-width:thin}.settings-nav-item{width:auto;min-width:max-content;min-height:50px;padding:10px 13px;border-left:0;border-bottom:3px solid transparent;font-size:12px}.settings-nav-item i{font-size:15px}.settings-nav-item.is-active{border-left:0;border-bottom-color:#c95730}.settings-back-link{margin:0 18px;padding:13px 0}.settings-content{width:calc(100% - 32px);padding:27px 0 65px}.settings-content-heading h2{font-size:24px}.settings-card-heading{padding:19px 18px 14px}.settings-row{padding:15px 18px}.settings-unavailable{padding:15px 18px 18px}.settings-toggle-row{padding:17px 18px;gap:14px}.settings-status{padding:0 18px 17px}}
 @media(prefers-reduced-motion:reduce){.settings-nav-item,.settings-row{transition:none}}
 
