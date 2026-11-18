@@ -887,3 +887,14 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .company-gallery-item .company-gallery-date{position:absolute;inset:0;display:flex;align-items:flex-start;padding:14px;background:linear-gradient(180deg,rgba(0,0,0,.62),transparent 58%);color:#fff;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s ease;pointer-events:none}
 .company-gallery-item:hover .company-gallery-date,.company-gallery-item:focus-within .company-gallery-date{opacity:1}
 .company-gallery-add.is-disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
+
+/* Lista de empresas acompanhadas pelo candidato */
+.followed-company-item{align-items:center}
+.followed-company-identity{display:flex;align-items:center;gap:14px;min-width:0}
+.followed-company-logo{width:54px;height:54px;flex:0 0 54px;border:1px solid var(--line);border-radius:10px;object-fit:cover;background:var(--surface-soft)}
+.followed-company-initials{display:grid;place-items:center;color:var(--navy);font-size:16px;font-weight:800}
+.followed-company-identity>div{min-width:0}
+.followed-company-identity h3{margin:0 0 4px}
+.followed-company-identity p{margin:0 0 4px;color:var(--muted);font-size:13px;line-height:1.45}
+.followed-company-identity small{color:var(--muted);font-size:11px}
+@media(max-width:650px){.followed-company-item{align-items:flex-start;gap:14px}.followed-company-item .dashboard-item-actions{width:100%;flex-wrap:wrap}.followed-company-logo{width:46px;height:46px;flex-basis:46px}}
