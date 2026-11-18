@@ -50,6 +50,15 @@ CREATE TABLE IF NOT EXISTS vagas_salvas (
 
 CREATE INDEX IF NOT EXISTS idx_vagas_salvas_candidato_data
   ON vagas_salvas (candidato_id, salva_em DESC);
+CREATE TABLE IF NOT EXISTS empresas_seguidoras (
+  usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  data_seguimento TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (usuario_id, empresa_id),
+  CHECK (usuario_id <> empresa_id)
+);
+CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_empresa_data ON empresas_seguidoras (empresa_id, data_seguimento DESC);
+CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_usuario_data ON empresas_seguidoras (usuario_id, data_seguimento DESC);
 
 
 -- Dados adicionais para contas empresariais.
