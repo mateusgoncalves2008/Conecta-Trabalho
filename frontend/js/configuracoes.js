@@ -61,10 +61,31 @@
       syncDarkMode();
     });
 
+    const settingsHeading = document.querySelector('.settings-content-heading');
+    const demographicsPage = document.getElementById('settings-demographics-page');
+    const showMainSettings = () => {
+      settingsHeading.hidden = false;
+      document.querySelectorAll('[data-settings-panel]').forEach(panel => { panel.hidden = panel.dataset.settingsPanel !== 'account'; });
+      demographicsPage.hidden = true;
+      activateTab('account');
+    };
+
     nav.addEventListener('click', event => {
       const button = event.target.closest('[data-settings-tab]');
-      if (button) activateTab(button.dataset.settingsTab);
+      if (button) {
+        demographicsPage.hidden = true;
+        settingsHeading.hidden = false;
+        activateTab(button.dataset.settingsTab);
+      }
     });
+
+    document.querySelector('[data-settings-subpage="demographics"]').addEventListener('click', () => {
+      settingsHeading.hidden = true;
+      document.querySelectorAll('[data-settings-panel]').forEach(panel => { panel.hidden = true; });
+      demographicsPage.hidden = false;
+      document.getElementById('settings-demographics-back').focus();
+    });
+    document.getElementById('settings-demographics-back').addEventListener('click', showMainSettings);
 
     try {
       const session = await Conecta.api('/api/me');
