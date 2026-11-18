@@ -1082,3 +1082,86 @@ body[data-a11y-font=large] main :is(p,span,a,label,button,input,select,textarea,
 body[data-a11y-font=larger] main :is(p,span,a,label,button,input,select,textarea,li,small,strong){font-size:max(1em,1.35rem)!important;line-height:1.7!important}
 @media(max-width:600px){.accessibility-launcher{right:15px;bottom:102px;width:54px;height:54px}.accessibility-dialog{padding:20px 17px}.accessibility-option{align-items:flex-start;flex-direction:column}.accessibility-option input[type=checkbox]{align-self:flex-end;margin-top:-25px}.accessibility-font-controls{width:100%}.accessibility-font-controls button{flex:1}.accessibility-dialog-footer{align-items:stretch;flex-direction:column-reverse}.accessibility-dialog-footer button{width:100%}}
 @media(prefers-reduced-motion:reduce){.accessibility-launcher,.accessibility-backdrop{transition:none}}
+
+ 
+/* Cabeçalho do perfil público: composição inspirada na referência enviada */
+.company-public-cover{height:168px}
+.company-public-identity{
+  display:block;
+  padding:0 30px 26px;
+  border:0;
+}
+.company-public-logo{
+  display:block;
+  width:160px;
+  height:160px;
+  flex:0 0 160px;
+  margin-top:-80px;
+  border:5px solid var(--surface);
+  border-radius:2px;
+  object-fit:cover;
+}
+.company-public-logo-fallback{font-size:32px}
+.company-public-heading{
+  min-width:0;
+  padding:25px 0 0;
+}
+.company-public-heading h1{
+  font-size:clamp(25px,3.2vw,32px);
+  line-height:1.2;
+  letter-spacing:-.5px;
+}
+.company-public-heading p{
+  margin:5px 0 0;
+  font-size:15px;
+  line-height:1.5;
+}
+.company-public-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:16px;
+}
+.company-public-primary-action,
+.company-public-secondary-action{
+  min-height:42px;
+  padding:0 20px;
+  border-radius:24px;
+  font-size:14px;
+}
+.company-public-nav{margin:0}
+
+/* Mantém a mesma hierarquia visual em telas menores */
+@media(max-width:760px){
+  .company-public-cover{height:132px}
+  .company-public-identity{display:block;padding:0 18px 22px}
+  .company-public-logo{
+    width:136px;
+    height:136px;
+    margin-top:-68px;
+    border-width:4px;
+  }
+  .company-public-heading{padding-top:22px}
+  .company-public-heading h1{font-size:24px}
+  .company-public-heading p{font-size:14px}
+  .company-public-actions{gap:9px;margin-top:16px}
+  .company-public-primary-action,
+  .company-public-secondary-action{
+    width:auto;
+    min-height:40px;
+    padding:0 17px;
+    font-size:13px;
+  }
+  .company-public-nav{gap:24px;padding:0 16px}
+  .company-public-nav button{min-height:52px}
+}
+@media(max-width:420px){
+  .company-public-identity{padding-right:16px;padding-left:16px}
+  .company-public-logo{width:120px;height:120px;margin-top:-60px}
+  .company-public-heading{padding-top:19px}
+  .company-public-heading h1{font-size:22px}
+  .company-public-actions{gap:8px}
+  .company-public-primary-action,
+  .company-public-secondary-action{padding:0 14px}
+}
