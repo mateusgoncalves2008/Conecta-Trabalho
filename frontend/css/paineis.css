@@ -917,3 +917,15 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .candidate-public-setting input:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 35%,transparent);outline-offset:3px}
 .candidate-public-setting input:disabled{opacity:.6;cursor:wait}
 .candidate-public-status{margin:0;padding-top:10px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--muted)}
+
+.account-settings-main{max-width:900px}
+.account-settings-main>.text-link{display:inline-flex;margin-bottom:10px}
+.account-settings-card{margin-top:18px;padding:26px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.account-settings-card .section-heading h2{font-size:21px}
+.account-settings-card .candidate-public-setting{padding:20px 0}
+.saved-posts-empty{display:grid;justify-items:center;gap:12px;padding:54px 28px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px}
+.saved-posts-empty>i{font-size:30px;color:var(--orange)}
+.saved-posts-empty h2{margin:0;color:var(--navy);font-size:20px}
+.saved-posts-empty p{max-width:520px;margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+html[data-theme="dark"] .account-settings-card,html[data-theme="dark"] .saved-posts-empty{background:#1b2b3d;border-color:#34465c}
+html[data-theme="dark"] .saved-posts-empty h2{color:#edf2f7}
