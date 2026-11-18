@@ -53,9 +53,32 @@
           <div class="settings-demographics-intro">
             <h3 id="settings-demographics-title">Informações demográficas</h3>
             <p>Essas informações não são exibidas no seu perfil público.</p>
-            <p>O ConectaTrabalho não solicita nem armazena informações demográficas nesta área.</p>
+            <p>Os campos abaixo são apenas demonstrativos. As respostas não são enviadas nem armazenadas pelo ConectaTrabalho.</p>
             <button class="settings-demographics-remove" type="button" disabled>Remover</button>
             <small>Não há dados demográficos cadastrados para remover.</small>
+          </div>
+          <div class="settings-demographics-fields">
+            <div class="settings-demographics-field">
+              <label for="demographics-gender">Gênero</label>
+              <span id="demographics-gender-help">Selecione o seu gênero</span>
+              <select id="demographics-gender" aria-describedby="demographics-gender-help">
+                <option value="" selected>Selecionar</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="outra-identidade">Outra identidade de gênero</option>
+                <option value="prefiro-nao-dizer">Prefiro não dizer</option>
+              </select>
+            </div>
+            <div class="settings-demographics-field">
+              <label for="demographics-disability">Deficiência</label>
+              <span id="demographics-disability-help">Você é uma pessoa com alguma deficiência que restringe de modo substancial uma atividade importante da vida cotidiana ou tem histórico de alguma deficiência?</span>
+              <select id="demographics-disability" aria-describedby="demographics-disability-help">
+                <option value="" selected>Selecionar</option>
+                <option value="sim">Sim, sou ou fui uma pessoa com alguma deficiência</option>
+                <option value="nao">Não sou uma pessoa com alguma deficiência</option>
+                <option value="prefiro-nao-dizer">Prefiro não dizer</option>
+              </select>
+            </div>
           </div>
           <div class="settings-demographics-notice">
             <strong>Sobre seus dados</strong>
