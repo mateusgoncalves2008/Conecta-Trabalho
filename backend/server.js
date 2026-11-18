@@ -212,6 +212,17 @@ const profileSchemaReady = pool.query(`
   );
   CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_empresa_data ON empresas_seguidoras (empresa_id, data_seguimento DESC);
   CREATE INDEX IF NOT EXISTS idx_empresas_seguidoras_usuario_data ON empresas_seguidoras (usuario_id, data_seguimento DESC);
+  CREATE TABLE IF NOT EXISTS notificacoes_empresas (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    empresa_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
+    tipo VARCHAR(30) NOT NULL DEFAULT 'nova_vaga',
+    lida_em TIMESTAMPTZ,
+    criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (usuario_id, vaga_id, tipo)
+  );
+  CREATE INDEX IF NOT EXISTS idx_notificacoes_empresas_usuario_data ON notificacoes_empresas (usuario_id, criada_em DESC);
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
@@ -967,16 +978,51 @@ app.get('/api/empresas-seguidas', role('candidato'), asyncRoute(async (req, res)
   );
   res.json({ empresas: result.rows.map(company => ({ ...company, foto_perfil: imageReference(company.id, 'foto_perfil', company.foto_perfil) })) });
 }));
+app.get('/api/notificacoes-empresas', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    'SELECT n.id,n.tipo,n.lida_em,n.criada_em,v.id AS vaga_id,v.titulo AS vaga_titulo,u.id AS empresa_id,u.nome_empresa,u.nome_fantasia ' +
+    'FROM notificacoes_empresas n JOIN usuarios u ON u.id=n.empresa_id JOIN vagas v ON v.id=n.vaga_id ' +
+    'WHERE n.usuario_id=$1 ORDER BY n.criada_em DESC LIMIT 30',
+    [req.session.user.id]
+  );
+  res.json({ notificacoes: result.rows });
+}));
+
+app.patch('/api/notificacoes-empresas/:id/lida', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const notificationId = Number(req.params.id);
+  if (!Number.isSafeInteger(notificationId) || notificationId < 1) return res.status(400).json({ erro: 'Notificação inválida.' });
+  const result = await pool.query('UPDATE notificacoes_empresas SET lida_em=COALESCE(lida_em,NOW()) WHERE id=$1 AND usuario_id=$2 RETURNING id,lida_em', [notificationId, req.session.user.id]);
+  if (!result.rowCount) return res.status(404).json({ erro: 'Notificação não encontrada.' });
+  res.json({ sucesso: true, notificacao: result.rows[0] });
+}));
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
   const vaga = Vaga.fromRequest(req.body);
   const erroValidacao = vaga.validarCadastro();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
 
-  const result = await pool.query(
-    'INSERT INTO vagas (empresa_id,titulo,descricao,requisitos,tipo_contrato,modalidade,cidade,salario) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-    vaga.paraInsercao(req.session.user.id)
-  );
-  res.status(201).json({ sucesso: true, vaga: result.rows[0] });
+  const client = await pool.connect();
+  let createdJob;
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(
+      'INSERT INTO vagas (empresa_id,titulo,descricao,requisitos,tipo_contrato,modalidade,cidade,salario) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
+      vaga.paraInsercao(req.session.user.id)
+    );
+    createdJob = result.rows[0];
+    await client.query(
+      "INSERT INTO notificacoes_empresas (usuario_id,empresa_id,vaga_id,tipo) SELECT usuario_id,$1,$2,'nova_vaga' FROM empresas_seguidoras WHERE empresa_id=$1 ON CONFLICT (usuario_id,vaga_id,tipo) DO NOTHING",
+      [req.session.user.id, createdJob.id]
+    );
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+  res.status(201).json({ sucesso: true, vaga: createdJob });
 }));
 
 app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
