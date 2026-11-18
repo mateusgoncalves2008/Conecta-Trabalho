@@ -42,6 +42,25 @@
       description.textContent = sections[key][1];
     };
 
+    const darkModeButton = document.getElementById('settings-dark-mode');
+    const syncDarkMode = () => {
+      const enabled = document.documentElement.dataset.theme === 'dark';
+      darkModeButton.setAttribute('aria-checked', String(enabled));
+      darkModeButton.classList.toggle('is-enabled', enabled);
+    };
+    syncDarkMode();
+    darkModeButton.addEventListener('click', () => {
+      const headerThemeButton = document.querySelector('.theme-toggle');
+      if (headerThemeButton) {
+        headerThemeButton.click();
+      } else {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('conecta-theme', nextTheme);
+        document.documentElement.dataset.theme = nextTheme;
+      }
+      syncDarkMode();
+    });
+
     nav.addEventListener('click', event => {
       const button = event.target.closest('[data-settings-tab]');
       if (button) activateTab(button.dataset.settingsTab);
