@@ -998,6 +998,7 @@ app.patch('/api/notificacoes-empresas/:id/lida', role('candidato'), asyncRoute(a
   res.json({ sucesso: true, notificacao: result.rows[0] });
 }));
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const vaga = Vaga.fromRequest(req.body);
   const erroValidacao = vaga.validarCadastro();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
