@@ -1167,3 +1167,13 @@ body[data-a11y-font=larger] main :is(p,span,a,label,button,input,select,textarea
   .company-public-primary-action,
   .company-public-secondary-action{padding:0 14px}
 }
+
+/* Acompanhamento de empresas no perfil público */
+.company-public-follow-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;min-width:128px;padding:0 20px;border:1px solid #0a66c2;border-radius:24px;background:#0a66c2;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.company-public-follow-action:hover{background:#004182;border-color:#004182}
+.company-public-follow-action.is-following{background:transparent;color:#0a66c2}
+.company-public-follow-action.is-following:hover{background:#eef6ff}
+.company-public-follow-action:disabled{opacity:.65;cursor:wait}
+.company-public-followers{margin:8px 0 0;color:var(--muted);font-size:13px}
+.company-public-followers strong{color:var(--ink);font-weight:700}
+@media(max-width:760px){.company-public-follow-action{min-height:40px;min-width:112px;padding:0 16px;font-size:13px}.company-public-followers{margin-top:7px}}
