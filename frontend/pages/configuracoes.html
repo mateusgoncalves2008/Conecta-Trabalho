@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="/img/logo-conectatrabalho.svg" type="image/svg+xml">
   <title>Configurações e privacidade | ConectaTrabalho</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/paineis.css">
+  <link rel="stylesheet" href="../css/configuracoes.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="../js/main.js" defer></script>
   <script src="../js/configuracoes.js" defer></script>
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page settings-page">
   <header class="dashboard-header site-header">
     <a class="brand" href="../"><img class="brand-mark-image" src="../img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -20,25 +22,87 @@
     </nav>
     <div class="header-actions"></div>
   </header>
-  <main class="dashboard-main account-settings-main">
-    <a class="text-link" id="settings-back-link" href="candidato.html">← Voltar ao painel</a>
-    <section class="dashboard-section">
-      <div class="section-heading"><div><span class="eyebrow">SUA CONTA</span><h1>Configurações e privacidade</h1><p>Gerencie como seu perfil aparece no ConectaTrabalho.</p></div></div>
-      <section class="dashboard-section candidate-profile-card account-settings-card" id="candidate-privacy-settings" hidden>
-        <div class="section-heading"><div><h2>Visibilidade do perfil</h2><p>Escolha se seu perfil profissional pode ser encontrado nas pesquisas.</p></div></div>
-        <label class="candidate-public-setting" for="candidate-public-profile-toggle">
-          <span><strong>Perfil público nas pesquisas</strong><small>Permitir que pessoas e empresas encontrem seu perfil na busca de pessoas.</small></span>
-          <input type="checkbox" id="candidate-public-profile-toggle" aria-describedby="candidate-public-profile-status">
-        </label>
-        <p class="candidate-public-status" id="candidate-public-profile-status" role="status">Carregando sua preferência...</p>
+
+  <main class="settings-layout">
+    <aside class="settings-sidebar" aria-label="Categorias de configurações">
+      <div class="settings-user">
+        <div class="settings-avatar" id="settings-avatar" aria-hidden="true">CT</div>
+        <div class="settings-user-copy"><h1>Configurações</h1><p id="settings-user-name">Sua conta</p></div>
+      </div>
+      <nav class="settings-nav" id="settings-nav">
+        <button class="settings-nav-item is-active" type="button" data-settings-tab="account" aria-current="page"><i class="fa-regular fa-user" aria-hidden="true"></i><span>Preferências da conta</span></button>
+        <button class="settings-nav-item" type="button" data-settings-tab="security"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Acesso e segurança</span></button>
+        <button class="settings-nav-item" type="button" data-settings-tab="visibility"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Visibilidade</span></button>
+        <button class="settings-nav-item" type="button" data-settings-tab="privacy"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Privacidade dos dados</span></button>
+        <button class="settings-nav-item" type="button" data-settings-tab="notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notificações</span></button>
+        <button class="settings-nav-item" type="button" data-settings-tab="general"><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Preferências gerais</span></button>
+      </nav>
+      <a class="settings-back-link" id="settings-back-link" href="candidato.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar ao painel</a>
+    </aside>
+
+    <section class="settings-content" aria-live="polite">
+      <div class="settings-content-heading">
+        <span class="settings-eyebrow">SUA CONTA</span>
+        <h2 id="settings-section-title">Preferências da conta</h2>
+        <p id="settings-section-description">Gerencie as informações e preferências da sua conta.</p>
+      </div>
+
+      <section class="settings-panel" data-settings-panel="account">
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Informações do perfil</h3><p>Consulte e atualize as informações apresentadas no seu perfil.</p></div>
+          <a class="settings-row" id="settings-profile-link" href="candidato.html#meu-perfil"><span>Dados do perfil</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </article>
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Preferências da conta</h3><p>Algumas opções adicionais serão disponibilizadas conforme os recursos da plataforma forem implementados.</p></div>
+          <div class="settings-unavailable"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>Não há outras preferências disponíveis nesta seção no momento.</span></div>
+        </article>
       </section>
-      <section class="dashboard-section candidate-profile-card account-settings-card" id="company-settings-placeholder" hidden>
-        <h2>Configurações da empresa</h2>
-        <p>As preferências específicas da conta empresarial serão organizadas nesta área. Os dados e a visibilidade do perfil público da empresa continuam sendo gerenciados no painel da empresa.</p>
-        <a class="button button-outline" href="empresa.html#company-profile-heading">Gerenciar perfil da empresa</a>
+
+      <section class="settings-panel" data-settings-panel="security" hidden>
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Acesso e segurança</h3><p>Opções relacionadas ao acesso e à proteção da sua conta.</p></div>
+          <div class="settings-unavailable"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>As opções de segurança serão apresentadas aqui quando estiverem disponíveis.</span></div>
+        </article>
+      </section>
+
+      <section class="settings-panel" data-settings-panel="visibility" hidden>
+        <article class="settings-card" id="candidate-privacy-settings" hidden>
+          <div class="settings-card-heading"><h3>Visibilidade do perfil</h3><p>Escolha se seu perfil profissional pode ser encontrado nas pesquisas.</p></div>
+          <label class="settings-toggle-row" for="candidate-public-profile-toggle">
+            <span class="settings-toggle-copy"><strong>Perfil público nas pesquisas</strong><small>Permitir que pessoas e empresas encontrem seu perfil na busca de pessoas.</small></span>
+            <input type="checkbox" id="candidate-public-profile-toggle" aria-describedby="candidate-public-profile-status">
+          </label>
+          <p class="settings-status" id="candidate-public-profile-status" role="status">Carregando sua preferência...</p>
+        </article>
+        <article class="settings-card" id="company-settings-placeholder" hidden>
+          <div class="settings-card-heading"><h3>Visibilidade da empresa</h3><p>O perfil público da empresa continua sendo gerenciado no painel empresarial.</p></div>
+          <a class="settings-row" href="empresa.html#company-profile-heading"><span>Gerenciar perfil da empresa</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </article>
+      </section>
+
+      <section class="settings-panel" data-settings-panel="privacy" hidden>
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Privacidade dos dados</h3><p>Informações sobre o tratamento e a privacidade dos dados da sua conta.</p></div>
+          <div class="settings-unavailable"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>Os controles de privacidade de dados ainda não estão disponíveis nesta área.</span></div>
+        </article>
+      </section>
+
+      <section class="settings-panel" data-settings-panel="notifications" hidden>
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Notificações</h3><p>Gerencie como deseja receber atualizações do ConectaTrabalho.</p></div>
+          <div class="settings-unavailable"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>As preferências de notificações ainda não podem ser alteradas por esta página.</span></div>
+        </article>
+      </section>
+
+      <section class="settings-panel" data-settings-panel="general" hidden>
+        <article class="settings-card">
+          <div class="settings-card-heading"><h3>Preferências gerais</h3><p>Configurações gerais de experiência na plataforma.</p></div>
+          <div class="settings-unavailable"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>Novas preferências gerais serão adicionadas quando estiverem implementadas.</span></div>
+        </article>
       </section>
     </section>
   </main>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <button class="back-to-top" type="button" id="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg></button>
 </body>
