@@ -1338,7 +1338,6 @@
       applyFontSize(['normal', 'large', 'larger'].includes(savedFontSize) ? savedFontSize : 'normal');
       fontButtons.forEach(button => button.addEventListener('click', () => applyFontSize(button.dataset.fontSize)));
     }
-    setupCandidatePrivacySettings();
     setupCandidateProfileEditor();
     setupCompanyProfileEditor();
     initPanel();
