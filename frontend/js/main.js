@@ -184,6 +184,7 @@
     const accessibilityModal = document.getElementById('accessibility-modal');
     const accessibilityOpen = document.getElementById('accessibility-open');
     if (accessibilityModal && accessibilityOpen) {
+      let accessibilityReturnFocus = null;
       const applyAccessibility = () => {
         const root = document.documentElement;
         const body = document.body;
@@ -197,9 +198,13 @@
         accessibilityModal.classList.remove('is-open');
         accessibilityModal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('accessibility-modal-open');
-        accessibilityOpen.focus();
+        const returnTarget = accessibilityReturnFocus && accessibilityReturnFocus.isConnected
+          ? accessibilityReturnFocus
+          : accessibilityOpen;
+        returnTarget.focus();
       };
       const openAccessibility = () => {
+        accessibilityReturnFocus = document.activeElement;
         accessibilityModal.classList.add('is-open');
         accessibilityModal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('accessibility-modal-open');
@@ -210,7 +215,30 @@
       document.getElementById('accessibility-done').addEventListener('click', closeAccessibility);
       accessibilityModal.addEventListener('click', event => { if (event.target === accessibilityModal) closeAccessibility(); });
       document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && accessibilityModal.classList.contains('is-open')) closeAccessibility();
+        if (!accessibilityModal.classList.contains('is-open')) return;
+        if (event.key === 'Escape') {
+          closeAccessibility();
+          return;
+        }
+        if (event.key !== 'Tab') return;
+        const dialog = accessibilityModal.querySelector('.accessibility-dialog');
+        const focusable = [...dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])')]
+          .filter(element => !element.hidden && element.getClientRects().length);
+        if (!focusable.length) {
+          event.preventDefault();
+          dialog.setAttribute('tabindex', '-1');
+          dialog.focus();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+          event.preventDefault();
+          first.focus();
+        }
       });
       accessibilityModal.querySelectorAll('[data-a11y-font]').forEach(button => button.addEventListener('click', () => {
         accessibilitySettings.font = button.dataset.a11yFont;
