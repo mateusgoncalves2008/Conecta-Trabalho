@@ -464,6 +464,12 @@
       const control = button.closest('.reaction-control');
       const picker = control && control.querySelector('.reaction-picker');
       if (picker) {
+        feed.querySelectorAll('.reaction-picker').forEach(item => {
+          if (item !== picker) {
+            item.hidden = true;
+            item.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
+          }
+        });
         picker.hidden = !picker.hidden;
         button.setAttribute('aria-expanded', String(!picker.hidden));
       }
@@ -519,6 +525,22 @@
       reportDetailLabel.hidden = true;
       reportDialog.showModal();
     }
+  });
+
+  document.addEventListener('click', event => {
+    if (event.target.closest('.reaction-control')) return;
+    feed.querySelectorAll('.reaction-picker').forEach(picker => {
+      picker.hidden = true;
+      picker.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    feed.querySelectorAll('.reaction-picker').forEach(picker => {
+      picker.hidden = true;
+      picker.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
+    });
   });
 
   reportReason.addEventListener('change', () => {
