@@ -90,7 +90,7 @@
     const reactionButtons = reactions.map(emoji => {
       const active = post.minhaReacao === emoji;
       const count = summary.find(item => item.emoji === emoji);
-      return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + (count ? ' ' + count.total : '') + '</button>';
+      return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" data-count="' + (count ? Number(count.total) : 0) + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + (count && Number(count.total) ? ' ' + count.total : '') + '</button>';
     }).join('');
     return summaryHTML + '<div class="publication-actions"><div class="reaction-picker">' + reactionButtons + '</div>' +
       (post.minha ? '<button type="button" class="report-button" data-action="delete" data-id="' + post.id + '">Excluir</button>' :
@@ -115,6 +115,36 @@
       '<div class="publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><small>' + escapeHTML(authorDetail) + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
       '</header>' + description + renderMedia(post.midias || []) +
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
+  }
+
+  function updateReactionUI(card, nextEmoji) {
+    const buttons = [...card.querySelectorAll('[data-action="react"]')];
+    const previous = buttons.find(item => item.getAttribute('aria-pressed') === 'true');
+    const previousEmoji = previous ? previous.dataset.emoji : null;
+    if (previousEmoji === nextEmoji) return previousEmoji;
+
+    const previousButton = previousEmoji ? buttons.find(item => item.dataset.emoji === previousEmoji) : null;
+    const nextButton = nextEmoji ? buttons.find(item => item.dataset.emoji === nextEmoji) : null;
+    if (previousButton) previousButton.dataset.count = String(Math.max(0, Number(previousButton.dataset.count || 0) - 1));
+    if (nextButton) nextButton.dataset.count = String(Number(nextButton.dataset.count || 0) + 1);
+
+    buttons.forEach(item => {
+      const active = item.dataset.emoji === nextEmoji;
+      const count = Number(item.dataset.count || 0);
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-pressed', String(active));
+      item.textContent = item.dataset.emoji + (count > 0 ? ' ' + count : '');
+    });
+
+    const summary = card.querySelector('.reaction-summary');
+    const totals = buttons
+      .map(item => ({ emoji: item.dataset.emoji, total: Number(item.dataset.count || 0) }))
+      .filter(item => item.total > 0);
+    const total = totals.reduce((sum, item) => sum + item.total, 0);
+    summary.textContent = total
+      ? totals.map(item => item.emoji + ' ' + item.total).join(' ')
+      : 'Seja a primeira pessoa a reagir';
+    return previousEmoji;
   }
 
   async function loadPosts(reset) {
@@ -437,17 +467,30 @@
         window.location.href = '/pages/login.html';
         return;
       }
+      const card = button.closest('.publication-card');
+      if (!card || card.dataset.reacting === 'true') return;
+      const selectedEmoji = button.getAttribute('aria-pressed') === 'true' ? null : button.dataset.emoji;
+      const previousEmoji = card.querySelector('[data-action="react"][aria-pressed="true"]')?.dataset.emoji || null;
+      card.dataset.reacting = 'true';
+      const reactionButtons = [...card.querySelectorAll('[data-action="react"]')];
+      reactionButtons.forEach(item => { item.disabled = true; });
+      updateReactionUI(card, selectedEmoji);
       try {
-        if (button.getAttribute('aria-pressed') === 'true') {
-          await api('/api/publicacoes/' + id + '/reacao', { method: 'DELETE' });
-        } else {
+        if (selectedEmoji) {
           await api('/api/publicacoes/' + id + '/reacao', {
             method: 'PUT',
-            body: JSON.stringify({ emoji: button.dataset.emoji })
+            body: JSON.stringify({ emoji: selectedEmoji })
           });
+        } else {
+          await api('/api/publicacoes/' + id + '/reacao', { method: 'DELETE' });
         }
-        await loadPosts(true);
-      } catch (error) { toast(error.message); }
+      } catch (error) {
+        updateReactionUI(card, previousEmoji);
+        toast(error.message);
+      } finally {
+        delete card.dataset.reacting;
+        reactionButtons.forEach(item => { item.disabled = false; });
+      }
     }
     if (action === 'delete') {
       if (!window.confirm('Deseja excluir esta publicação? As fotos ou o vídeo e todas as reações também serão excluídos.')) return;
