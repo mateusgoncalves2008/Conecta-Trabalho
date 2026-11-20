@@ -1833,3 +1833,46 @@ body.a11y-motion .site-header .brand:focus-visible .brand-mark-image {
   transition: none;
 }
 
+/* Reduzir animações: cabeçalho sólido, sem vidro e sempre preso ao topo */
+body.a11y-motion .site-header,
+body.a11y-motion .site-header.is-scrolled {
+  position: sticky !important;
+  top: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e3e8ee !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 2px 8px rgba(20, 43, 73, .06) !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+html[data-theme="dark"] body.a11y-motion .site-header,
+html[data-theme="dark"] body.a11y-motion .site-header.is-scrolled {
+  border-bottom-color: #354255 !important;
+  background: #182231 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .22) !important;
+}
+
+/* No celular, o cabeçalho continua fixo na viewport sem efeito de vidro */
+@media (max-width: 760px) {
+  body.a11y-motion body > .site-header,
+  body.a11y-motion > .site-header,
+  body.a11y-motion > .site-header.is-scrolled {
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+}
+
