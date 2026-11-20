@@ -2,6 +2,7 @@
   const form = document.getElementById('directory-search-form');
   if (!form) return;
   const input = document.getElementById('directory-search-input');
+  input.value = new URLSearchParams(window.location.search).get('q') || '';
   const resultsNode = document.getElementById('directory-results');
   const summary = document.getElementById('directory-result-summary');
   const filters = [...document.querySelectorAll('[data-directory-filter]')];
