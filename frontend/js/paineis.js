@@ -1446,10 +1446,6 @@
       imageEditor.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('candidate-image-editor-open');
     }
-    document.getElementById('company-photo-edit').addEventListener('click', () => {
-      closeCompanyPhotoViewer();
-      openCompanyImageEditor();
-    });
     document.getElementById('company-image-editor-close').addEventListener('click', closeImageEditor);
     imageEditor.addEventListener('click', event => { if (event.target === imageEditor) closeImageEditor(); });
     document.querySelectorAll('[data-editor-tab]').forEach(tab => tab.addEventListener('click', () => {
