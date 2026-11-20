@@ -119,7 +119,7 @@ body[data-a11y-font="larger"] .publicacoes-main .publication-description{font-si
 body[data-a11y-font="large"] .publicacoes-main .description-toggle{font-size:14px}
 body[data-a11y-font="larger"] .publicacoes-main .description-toggle{font-size:15px}
 body[data-a11y-font="large"] .publicacoes-main :is(.publicacoes-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.08em}
-body[data-a11y-font="larger"] .publicacoes-main :is(.publication-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.16em}
+body[data-a11y-font="larger"] .publicacoes-main :is(.publicacoes-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.16em}
 body[data-a11y-font="large"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.75}
 body[data-a11y-font="larger"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.8}
 
