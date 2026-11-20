@@ -231,6 +231,12 @@ const profileSchemaReady = pool.query(`
     UNIQUE (usuario_id, vaga_id, tipo)
   );
   CREATE INDEX IF NOT EXISTS idx_notificacoes_empresas_usuario_data ON notificacoes_empresas (usuario_id, criada_em DESC);
+  CREATE TABLE IF NOT EXISTS pesquisas_populares (
+    termo_normalizado TEXT PRIMARY KEY,
+    termo_exibicao VARCHAR(100) NOT NULL,
+    total_pesquisas BIGINT NOT NULL DEFAULT 0 CHECK (total_pesquisas >= 0),
+    atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
 const role = type => (req, res, next) => {
@@ -987,6 +993,32 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
+
+app.post('/api/pesquisas/registrar', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const termo = clean(req.body?.termo, 100).replace(/\\s+/g, ' ');
+  if (!termo || termo.length < 2) return res.status(400).json({ erro: 'Informe um termo de pesquisa válido.' });
+  const normalized = termo.toLocaleLowerCase('pt-BR');
+  await pool.query(
+    `INSERT INTO pesquisas_populares (termo_normalizado, termo_exibicao, total_pesquisas, atualizado_em)
+     VALUES ($1, $2, 1, NOW())
+     ON CONFLICT (termo_normalizado) DO UPDATE
+       SET total_pesquisas = pesquisas_populares.total_pesquisas + 1,
+           atualizado_em = NOW()`,
+    [normalized, termo]
+  );
+  res.json({ sucesso: true });
+}));
+
+app.get('/api/pesquisas/populares', asyncRoute(async (_req, res) => {
+  await profileSchemaReady;
+  const result = await pool.query(
+    `SELECT termo_exibicao FROM pesquisas_populares
+     ORDER BY total_pesquisas DESC, atualizado_em DESC, termo_normalizado ASC
+     LIMIT 3`
+  );
+  res.json({ pesquisas: result.rows.map(row => row.termo_exibicao) });
+}));
 
 app.get('/api/pesquisar', asyncRoute(async (req, res) => {
   await profileSchemaReady;
