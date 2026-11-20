@@ -189,11 +189,13 @@
   }
 
   async function compressVideo(file) {
-    if (!window.MediaRecorder || !HTMLMediaElement.prototype.captureStream) return file;
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) return file;
     const url = URL.createObjectURL(file);
     const video = document.createElement('video');
+    let stream = null;
+    let audioContext = null;
+    let frameHandle = 0;
     video.preload = 'auto';
-    video.muted = true;
     video.playsInline = true;
     video.src = url;
     try {
@@ -201,13 +203,35 @@
         video.onloadedmetadata = resolve;
         video.onerror = () => reject(new Error('Não foi possível preparar o vídeo.'));
       });
-      const stream = video.captureStream();
+      const scale = Math.min(1, 1920 / video.videoWidth, 1080 / video.videoHeight);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+      canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+      const context = canvas.getContext('2d');
+      const videoStream = canvas.captureStream(30);
+      let audioTracks = [];
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+        const source = audioContext.createMediaElementSource(video);
+        const destination = audioContext.createMediaStreamDestination();
+        source.connect(destination);
+        await audioContext.resume();
+        audioTracks = destination.stream.getAudioTracks();
+      } else if (typeof video.captureStream === 'function') {
+        video.muted = true;
+        audioTracks = video.captureStream().getAudioTracks();
+      }
+      stream = new MediaStream([...videoStream.getVideoTracks(), ...audioTracks]);
+      const drawFrame = () => {
+        if (video.readyState >= 2) context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        if (!video.ended) frameHandle = requestAnimationFrame(drawFrame);
+      };
+      drawFrame();
+
       const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
         .find(type => MediaRecorder.isTypeSupported(type));
-      if (!mimeType) {
-        stream.getTracks().forEach(track => track.stop());
-        return file;
-      }
+      if (!mimeType) return file;
       const recorder = new MediaRecorder(stream, {
         mimeType,
         videoBitsPerSecond: 2200000,
@@ -219,15 +243,15 @@
         recorder.onerror = () => reject(new Error('Não foi possível comprimir o vídeo neste navegador.'));
         recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
       });
-      recorder.start(1000);
-      await video.play();
-      await new Promise((resolve, reject) => {
+      const playbackEnded = new Promise((resolve, reject) => {
         video.onended = resolve;
         video.onerror = () => reject(new Error('Falha durante a leitura do vídeo.'));
       });
+      recorder.start(1000);
+      await video.play();
+      await playbackEnded;
       if (recorder.state !== 'inactive') recorder.stop();
       const blob = await finished;
-      stream.getTracks().forEach(track => track.stop());
       if (!blob.size || blob.size >= file.size) return file;
       return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webm', {
         type: 'video/webm',
@@ -236,17 +260,15 @@
     } catch {
       return file;
     } finally {
+      if (frameHandle) cancelAnimationFrame(frameHandle);
+      if (stream) stream.getTracks().forEach(track => track.stop());
+      if (audioContext) {
+        try { await audioContext.close(); } catch {}
+      }
       URL.revokeObjectURL(url);
       video.removeAttribute('src');
       video.load();
     }
-  }
-
-  function discardStagedMedia() {
-    const staged = uploadedMedia.splice(0);
-    staged.forEach(item => {
-      api('/api/publicacoes/upload/' + item.id, { method: 'DELETE' }).catch(() => {});
-    });
   }
 
   function clearPreview() {
