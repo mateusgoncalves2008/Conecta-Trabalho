@@ -1777,7 +1777,7 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
   transition:rotate .75s ease-in-out;
 }
 .site-header .brand:hover .brand-mark-image{
-  rotate:360deg;
+  rotate:190deg;
 }
 @media(hover:none){
   .site-header .brand{
