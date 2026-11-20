@@ -1439,7 +1439,7 @@ html[data-theme=dark] .back-to-top{background:#1c2838;border-color:#46566b;color
 @media(max-width:600px){.back-to-top{right:15px;bottom:32px;width:54px;height:54px}}
 @media(prefers-reduced-motion:reduce){.back-to-top{transition:none}}
 
-.accessibility-backdrop{position:fixed;inset:0;z-index:600;display:grid;place-items:center end;padding:20px;background:rgba(9,20,34,.58);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.accessibility-backdrop{position:fixed;inset:0;z-index:2000;display:grid;place-items:center end;padding:20px;background:rgba(9,20,34,.58);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
 .accessibility-backdrop.is-open{opacity:1;visibility:visible}
 .accessibility-dialog{width:min(430px,100%);height:auto;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);min-height:0;overflow:auto;padding:26px;background:#fff;color:#243247;border:1px solid #dce3eb;border-radius:16px;box-shadow:0 22px 70px rgba(0,0,0,.28)}
 .accessibility-dialog-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding-bottom:18px;border-bottom:1px solid #e5eaf0}
