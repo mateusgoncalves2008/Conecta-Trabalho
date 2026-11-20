@@ -813,6 +813,9 @@
           : document.getElementById('candidate-change-cover');
         trigger.disabled = true;
         try {
+          if (field === 'banner_perfil' && !['image/png','image/jpeg','image/webp'].includes(file.type)) {
+            throw new Error('Formato não permitido. Escolha PNG, JPG/JPEG ou WEBP.');
+          }
           const imageData = await prepareCandidateImage(file, maxDimension);
           await saveCandidateImage(field, imageData);
         } catch (error) {
