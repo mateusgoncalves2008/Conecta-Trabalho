@@ -1171,7 +1171,7 @@
           await loadCompanyProfile();
           Conecta.toast('Logotipo atualizado com sucesso.');
         } catch (error) { Conecta.toast(error.message); }
-        finally { input.value = ''; }
+        finally { input.value = ''; input.removeAttribute('capture'); }
       });
     };
     bindCompanyLogoImage();
