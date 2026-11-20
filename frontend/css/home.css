@@ -1204,3 +1204,18 @@ body[data-a11y-font=larger] main :is(p,span,a,label,button,input,select,textarea
 .company-public-followers strong{color:var(--ink);font-size:13px;font-weight:750}
 .company-public-followers span{color:var(--muted)}
 @media(max-width:760px){.company-public-follow-action{min-height:40px;min-width:112px;padding:0 16px;font-size:13px}.company-public-followers{min-height:40px;margin-left:0;padding:0 11px}}
+
+
+/* Navegação do perfil público: identidade visual ConectaTrabalho */
+.company-public-nav button:hover,
+.company-public-nav button:focus-visible,
+.company-public-nav button[aria-current="page"]{
+  color:var(--orange)!important;
+  border-bottom-color:var(--orange)!important;
+}
+html[data-theme="dark"] .company-public-nav button:hover,
+html[data-theme="dark"] .company-public-nav button:focus-visible,
+html[data-theme="dark"] .company-public-nav button[aria-current="page"]{
+  color:var(--orange)!important;
+  border-bottom-color:var(--orange)!important;
+}
