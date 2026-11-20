@@ -1,6 +1,8 @@
 (() => {
   const root = document.getElementById('company-public-content');
   if (!root) return;
+  const profileBackLink = document.getElementById('company-profile-back');
+  if (profileBackLink) profileBackLink.hidden = new URLSearchParams(location.search).get('origem') !== 'meu-perfil';
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
