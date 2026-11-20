@@ -912,11 +912,11 @@ html[data-theme="dark"] .company-public-nav button:hover,html[data-theme="dark"]
 .company-public-heading .company-public-tagline{font-size:15px;line-height:1.5}
 .company-public-heading .company-public-meta{margin-top:3px;font-size:13px;line-height:1.45}
 .company-public-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
-.company-public-primary-action,.company-public-secondary-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 20px;border:1px solid #0a66c2;border-radius:24px;font-size:14px;font-weight:700;white-space:nowrap;text-decoration:none;cursor:pointer}
-.company-public-primary-action{background:#0a66c2;color:#fff}
-.company-public-primary-action:hover{background:#004182}
-.company-public-secondary-action{background:transparent;color:#0a66c2}
-.company-public-secondary-action:hover{background:#eef6ff}
+.company-public-primary-action,.company-public-secondary-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 20px;border:1px solid var(--orange);border-radius:24px;font-size:14px;font-weight:700;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.company-public-primary-action{background:var(--orange);color:#fff}
+.company-public-primary-action:hover{background:var(--orange-dark);border-color:var(--orange-dark)}
+.company-public-secondary-action{background:transparent;color:var(--orange)}
+.company-public-secondary-action:hover{background:rgba(214,107,61,.09);color:var(--orange-dark);border-color:var(--orange-dark)}
 .company-public-nav{position:relative;z-index:2;display:flex;gap:28px;padding:0 24px;border:0;border-top:1px solid var(--line);border-radius:0;background:var(--surface);overflow-x:auto;scrollbar-width:none}
 .company-public-nav::-webkit-scrollbar{display:none}
 .company-public-nav button{display:inline-flex;align-items:center;min-height:62px;padding:0 2px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-size:15px;font-weight:700;white-space:nowrap;cursor:pointer}
@@ -1194,10 +1194,10 @@ body[data-a11y-font=larger] main :is(p,span,a,label,button,input,select,textarea
 }
 
 /* Acompanhamento de empresas no perfil público */
-.company-public-follow-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;min-width:128px;padding:0 20px;border:1px solid #0a66c2;border-radius:24px;background:#0a66c2;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
-.company-public-follow-action:hover{background:#004182;border-color:#004182}
-.company-public-follow-action.is-following{background:transparent;color:#0a66c2}
-.company-public-follow-action.is-following:hover{background:#eef6ff}
+.company-public-follow-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;min-width:128px;padding:0 20px;border:1px solid var(--orange);border-radius:24px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.company-public-follow-action:hover{background:var(--orange-dark);border-color:var(--orange-dark)}
+.company-public-follow-action.is-following{background:transparent;color:var(--orange);border-color:var(--orange)}
+.company-public-follow-action.is-following:hover{background:rgba(214,107,61,.09);color:var(--orange-dark);border-color:var(--orange-dark)}
 .company-public-follow-action:disabled{opacity:.65;cursor:wait}
 .company-public-followers{display:inline-flex;align-items:center;gap:6px;min-height:42px;margin:0 0 0 3px;padding:0 13px;border:1px solid var(--line);border-radius:24px;background:var(--surface-soft,#f6f8fb);color:var(--muted);font-size:12px;white-space:nowrap}
 .company-public-followers i{color:var(--orange);font-size:13px}
