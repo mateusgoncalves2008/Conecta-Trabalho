@@ -535,6 +535,21 @@
       image.onerror = () => Conecta.toast('Não foi possível abrir esta foto para edição.');
       image.src = current;
     }
+    function openCompanyImageEditorFromImage(image) {
+      editorState.image = image;
+      editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+      editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value`).textContent = '100%'; });
+      document.getElementById('company-image-vignette').value = '0';
+      document.getElementById('company-image-vignette-value').textContent = '0%';
+      document.getElementById('company-image-zoom').value = '1';
+      document.getElementById('company-image-angle').value = '0';
+      document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+      renderImageEditor();
+      imageEditor.classList.add('is-open');
+      imageEditor.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('candidate-image-editor-open');
+    }
     function closeImageEditor() {
       imageEditor.classList.remove('is-open');
       imageEditor.setAttribute('aria-hidden', 'true');
@@ -1124,12 +1139,144 @@
     document.getElementById('company-photo-update').addEventListener('click', openCompanyPhotoUpdateModal);
     document.getElementById('company-photo-update-close').addEventListener('click', closeCompanyPhotoUpdateModal);
     companyPhotoUpdateModal.addEventListener('click', event => { if (event.target === companyPhotoUpdateModal) closeCompanyPhotoUpdateModal(); });
-    document.getElementById('company-photo-use-camera').addEventListener('click', () => {
-      const input = document.getElementById('company-logo-input');
-      input.setAttribute('capture', 'user');
-      closeCompanyPhotoUpdateModal();
-      showImageGuidelines('profile', () => input.click());
+    const companyCameraModal = document.getElementById('company-camera-modal');
+    const companyCameraVideo = document.getElementById('company-camera-video');
+    const companyCameraPreview = document.getElementById('company-camera-preview');
+    const companyCameraFeedback = document.getElementById('company-camera-feedback');
+    const companyCameraCountdown = document.getElementById('company-camera-countdown');
+    const companyCameraCapture = document.getElementById('company-camera-capture');
+    const companyCameraCancel = document.getElementById('company-camera-cancel');
+    const companyCameraPreviewActions = document.getElementById('company-camera-preview-actions');
+    const companyCameraFlash = document.getElementById('company-camera-flash');
+    let companyCameraStream = null;
+    let companyCapturedCanvas = null;
+    let companyCameraTimer = null;
+    const stopCompanyCamera = () => {
+      if (companyCameraStream) companyCameraStream.getTracks().forEach(track => track.stop());
+      companyCameraStream = null;
+      companyCameraVideo.srcObject = null;
+    };
+    const closeCompanyCamera = () => {
+      if (companyCameraTimer) window.clearTimeout(companyCameraTimer);
+      companyCameraTimer = null;
+      stopCompanyCamera();
+      companyCameraModal.classList.remove('is-open');
+      companyCameraModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-camera-open');
+      companyCapturedCanvas = null;
+      companyCameraVideo.hidden = false;
+      companyCameraPreview.hidden = true;
+      companyCameraPreview.removeAttribute('src');
+      companyCameraCountdown.textContent = '';
+      companyCameraCountdown.classList.remove('is-visible');
+      companyCameraFlash.classList.remove('is-visible');
+      companyCameraCapture.hidden = false;
+      companyCameraCancel.hidden = false;
+      companyCameraPreviewActions.hidden = true;
+      companyCameraFeedback.textContent = 'Posicione a imagem dentro da área da câmera.';
+      companyCameraCapture.disabled = false;
+      companyCameraCancel.disabled = false;
+    };
+    document.getElementById('company-photo-use-camera').addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        Conecta.toast('O acesso à câmera exige HTTPS ou localhost e um navegador compatível.');
+        return;
+      }
+      const button = document.getElementById('company-photo-use-camera');
+      button.disabled = true;
+      companyCameraFeedback.textContent = 'Aguardando autorização para acessar a câmera...';
+      try {
+        companyCameraStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } }
+        });
+        companyCameraVideo.srcObject = companyCameraStream;
+        await companyCameraVideo.play();
+        closeCompanyPhotoUpdateModal();
+        companyCameraModal.classList.add('is-open');
+        companyCameraModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('candidate-camera-open');
+        companyCameraFeedback.textContent = 'Posicione o logotipo ou a imagem dentro da área da câmera.';
+      } catch (error) {
+        stopCompanyCamera();
+        const message = error && error.name === 'NotAllowedError'
+          ? 'Permita o acesso à câmera nas configurações do navegador e tente novamente.'
+          : error && error.name === 'NotFoundError'
+            ? 'Nenhuma câmera foi encontrada neste dispositivo.'
+            : 'Não foi possível iniciar a câmera. Verifique se ela está disponível e tente novamente.';
+        Conecta.toast(message);
+      } finally { button.disabled = false; }
     });
+    const captureCompanyCameraFrame = () => {
+      if (!companyCameraStream || !companyCameraVideo.videoWidth || !companyCameraVideo.videoHeight) {
+        companyCameraFeedback.textContent = 'A câmera ainda está iniciando. Aguarde um instante.';
+        return;
+      }
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(companyCameraVideo.videoWidth, companyCameraVideo.videoHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(companyCameraVideo.videoWidth * scale);
+      canvas.height = Math.round(companyCameraVideo.videoHeight * scale);
+      const context = canvas.getContext('2d');
+      if (!context) { companyCameraFeedback.textContent = 'Não foi possível preparar a imagem. Tente novamente.'; return; }
+      context.drawImage(companyCameraVideo, 0, 0, canvas.width, canvas.height);
+      companyCapturedCanvas = canvas;
+      companyCameraPreview.src = canvas.toDataURL('image/jpeg', .92);
+      companyCameraVideo.hidden = true;
+      companyCameraPreview.hidden = false;
+      companyCameraCapture.hidden = true;
+      companyCameraCancel.hidden = true;
+      companyCameraPreviewActions.hidden = false;
+      companyCameraFeedback.textContent = 'Confira a imagem. Você pode tirar novamente ou usar esta foto.';
+      companyCameraFlash.classList.add('is-visible');
+      window.setTimeout(() => companyCameraFlash.classList.remove('is-visible'), 260);
+    };
+    companyCameraCapture.addEventListener('click', () => {
+      if (companyCameraTimer || companyCameraCapture.disabled) return;
+      companyCameraCapture.disabled = true;
+      companyCameraCancel.disabled = true;
+      let count = 3;
+      const tick = () => {
+        companyCameraCountdown.classList.remove('is-visible');
+        companyCameraCountdown.textContent = String(count);
+        void companyCameraCountdown.offsetWidth;
+        companyCameraCountdown.classList.add('is-visible');
+        if (count > 1) {
+          count -= 1;
+          companyCameraTimer = window.setTimeout(tick, 1000);
+          return;
+        }
+        companyCameraTimer = window.setTimeout(() => {
+          companyCameraTimer = null;
+          companyCameraCountdown.classList.remove('is-visible');
+          companyCameraCountdown.textContent = '';
+          captureCompanyCameraFrame();
+          companyCameraCapture.disabled = false;
+          companyCameraCancel.disabled = false;
+        }, 850);
+      };
+      tick();
+    });
+    document.getElementById('company-camera-retake').addEventListener('click', () => {
+      companyCapturedCanvas = null;
+      companyCameraVideo.hidden = false;
+      companyCameraPreview.hidden = true;
+      companyCameraPreview.removeAttribute('src');
+      companyCameraPreviewActions.hidden = true;
+      companyCameraCapture.hidden = false;
+      companyCameraCancel.hidden = false;
+      companyCameraFeedback.textContent = 'Posicione o logotipo ou a imagem dentro da área da câmera.';
+    });
+    document.getElementById('company-camera-use').addEventListener('click', () => {
+      if (!companyCapturedCanvas) return;
+      const capturedImage = companyCapturedCanvas;
+      closeCompanyCamera();
+      openCompanyImageEditorFromImage(capturedImage);
+    });
+    document.getElementById('company-camera-close').addEventListener('click', closeCompanyCamera);
+    companyCameraCancel.addEventListener('click', closeCompanyCamera);
+    companyCameraModal.addEventListener('click', event => { if (event.target === companyCameraModal) closeCompanyCamera(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && companyCameraModal.classList.contains('is-open')) closeCompanyCamera(); });
     document.getElementById('company-photo-upload').addEventListener('click', () => {
       const input = document.getElementById('company-logo-input');
       input.removeAttribute('capture');
