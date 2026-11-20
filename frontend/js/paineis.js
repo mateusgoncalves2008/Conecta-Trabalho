@@ -9,7 +9,14 @@
     aberta: 'Aberta', pausada: 'Pausada', encerrada: 'Encerrada'
   })[status] || status;
 
-  function showBannerGuidelines(onChoose) {
+  function showImageGuidelines(type, onChoose) {
+    const isBanner = type === 'banner';
+    const title = isBanner ? 'Requisitos do banner' : 'Requisitos da foto de perfil';
+    const eyebrow = isBanner ? 'IMAGEM DE CAPA' : 'FOTO DE PERFIL';
+    const dimension = isBanner ? '1600 × 600 pixels (proporção 8:3)' : '600 × 600 pixels (formato quadrado)';
+    const note = isBanner
+      ? 'A imagem será ajustada automaticamente para se adaptar à área do banner. Para um melhor resultado, use uma imagem horizontal.'
+      : 'A imagem será ajustada automaticamente para se adaptar ao espaço circular ou quadrado do perfil. Para um melhor resultado, use uma imagem quadrada, com o rosto ou logotipo centralizado.';
     let modal = document.getElementById('banner-guidelines-modal');
     if (!modal) {
       modal = document.createElement('div');
@@ -19,15 +26,15 @@
       modal.innerHTML = `
         <section class="banner-guidelines-dialog" role="dialog" aria-modal="true" aria-labelledby="banner-guidelines-title">
           <button type="button" class="banner-guidelines-close" data-banner-guidelines-close aria-label="Fechar">×</button>
-          <span class="banner-guidelines-eyebrow">IMAGEM DE CAPA</span>
-          <h2 id="banner-guidelines-title">Requisitos do banner</h2>
+          <span class="banner-guidelines-eyebrow" data-guidelines-eyebrow></span>
+          <h2 id="banner-guidelines-title" data-guidelines-title></h2>
           <p>Para garantir uma boa apresentação do seu perfil, escolha uma imagem com estas características:</p>
           <div class="banner-guidelines-list">
             <div><i class="fa-regular fa-image" aria-hidden="true"></i><span><strong>Formatos permitidos</strong><small>PNG, JPG/JPEG ou WEBP</small></span></div>
-            <div><i class="fa-solid fa-expand" aria-hidden="true"></i><span><strong>Dimensão recomendada</strong><small>1600 × 600 pixels (proporção 8:3)</small></span></div>
+            <div><i class="fa-solid fa-expand" aria-hidden="true"></i><span><strong>Dimensão recomendada</strong><small data-guidelines-dimension></small></span></div>
             <div><i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i><span><strong>Tamanho máximo</strong><small>5 MB por imagem</small></span></div>
           </div>
-          <p class="banner-guidelines-note">A imagem será ajustada automaticamente para se adaptar à área do banner. Para um melhor resultado, use uma imagem horizontal.</p>
+          <p class="banner-guidelines-note" data-guidelines-note></p>
           <div class="banner-guidelines-actions">
             <button type="button" class="button button-outline" data-banner-guidelines-close>Cancelar</button>
             <button type="button" class="button button-primary" data-banner-guidelines-choose>Escolher imagem</button>
@@ -48,8 +55,11 @@
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && modal.classList.contains('is-open')) close();
       });
-      modal._close = close;
     }
+    modal.querySelector('[data-guidelines-eyebrow]').textContent = eyebrow;
+    modal.querySelector('[data-guidelines-title]').textContent = title;
+    modal.querySelector('[data-guidelines-dimension]').textContent = dimension;
+    modal.querySelector('[data-guidelines-note]').textContent = note;
     modal._onChoose = onChoose;
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
@@ -230,6 +240,7 @@
   let candidateProfileCache = {};
 
   async function prepareCandidateImage(file, maxDimension) {
+    if (!['image/png','image/jpeg','image/webp'].includes(file.type)) throw new Error('Formato não permitido. Escolha PNG, JPG/JPEG ou WEBP.');
     if (file.size > 5 * 1024 * 1024) throw new Error('Escolha uma imagem de até 5 MB.');
     let bitmap;
     try {
@@ -395,7 +406,10 @@
       photoViewer.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('candidate-photo-viewer-open');
     };
-    document.getElementById('candidate-change-photo').addEventListener('click', openPhotoViewer);
+    document.getElementById('candidate-change-photo').addEventListener('click', () => {
+      if (!candidateProfileCache.foto_perfil) return showImageGuidelines('profile', () => quickPhotoInput.click());
+      openPhotoViewer();
+    });
     document.getElementById('candidate-profile-avatar').addEventListener('click', openPhotoViewer);
     document.getElementById('candidate-profile-initials').addEventListener('click', openPhotoViewer);
     document.getElementById('candidate-photo-viewer-close').addEventListener('click', closePhotoViewer);
@@ -784,6 +798,14 @@
       editorInput.removeAttribute('capture');
       editorInput.click();
     });
+    const candidatePhotoInput = document.getElementById('candidate-photo-input');
+    const candidatePhotoLabel = document.querySelector('label[for="candidate-photo-input"]');
+    if (candidatePhotoLabel && candidatePhotoInput) {
+      candidatePhotoLabel.addEventListener('click', event => {
+        event.preventDefault();
+        showImageGuidelines('profile', () => candidatePhotoInput.click());
+      });
+    }
     document.getElementById('candidate-photo-delete').addEventListener('click', async () => {
       if (!window.confirm('Tem certeza de que deseja excluir sua foto de perfil?')) return;
       const button = document.getElementById('candidate-photo-delete');
@@ -802,7 +824,7 @@
         button.disabled = false;
       }
     });
-    document.getElementById('candidate-change-cover').addEventListener('click', () => showBannerGuidelines(() => quickCoverInput.click()));
+    document.getElementById('candidate-change-cover').addEventListener('click', () => showImageGuidelines('banner', () => quickCoverInput.click()));
 
     async function handleQuickImage(input, field, maxDimension) {
       input.addEventListener('change', async event => {
@@ -1044,7 +1066,9 @@
     const bindImage = (buttonId,inputId,field,width,height,label) => {
       const button = document.getElementById(buttonId);
       const input = document.getElementById(inputId);
-      button.addEventListener('click', () => input.click());
+      button.addEventListener('click', () => field === 'foto_perfil'
+        ? showImageGuidelines('profile', () => input.click())
+        : input.click());
       input.addEventListener('change', async () => {
         const file = input.files[0];
         if (!file) return;
@@ -1246,7 +1270,7 @@
         coverEditorSave.disabled = false;
       }
     });
-    coverChangeAction.addEventListener('click', () => showBannerGuidelines(() => coverInput.click()));
+    coverChangeAction.addEventListener('click', () => showImageGuidelines('banner', () => coverInput.click()));
     coverInput.addEventListener('change', async () => {
       const file = coverInput.files[0];
       if (!file) return;
