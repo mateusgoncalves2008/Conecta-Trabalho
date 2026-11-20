@@ -31,9 +31,10 @@
       const cards = [];
       people.forEach(person => {
         const description = person.titulo_profissional || 'Profissional';
-        cards.push('<article class="directory-card"><div class="directory-card-identity">' + avatar(person.foto_perfil, person.nome) +
-          '<div class="directory-card-copy"><span class="directory-card-type">Pessoa</span><h2>' + escapeHTML(person.nome) + '</h2><p>' + escapeHTML(description) + '</p><small><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ' + escapeHTML(person.cidade || 'Localização não informada') + '</small></div></div>' +
-          '<a class="button button-outline button-small" href="candidato-perfil.html?id=' + encodeURIComponent(person.id) + '">Ver perfil</a></article>');
+        const profileUrl = 'candidato-perfil.html?id=' + encodeURIComponent(person.id);
+        cards.push('<article class="directory-card"><div class="directory-card-identity"><a class="directory-profile-link directory-avatar-link" href="' + profileUrl + '" aria-label="Ver perfil de ' + escapeHTML(person.nome) + '">' + avatar(person.foto_perfil, person.nome) + '</a>' +
+          '<div class="directory-card-copy"><span class="directory-card-type">Pessoa</span><h2><a class="directory-profile-link" href="' + profileUrl + '">' + escapeHTML(person.nome) + '</a></h2><p>' + escapeHTML(description) + '</p><small><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ' + escapeHTML(person.cidade || 'Localização não informada') + '</small></div></div>' +
+          '<a class="button button-outline button-small" href="' + profileUrl + '">Ver perfil</a></article>');
       });
       companies.forEach(company => {
         const name = company.nome || 'Empresa';
@@ -41,9 +42,10 @@
         const followAction = currentUser?.tipo === 'candidato'
           ? '<button type="button" class="button ' + (company.seguindo ? 'button-outline is-following' : 'button-primary') + ' button-small" data-follow-company="' + escapeHTML(company.id) + '" aria-pressed="' + String(Boolean(company.seguindo)) + '">' + (company.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
           : '';
-        cards.push('<article class="directory-card"><div class="directory-card-identity">' + avatar(company.foto_perfil, name, true) +
-          '<div class="directory-card-copy"><span class="directory-card-type">Empresa</span><h2>' + escapeHTML(name) + '</h2><p>' + escapeHTML(description) + '</p><small><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ' + escapeHTML(company.cidade || 'Localização não informada') + '</small><small>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + ' seguidores · ' + Number(company.vagas_abertas || 0).toLocaleString('pt-BR') + ' vagas abertas</small></div></div>' +
-          '<div class="directory-card-actions"><a class="button button-outline button-small" href="empresa-perfil.html?id=' + encodeURIComponent(company.id) + '">Ver empresa</a>' + followAction + '</div></article>');
+        const profileUrl = 'empresa-perfil.html?id=' + encodeURIComponent(company.id);
+        cards.push('<article class="directory-card"><div class="directory-card-identity"><a class="directory-profile-link directory-avatar-link" href="' + profileUrl + '" aria-label="Ver empresa ' + escapeHTML(name) + '">' + avatar(company.foto_perfil, name, true) + '</a>' +
+          '<div class="directory-card-copy"><span class="directory-card-type">Empresa</span><h2><a class="directory-profile-link" href="' + profileUrl + '">' + escapeHTML(name) + '</a></h2><p>' + escapeHTML(description) + '</p><small><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ' + escapeHTML(company.cidade || 'Localização não informada') + '</small><small>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + ' seguidores · ' + Number(company.vagas_abertas || 0).toLocaleString('pt-BR') + ' vagas abertas</small></div></div>' +
+          '<div class="directory-card-actions"><a class="button button-outline button-small" href="' + profileUrl + '">Ver empresa</a>' + followAction + '</div></article>');
       });
       resultsNode.innerHTML = cards.length ? cards.join('') : '<div class="directory-empty"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><h2>Nenhum resultado encontrado</h2><p>Tente pesquisar por outro nome, profissão, setor ou cidade.</p></div>';
       resultsNode.querySelectorAll('[data-follow-company]').forEach(button => button.addEventListener('click', async () => {
