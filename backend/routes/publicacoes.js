@@ -8,7 +8,7 @@ const MAX_PHOTO_BYTES = 20 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 const MAX_VIDEO_SECONDS = 60;
 const MAX_DESCRIPTION_LENGTH = 2000;
-const ALLOWED_REACTIONS = ['👍', '❤️', '😂', '👏', '🎉', '💡', '🔥'];
+const ALLOWED_REACTIONS = ['❤️'];
 const REPORT_REASONS = [
   'Conteúdo ofensivo ou discriminatório',
   'Informação falsa ou enganosa',
@@ -36,6 +36,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     'CREATE INDEX IF NOT EXISTS idx_publicacao_midias_staging ON publicacao_midias (autor_id, criada_em) WHERE publicacao_id IS NULL',
     'CREATE TABLE IF NOT EXISTS publicacao_reacoes (publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, emoji VARCHAR(16) NOT NULL, criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY (publicacao_id, usuario_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_reacoes_post ON publicacao_reacoes (publicacao_id)',
+    "UPDATE publicacao_reacoes SET emoji='❤️' WHERE emoji <> '❤️'",
     'CREATE TABLE IF NOT EXISTS publicacao_denuncias (id BIGSERIAL PRIMARY KEY, publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, denunciante_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, motivo VARCHAR(100) NOT NULL, detalhe VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT \'pendente\' CHECK (status IN (\'pendente\',\'em_analise\',\'resolvida\',\'descartada\')), criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE (publicacao_id, denunciante_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)'
   ].join(';'));
@@ -118,7 +119,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     const [mediaResult, reactionResult, myReactionResult] = await Promise.all([
       pool.query('SELECT id,publicacao_id,tipo,mime_type,tamanho_bytes,duracao_segundos,ordem FROM publicacao_midias WHERE publicacao_id=ANY($1::bigint[]) ORDER BY ordem,id', [ids]),
       pool.query('SELECT publicacao_id,emoji,COUNT(*)::int AS total FROM publicacao_reacoes WHERE publicacao_id=ANY($1::bigint[]) GROUP BY publicacao_id,emoji ORDER BY emoji', [ids]),
-      req.session.user ? pool.query('SELECT publicacao_id,emoji FROM publicacao_reacoes WHERE usuario_id=$1 AND publicacao_id=ANY($2::bigint[])', [req.session.user.id, ids]) : Promise.resolve({ rows: [] })
+      req.session.user ? pool.query('SELECT publicacao_id FROM publicacao_reacoes WHERE usuario_id=$1 AND publicacao_id=ANY($2::bigint[])', [req.session.user.id, ids]) : Promise.resolve({ rows: [] })
     ]);
     const mediaByPost = new Map();
     for (const media of mediaResult.rows) {
@@ -135,7 +136,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
       if (!reactionsByPost.has(reaction.publicacao_id)) reactionsByPost.set(reaction.publicacao_id, []);
       reactionsByPost.get(reaction.publicacao_id).push({ emoji: reaction.emoji, total: reaction.total });
     }
-    const myReactions = new Map(myReactionResult.rows.map(item => [String(item.publicacao_id), item.emoji]));
+    const myReactions = new Set(myReactionResult.rows.map(item => String(item.publicacao_id)));
     res.json({
       publicacoes: rows.map(post => ({
         id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
@@ -147,7 +148,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         },
         midias: mediaByPost.get(post.id) || [],
         reacoes: reactionsByPost.get(post.id) || [],
-        minhaReacao: myReactions.get(String(post.id)) || null,
+        minhaCurtida: myReactions.has(String(post.id)),
         minha: Boolean(req.session.user && String(req.session.user.id) === String(post.autor_id))
       })),
       proximoCursor: hasMore ? cursor + limit : null
