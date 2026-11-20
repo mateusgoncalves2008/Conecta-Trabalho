@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Área restrita para análise de denúncias de publicações do ConectaTrabalho.">
+  <meta name="theme-color" content="#142b49">
+  <link rel="icon" href="/img/logo-conectatrabalho.svg" type="image/svg+xml">
+  <title>Moderação de publicações | ConectaTrabalho</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/publicacoes.css">
+  <link rel="stylesheet" href="/css/moderacao-publicacoes.css">
+  <script src="/js/main.js" defer></script>
+  <script src="/js/moderacao-publicacoes.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ConectaTrabalho - início"><img class="brand-mark-image" src="/img/logo-conectatrabalho.svg" alt="" width="38" height="38"><span>Conecta<span class="brand-light">Trabalho</span></span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal"><a href="/">Início</a><a href="/pages/vagas.html">Vagas</a><a href="/pages/publicacoes.html">Publicações</a><a href="/pages/como-funciona.html">Como funciona</a><a href="/pages/sobre.html">Sobre</a><a class="mobile-login-link" href="/pages/login.html">Entrar</a><a class="mobile-register-link" href="/pages/cadastro.html">Cadastrar</a></nav>
+    <div class="header-actions"><a class="button button-outline button-small" href="/pages/login.html">Entrar</a><a class="button button-primary button-small" href="/pages/cadastro.html">Cadastrar</a></div>
+  </header>
+  <main class="moderation-main">
+    <section class="moderation-heading"><span class="eyebrow">ÁREA RESTRITA</span><h1>Moderação de publicações</h1><p>Analise as denúncias enviadas pela comunidade e atualize a situação de cada ocorrência.</p></section>
+    <section class="moderation-panel">
+      <div class="moderation-toolbar"><div><h2>Denúncias recebidas</h2><span id="moderation-count">Carregando...</span></div><label for="moderation-filter">Filtrar situação<select id="moderation-filter"><option value="todas">Todas</option><option value="pendente">Pendentes</option><option value="em_analise">Em análise</option><option value="resolvida">Resolvidas</option><option value="descartada">Descartadas</option></select></label></div>
+      <div id="moderation-list" class="moderation-list" aria-live="polite"><div class="feed-loading">Carregando denúncias...</div></div>
+    </section>
+    <div class="moderation-access-message" id="moderation-access-message" hidden></div>
+  </main>
+  <footer class="site-footer site-footer-simple"><nav class="footer-simple-links" aria-label="Links institucionais"><a href="/pages/sobre.html" class="footer-simple-link">Sobre</a><a href="/pages/acessibilidade.html" class="footer-simple-link">Acessibilidade</a><a href="/pages/central-ajuda.html" class="footer-simple-link">Central de Ajuda</a><a href="/pages/termos-privacidade.html" class="footer-simple-link">Termos e Privacidade</a><a href="/pages/publicidade.html" class="footer-simple-link">Publicidade</a><a href="/pages/solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas</a><a href="/pages/aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a><a href="/pages/mais.html" class="footer-simple-link">Mais</a></nav><div class="footer-simple-copyright"><a class="footer-simple-brand" href="/">ConectaTrabalho</a><span>ConectaTrabalho © <span class="current-year"></span></span></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
