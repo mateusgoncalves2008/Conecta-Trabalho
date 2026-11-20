@@ -271,6 +271,15 @@
     }
   }
 
+  function discardStagedMedia() {
+    const staged = uploadedMedia.splice(0, uploadedMedia.length);
+    if (!api) return;
+    staged.forEach(media => {
+      if (!media || !media.id) return;
+      api('/api/publicacoes/upload/' + encodeURIComponent(media.id), { method: 'DELETE' }).catch(() => {});
+    });
+  }
+
   function clearPreview() {
     selectedFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
     selectedFiles = [];
