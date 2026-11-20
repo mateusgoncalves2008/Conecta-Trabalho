@@ -164,3 +164,12 @@ CREATE TABLE IF NOT EXISTS publicacao_denuncias (
 );
 CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data
   ON publicacao_denuncias (status, criada_em DESC);
+
+
+-- Ranking global dos termos mais pesquisados pela comunidade.
+CREATE TABLE IF NOT EXISTS pesquisas_populares (
+  termo_normalizado TEXT PRIMARY KEY,
+  termo_exibicao VARCHAR(100) NOT NULL,
+  total_pesquisas BIGINT NOT NULL DEFAULT 0 CHECK (total_pesquisas >= 0),
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
