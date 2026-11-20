@@ -25,7 +25,7 @@ const MIME_TYPES = {
   'video/webm': { kind: 'video', extension: 'webm' }
 };
 
-const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference }) => {
+const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) => {
   const router = express.Router();
   const schemaReady = pool.query([
     'CREATE TABLE IF NOT EXISTS publicacoes (id BIGSERIAL PRIMARY KEY, autor_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, descricao TEXT NOT NULL DEFAULT \'\', criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW())',
@@ -39,6 +39,13 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
     'CREATE TABLE IF NOT EXISTS publicacao_denuncias (id BIGSERIAL PRIMARY KEY, publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, denunciante_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, motivo VARCHAR(100) NOT NULL, detalhe VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT \'pendente\' CHECK (status IN (\'pendente\',\'em_analise\',\'resolvida\',\'descartada\')), criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE (publicacao_id, denunciante_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)'
   ].join(';'));
+  const member = (req, res, next) => {
+    const user = req.session.user;
+    if (!user) return res.status(401).json({ erro: 'Faça login para continuar.' });
+    if (!['candidato', 'empresa'].includes(user.tipo)) return res.status(403).json({ erro: 'Somente candidatos e empresas podem interagir com as publicações.' });
+    if (user.tipo === 'empresa' && !user.emailVerificado) return res.status(403).json({ erro: 'Confirme o e-mail da empresa para continuar.' });
+    next();
+  };
   const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
   const uploadLimit = rateLimit({
     windowMs: 15 * 60 * 1000, limit: 25,
@@ -75,11 +82,22 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
 
   router.get('/', asyncRoute(async (req, res) => {
     await schemaReady;
+    if (s3) {
+      const expired = await pool.query("SELECT id,storage_key FROM publicacao_midias WHERE publicacao_id IS NULL AND criada_em < NOW() - INTERVAL '24 hours' ORDER BY criada_em LIMIT 50");
+      for (const item of expired.rows) {
+        try {
+          await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: item.storage_key }));
+          await pool.query('DELETE FROM publicacao_midias WHERE id=$1 AND publicacao_id IS NULL', [item.id]);
+        } catch (error) {
+          console.warn('Não foi possível limpar uma mídia temporária:', error.message);
+        }
+      }
+    }
     const limit = Math.min(Math.max(Number(req.query.limit) || 15, 1), 30);
     const cursor = Number(req.query.cursor) || 0;
     if (!Number.isSafeInteger(cursor) || cursor < 0) return res.status(400).json({ erro: 'Página inválida.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,COALESCE(NULLIF(u.nome_empresa,\'\'),NULLIF(u.nome_fantasia,\'\'),u.nome) AS nome_exibicao,u.foto_perfil FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
+      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,COALESCE(NULLIF(u.nome_empresa,\'\'),NULLIF(u.nome_fantasia,\'\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
       [limit + 1, cursor]
     );
     const hasMore = posts.rows.length > limit;
@@ -112,7 +130,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
         id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
         autor: {
           id: post.autor_id, nome: post.nome_exibicao, tipo: post.tipo,
-          foto: imageReference(post.autor_id, 'foto_perfil', post.foto_perfil)
+          foto: (post.tipo === 'empresa' || post.visibilidade_foto === 'todos' || (post.visibilidade_foto === 'usuarios' && req.session.user)) ? imageReference(post.autor_id, 'foto_perfil', post.foto_perfil) : null
         },
         midias: mediaByPost.get(post.id) || [],
         reacoes: reactionsByPost.get(post.id) || [],
@@ -123,7 +141,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
     });
   }));
 
-  router.post('/upload', auth, uploadLimit, asyncRoute(async (req, res) => {
+  router.post('/upload', member, uploadLimit, asyncRoute(async (req, res) => {
     await schemaReady;
     if (!s3) return res.status(503).json({ erro: 'O armazenamento de arquivos não está configurado no servidor.' });
     const mime = String(req.headers['x-media-mime'] || '').toLowerCase();
@@ -203,7 +221,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
     }
   }));
 
-  router.delete('/upload/:id', auth, asyncRoute(async (req, res) => {
+  router.delete('/upload/:id', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Arquivo inválido.' });
