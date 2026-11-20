@@ -46,9 +46,9 @@
 .publication-menu{position:relative}
 .publication-menu button{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:21px}
 .publication-menu button:hover{background:var(--page);color:var(--ink)}
-.publication-description{padding:0 20px 15px;color:var(--ink);font-size:13px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}
+.publication-description{padding:0 20px 15px;color:var(--ink);font-size:14px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}
 .publication-description.is-collapsed{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
-.description-toggle{display:inline-block;margin:4px 0 0;padding:0;border:0;background:transparent;color:var(--orange-dark);font-size:12px;font-weight:700}
+.description-toggle{display:inline-block;margin:4px 0 0;padding:0;border:0;background:transparent;color:var(--orange-dark);font-size:13px;font-weight:700}
 .publication-media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;max-height:620px;overflow:hidden;background:var(--page)}
 .publication-media.single{grid-template-columns:minmax(0,1fr)}
 .publication-media-item{position:relative;min-width:0;max-height:560px;overflow:hidden;background:#111}
@@ -111,3 +111,14 @@ html[data-theme=dark] .reaction-picker{background:#182638;border-color:#40536a}
 html[data-theme=dark] .load-more-button{background:#182638;border-color:#40536a;color:#edf2f7}
 html[data-theme=dark] .dialog-close{background:#26384d;color:#edf2f7}
 body.a11y-motion .publicacoes-main *,body.a11y-motion .publicacoes-main *::before,body.a11y-motion .publicacoes-main *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+
+/* A escala de texto da acessibilidade também atende ao feed, sem alterar a estrutura dos cards. */
+body[data-a11y-font="large"] .publicacoes-main .publication-description{font-size:15.1px}
+body[data-a11y-font="larger"] .publicacoes-main .publication-description{font-size:16.2px}
+body[data-a11y-font="large"] .publicacoes-main .description-toggle{font-size:14px}
+body[data-a11y-font="larger"] .publicacoes-main .description-toggle{font-size:15px}
+body[data-a11y-font="large"] .publicacoes-main :is(.publication-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.08em}
+body[data-a11y-font="larger"] .publicacoes-main :is(.publication-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.16em}
+body[data-a11y-font="large"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.75}
+body[data-a11y-font="larger"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.8}
