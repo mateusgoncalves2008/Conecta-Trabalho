@@ -921,6 +921,19 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
   background:var(--surface-soft,#f8fafc);
   box-sizing:border-box;
 }
+
+/* No modo escuro, os cartões de informações institucionais acompanham o painel */
+html[data-theme="dark"] .company-institutional-item{
+  background:#1e3046;
+  border-color:#40536a;
+}
+html[data-theme="dark"] .company-institutional-item>span{
+  color:#aebed0;
+}
+html[data-theme="dark"] .company-institutional-item strong,
+html[data-theme="dark"] .company-institutional-item p{
+  color:#e8eef5;
+}
 .company-institutional-item>span{font-size:12px;line-height:1.35}
 .company-institutional-item strong,
 .company-institutional-item p{font-size:14px;line-height:1.5}
