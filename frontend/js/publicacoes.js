@@ -51,6 +51,16 @@
       composer.hidden = false;
       visitorNote.hidden = true;
       document.getElementById('composer-account').textContent = currentUser.nomeEmpresa || currentUser.nome || '';
+      try {
+        const moderation = await api('/api/publicacoes/moderacao/acesso');
+        if (moderation.autorizado) {
+          const shortcut = document.createElement('a');
+          shortcut.className = 'moderation-shortcut';
+          shortcut.href = '/pages/moderacao-publicacoes.html';
+          shortcut.textContent = 'Analisar denúncias';
+          document.querySelector('.publicacoes-heading').appendChild(shortcut);
+        }
+      } catch {}
     } else {
       composer.hidden = true;
       visitorNote.hidden = false;
