@@ -1,4 +1,40 @@
 (() => {
+  // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
+  const currentPath = window.location.pathname.replace(/\\/+$/, '') || '/';
+  const isAuthPage = /\\/(login|cadastro)\\.html$/i.test(currentPath);
+  const isHomePage = currentPath === '/' || /\\/index\\.html$/i.test(currentPath);
+
+  if (!isAuthPage && !isHomePage) {
+    const currentHeader = document.querySelector('.site-header');
+    if (currentHeader) {
+      const template = document.createElement('template');
+      template.innerHTML = `
+        <header class="site-header">
+          <a class="brand" href="/" aria-label="ConectaTrabalho - início">
+            <img class="brand-mark-image" src="/img/logo-conectatrabalho.svg" alt="" width="38" height="38">
+            <span>Conecta<span class="brand-light">Trabalho</span></span>
+          </a>
+          <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+          <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/pages/vagas.html">Vagas</a>
+            <a href="/pages/pesquisar.html">Pesquisar</a>
+            <a href="/pages/como-funciona.html">Como funciona</a>
+            <a href="/pages/sobre.html">Sobre</a>
+            <a class="mobile-login-link" href="/pages/login.html">Entrar</a>
+            <a class="mobile-register-link" href="/pages/cadastro.html">Cadastrar</a>
+          </nav>
+          <div class="header-actions">
+            <a class="button button-outline button-small" href="/pages/login.html">Entrar</a>
+            <a class="button button-primary button-small" href="/pages/cadastro.html">Cadastrar</a>
+          </div>
+        </header>`;
+      currentHeader.replaceWith(template.content.firstElementChild);
+    }
+  }
+
   // Evita mostrar os links de visitante antes de confirmar a sessão.
   document.querySelector('.site-header .header-actions')?.classList.add('auth-checking');
 
