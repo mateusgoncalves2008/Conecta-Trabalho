@@ -1733,3 +1733,53 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
   background-color:#1e3046;
   color:#e8eef5;
 }
+
+
+/* Marca compacta com revelação do nome e rotação da logo */
+.site-header .brand{
+  gap:0;
+  transition:gap .35s ease;
+}
+.site-header .brand > span{
+  display:inline-block;
+  max-width:0;
+  margin-left:0;
+  overflow:hidden;
+  opacity:0;
+  transform:translateX(-7px);
+  white-space:nowrap;
+  transition:max-width .4s ease,opacity .25s ease,transform .4s ease,margin-left .35s ease;
+}
+.site-header .brand:hover,
+.site-header .brand:focus-visible{
+  gap:10px;
+}
+.site-header .brand:hover > span,
+.site-header .brand:focus-visible > span{
+  max-width:180px;
+  margin-left:0;
+  opacity:1;
+  transform:translateX(0);
+}
+.site-header .brand:hover .brand-mark-image,
+.site-header .brand:focus-visible .brand-mark-image{
+  animation:brand-logo-spin .75s ease-in-out;
+}
+@keyframes brand-logo-spin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+@media(hover:none){
+  .site-header .brand{gap:10px}
+  .site-header .brand > span{
+    max-width:180px;
+    opacity:1;
+    transform:none;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .site-header .brand,
+  .site-header .brand > span{transition:none}
+  .site-header .brand:hover .brand-mark-image,
+  .site-header .brand:focus-visible .brand-mark-image{animation:none}
+}
