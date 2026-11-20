@@ -1224,7 +1224,7 @@
         renderImageEditor();
         imageEditor.classList.add('is-open');
         imageEditor.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('company-image-editor-open');
+        document.body.classList.add('candidate-image-editor-open');
       };
       image.onerror = () => Conecta.toast('Não foi possível abrir esta foto para edição.');
       image.src = current;
@@ -1232,7 +1232,7 @@
     function closeImageEditor() {
       imageEditor.classList.remove('is-open');
       imageEditor.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('company-image-editor-open');
+      document.body.classList.remove('candidate-image-editor-open');
     }
     document.getElementById('company-photo-edit').addEventListener('click', () => {
       closeCompanyPhotoViewer();
@@ -1255,7 +1255,7 @@
       document.getElementById('company-image-angle').value = '0';
       document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
       renderImageEditor();
-      imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('company-image-editor-open');
+      imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
     };
     const loadImageIntoEditor = file => {
       if (!file) return;
