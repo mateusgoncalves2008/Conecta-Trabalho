@@ -236,7 +236,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     res.json({ sucesso: true });
   }));
 
-  router.post('/', auth, asyncRoute(async (req, res) => {
+  router.post('/', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const description = typeof req.body.descricao === 'string' ? req.body.descricao.trim() : '';
     const mediaIds = Array.isArray(req.body.midias) ? [...new Set(req.body.midias.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
@@ -275,7 +275,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     res.status(201).json({ sucesso: true, publicacao: post });
   }));
 
-  router.delete('/:id', auth, asyncRoute(async (req, res) => {
+  router.delete('/:id', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Publicação inválida.' });
@@ -303,7 +303,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     }
   }));
 
-  router.put('/:id/reacao', auth, asyncRoute(async (req, res) => {
+  router.put('/:id/reacao', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     const emoji = typeof req.body.emoji === 'string' ? req.body.emoji : '';
@@ -317,7 +317,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     res.json({ sucesso: true, emoji: result.rows[0].emoji });
   }));
 
-  router.delete('/:id/reacao', auth, asyncRoute(async (req, res) => {
+  router.delete('/:id/reacao', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Publicação inválida.' });
@@ -325,7 +325,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     res.json({ sucesso: true });
   }));
 
-  router.post('/:id/denuncias', auth, asyncRoute(async (req, res) => {
+  router.post('/:id/denuncias', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     const reason = typeof req.body.motivo === 'string' ? req.body.motivo : '';
