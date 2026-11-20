@@ -36,6 +36,8 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     'CREATE INDEX IF NOT EXISTS idx_publicacao_midias_staging ON publicacao_midias (autor_id, criada_em) WHERE publicacao_id IS NULL',
     'CREATE TABLE IF NOT EXISTS publicacao_reacoes (publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, emoji VARCHAR(16) NOT NULL, criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY (publicacao_id, usuario_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_reacoes_post ON publicacao_reacoes (publicacao_id)',
+    'CREATE TABLE IF NOT EXISTS publicacao_visualizacoes (publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, visualizada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY (publicacao_id, usuario_id))',
+    'CREATE INDEX IF NOT EXISTS idx_publicacao_visualizacoes_post ON publicacao_visualizacoes (publicacao_id)',
     "UPDATE publicacao_reacoes SET emoji='❤️' WHERE emoji <> '❤️'",
     'CREATE TABLE IF NOT EXISTS publicacao_denuncias (id BIGSERIAL PRIMARY KEY, publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, denunciante_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, motivo VARCHAR(100) NOT NULL, detalhe VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT \'pendente\' CHECK (status IN (\'pendente\',\'em_analise\',\'resolvida\',\'descartada\')), criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE (publicacao_id, denunciante_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)'
@@ -63,6 +65,45 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     return false;
   };
   const mediaUrl = id => '/api/publicacoes/midia/' + encodeURIComponent(id);
+
+  router.get('/empresa/:id', asyncRoute(async (req, res) => {
+    await schemaReady;
+    const companyId = Number(req.params.id);
+    if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
+    const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
+    if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
+    const posts = await pool.query(
+      'SELECT p.id,p.descricao,p.criada_em,COUNT(v.usuario_id)::int AS visualizacoes FROM publicacoes p LEFT JOIN publicacao_visualizacoes v ON v.publicacao_id=p.id WHERE p.autor_id=$1 GROUP BY p.id ORDER BY p.criada_em DESC,p.id DESC',
+      [companyId]
+    );
+    if (!posts.rowCount) return res.json({ publicacoes: [] });
+    const ids = posts.rows.map(post => post.id);
+    const media = await pool.query(
+      'SELECT id,publicacao_id,tipo,mime_type,ordem FROM publicacao_midias WHERE publicacao_id=ANY($1::bigint[]) ORDER BY ordem,id',
+      [ids]
+    );
+    const mediaByPost = new Map();
+    for (const item of media.rows) {
+      if (!mediaByPost.has(item.publicacao_id)) mediaByPost.set(item.publicacao_id, []);
+      mediaByPost.get(item.publicacao_id).push({ id: item.id, tipo: item.tipo, mimeType: item.mime_type, ordem: item.ordem, url: mediaUrl(item.id) });
+    }
+    res.json({ publicacoes: posts.rows.map(post => ({
+      id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
+      visualizacoes: Number(post.visualizacoes || 0), midias: mediaByPost.get(post.id) || []
+    })) });
+  }));
+
+  router.post('/:id/visualizacao', member, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Publicação inválida.' });
+    const result = await pool.query(
+      'INSERT INTO publicacao_visualizacoes (publicacao_id,usuario_id) SELECT p.id,$2 FROM publicacoes p WHERE p.id=$1 AND p.autor_id<>$2 ON CONFLICT (publicacao_id,usuario_id) DO NOTHING RETURNING publicacao_id',
+      [id, req.session.user.id]
+    );
+    const total = await pool.query('SELECT COUNT(*)::int AS total FROM publicacao_visualizacoes WHERE publicacao_id=$1', [id]);
+    res.json({ sucesso: true, registrada: result.rowCount > 0, visualizacoes: Number(total.rows[0]?.total || 0) });
+  }));
 
   router.get('/midia/:id', asyncRoute(async (req, res) => {
     await schemaReady;
