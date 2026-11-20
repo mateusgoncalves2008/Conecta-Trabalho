@@ -156,6 +156,31 @@
               </footer>
             </section>
           </div>
+          <div class="candidate-camera-modal" id="company-camera-modal" aria-hidden="true">
+            <section class="candidate-camera-dialog" role="dialog" aria-modal="true" aria-labelledby="company-camera-title">
+              <header class="candidate-camera-header">
+                <h2 id="company-camera-title">Tirar foto</h2>
+                <button type="button" id="company-camera-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+              </header>
+              <div class="candidate-camera-content">
+                <div class="candidate-camera-stage">
+                  <video id="company-camera-video" autoplay playsinline muted></video>
+                  <img id="company-camera-preview" alt="Pré-visualização da foto" hidden>
+                  <span class="candidate-camera-countdown" id="company-camera-countdown" aria-live="assertive"></span>
+                  <span class="candidate-camera-flash" id="company-camera-flash" aria-hidden="true"><i class="fa-solid fa-camera"></i></span>
+                </div>
+                <p id="company-camera-feedback" role="status">Posicione a imagem dentro da área da câmera.</p>
+              </div>
+              <footer class="candidate-camera-actions">
+                <button type="button" class="candidate-camera-cancel" id="company-camera-cancel">Cancelar</button>
+                <div class="candidate-camera-preview-actions" id="company-camera-preview-actions" hidden>
+                  <button type="button" id="company-camera-retake">Tirar novamente</button>
+                  <button type="button" class="candidate-camera-use" id="company-camera-use">Usar foto</button>
+                </div>
+                <button type="button" class="candidate-camera-capture" id="company-camera-capture"><i class="fa-solid fa-camera"></i> Tirar foto</button>
+              </footer>
+            </section>
+          </div>
           <div class="candidate-image-editor" id="company-image-editor" aria-hidden="true">
             <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="company-image-editor-title">
               <header class="candidate-image-editor-header">
