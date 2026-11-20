@@ -505,6 +505,14 @@ html[data-theme="dark"] .candidate-tags span{background:#26364a;color:#dce5ef}
 .candidate-photo-actions button:disabled{opacity:.5;cursor:wait}
 body.candidate-photo-viewer-open{overflow:hidden}
 @media(max-width:600px){.candidate-photo-viewer{padding:8px}.candidate-photo-dialog{max-height:92vh}.candidate-photo-dialog-body{padding:28px 14px 18px}.candidate-photo-dialog-body>img{width:min(70vw,300px);height:min(70vw,300px);min-width:150px;min-height:150px}.candidate-photo-actions{justify-content:space-between;gap:4px}.candidate-photo-actions button{min-width:0;padding:8px 6px;font-size:12px}.candidate-photo-actions button i{font-size:19px}.candidate-photo-actions #candidate-photo-delete{margin-left:0}}
+/* Ações da foto da empresa: mesmos ícones do candidato e exclusão alinhada à direita */
+.candidate-photo-actions #company-photo-edit i,
+.candidate-photo-actions #company-photo-update i,
+.candidate-photo-actions #company-photo-delete i{display:inline-block}
+.candidate-photo-actions #company-photo-delete{margin-left:auto}
+@media(max-width:600px){
+  .candidate-photo-actions #company-photo-delete{margin-left:auto}
+}
 @media(prefers-reduced-motion:reduce){.candidate-photo-viewer{transition:none}}
 
 
