@@ -14,6 +14,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = re
 const Usuario = require('./models/Usuario');
 const Vaga = require('./models/Vaga');
 const Candidatura = require('./models/Candidatura');
+const { createPublicacoesRouter } = require('./routes/publicacoes');
 
 const app = express();
 const production = process.env.NODE_ENV === 'production';
@@ -240,6 +241,9 @@ const role = type => (req, res, next) => {
   }
   next();
 };
+
+const publicacoesRoutes = createPublicacoesRouter({ pool, s3, storageBucket, auth, imageReference });
+app.use('/api/publicacoes', publicacoesRoutes.router);
 
 const normalizeCnpj = value => clean(value, 30).replace(/[^0-9a-z]/gi, '').toUpperCase();
 const validCnpj = value => {
