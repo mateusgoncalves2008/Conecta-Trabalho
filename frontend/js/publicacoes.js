@@ -60,11 +60,14 @@
   function renderMedia(media) {
     if (!media.length) return '';
     const classes = media.length === 1 ? 'publication-media single' : 'publication-media';
-    return '<div class="' + classes + '">' + media.map(item => {
+    return '<div class="' + classes + '">' + media.map((item, index) => {
+      const more = index === 3 && media.length > 4
+        ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
+        : '';
       if (item.tipo === 'video') {
         return '<div class="publication-media-item"><video controls playsinline preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
-      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação"></div>';
+      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
   }
 
