@@ -914,6 +914,13 @@
     const data = await Conecta.api('/api/empresa/perfil');
     companyProfileCache = data.perfil || {};
     const profile = companyProfileCache;
+    const companyPhotoVisibility = profile.visibilidade_foto || 'todos';
+    const companyVisibilityNames = { usuarios: 'Todos os usuários', todos: 'Todos' };
+    const companyVisibilityLabel = document.getElementById('company-photo-visibility-label');
+    if (companyVisibilityLabel) companyVisibilityLabel.textContent = companyVisibilityNames[companyPhotoVisibility] || 'Todos';
+    document.querySelectorAll('input[name="company-photo-visibility-choice"]').forEach(input => {
+      input.checked = input.value === companyPhotoVisibility;
+    });
     renderCompanyInstitutionalInfo(profile);
     const publicPreview = document.getElementById('company-public-preview');
     if (publicPreview) publicPreview.href = '/pages/empresa-perfil.html?id=' + encodeURIComponent(profile.id);
@@ -1114,6 +1121,57 @@
     };
     document.getElementById('company-logo-edit').addEventListener('click', openCompanyPhotoViewer);
     document.getElementById('company-photo-viewer-close').addEventListener('click', closeCompanyPhotoViewer);
+    const companyVisibilityButton = document.getElementById('company-photo-visibility');
+    const companyVisibilityPopover = document.getElementById('company-photo-visibility-popover');
+    const companyVisibilityLabel = document.getElementById('company-photo-visibility-label');
+    const companyVisibilityFeedback = document.getElementById('company-photo-visibility-feedback');
+    const companyVisibilitySave = document.getElementById('company-photo-visibility-save');
+    const companyVisibilityNames = { usuarios: 'Todos os usuários', todos: 'Todos' };
+    let savedCompanyPhotoVisibility = companyProfileCache.visibilidade_foto || 'todos';
+    let selectedCompanyPhotoVisibility = savedCompanyPhotoVisibility;
+    const setCompanyVisibilityPopover = open => {
+      companyVisibilityPopover.hidden = !open;
+      companyVisibilityButton.setAttribute('aria-expanded', String(open));
+      companyVisibilityFeedback.textContent = '';
+      if (open) {
+        const checked = companyVisibilityPopover.querySelector('input[name="company-photo-visibility-choice"]:checked');
+        if (checked) selectedCompanyPhotoVisibility = checked.value;
+      }
+    };
+    companyVisibilityButton.addEventListener('click', () => setCompanyVisibilityPopover(companyVisibilityPopover.hidden));
+    companyVisibilityPopover.querySelectorAll('input[name="company-photo-visibility-choice"]').forEach(input => {
+      input.addEventListener('change', () => { selectedCompanyPhotoVisibility = input.value; });
+    });
+    document.addEventListener('click', event => {
+      if (!companyVisibilityPopover.hidden && !event.target.closest('#company-photo-visibility-popover') && !event.target.closest('#company-photo-visibility')) {
+        setCompanyVisibilityPopover(false);
+      }
+    });
+    companyVisibilitySave.addEventListener('click', async () => {
+      if (!['usuarios', 'todos'].includes(selectedCompanyPhotoVisibility)) {
+        companyVisibilityFeedback.textContent = 'As opções de conexões estarão disponíveis quando o sistema de conexões for implementado.';
+        return;
+      }
+      companyVisibilitySave.disabled = true;
+      companyVisibilityFeedback.textContent = '';
+      try {
+        await Conecta.api('/api/empresa/perfil/visibilidade-foto', {
+          method: 'PUT',
+          body: JSON.stringify({ visibilidade: selectedCompanyPhotoVisibility })
+        });
+        savedCompanyPhotoVisibility = selectedCompanyPhotoVisibility;
+        companyProfileCache.visibilidade_foto = savedCompanyPhotoVisibility;
+        companyVisibilityLabel.textContent = companyVisibilityNames[savedCompanyPhotoVisibility];
+        setCompanyVisibilityPopover(false);
+      } catch (error) {
+        companyVisibilityFeedback.textContent = error.message || 'Não foi possível salvar a visibilidade.';
+        selectedCompanyPhotoVisibility = savedCompanyPhotoVisibility;
+        const selected = companyVisibilityPopover.querySelector('input[value="' + savedCompanyPhotoVisibility + '"]');
+        if (selected) selected.checked = true;
+      } finally {
+        companyVisibilitySave.disabled = false;
+      }
+    });
     companyPhotoViewer.addEventListener('click', event => { if (event.target === companyPhotoViewer) closeCompanyPhotoViewer(); });
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && companyPhotoViewer.classList.contains('is-open')) closeCompanyPhotoViewer(); });
     document.getElementById('company-photo-edit').addEventListener('click', () => {
