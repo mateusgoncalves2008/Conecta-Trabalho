@@ -72,14 +72,23 @@
               <button class="button button-save" type="button" id="save-job" aria-pressed="${saved}" ${saved ? 'disabled' : ''}>${saved ? 'Vaga salva' : 'Salvar vaga'}</button>
             </div>
           </section>
-          <section class="job-detail-panel">
-            <div class="job-detail-section"><h2>Sobre a oportunidade</h2><div class="job-detail-copy">${escapeHTML(vaga.descricao || 'A empresa não informou uma descrição para esta oportunidade.')}</div></div>
-            <div class="job-detail-section"><h2>Requisitos</h2><div class="job-detail-copy">${escapeHTML(vaga.requisitos || 'A empresa não informou requisitos específicos.')}</div></div>
-            <div class="job-detail-section"><h2>Sobre a empresa</h2><div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div><a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil completo da empresa</a></div>
+          <section class="job-detail-panel job-detail-description-panel">
+            <h2>Sobre a oportunidade</h2>
+            <div class="job-detail-copy">${escapeHTML(vaga.descricao || 'A empresa não informou uma descrição para esta oportunidade.')}</div>
+          </section>
+          <section class="job-detail-panel job-detail-requirements-panel">
+            <h2>Requisitos</h2>
+            <div class="job-detail-copy">${escapeHTML(vaga.requisitos || 'A empresa não informou requisitos específicos.')}</div>
+          </section>
+          <section class="job-detail-panel job-detail-about-company-panel">
+            <h2>Sobre a empresa</h2>
+            <div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div>
+            <a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil completo da empresa</a>
           </section>
         </div>
         <aside class="job-detail-aside">
           <section class="job-detail-panel job-detail-facts">
+            <h2>Informações da vaga</h2>
             <div class="job-detail-fact"><strong>Remuneração</strong><span>${escapeHTML(vaga.salario || 'A combinar')}</span></div>
             <div class="job-detail-fact"><strong>Tipo de contrato</strong><span>${escapeHTML(vaga.tipo_contrato || 'Não informado')}</span></div>
             <div class="job-detail-fact"><strong>Modalidade</strong><span>${escapeHTML(vaga.modalidade || 'Não informada')}</span></div>
