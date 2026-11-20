@@ -105,15 +105,18 @@
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
       : escapeHTML(initials(post.autor.nome));
     const authorDetail = post.autor.tipo === 'empresa'
-      ? Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + ' seguidores'
-      : (post.autor.tituloProfissional || 'Título profissional não informado');
+      ? '<span data-followers-count>' + Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + '</span> seguidores'
+      : escapeHTML(post.autor.tituloProfissional || 'Título profissional não informado');
     const authorProfileUrl = post.autor.tipo === 'empresa'
       ? '/pages/empresa-perfil.html?id=' + encodeURIComponent(post.autor.id)
       : '/pages/candidato-perfil.html?id=' + encodeURIComponent(post.autor.id);
     const authorName = escapeHTML(post.autor.nome);
     return '<article class="publication-card" data-post-id="' + post.id + '">' +
       '<header class="publication-card-header"><a class="publication-avatar publication-author-link" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Ver perfil de ' + authorName + '">' + avatar + '</a>' +
-      '<div class="publication-author"><a class="publication-author-name-link" href="' + escapeHTML(authorProfileUrl) + '">' + authorName + '</a><small>' + escapeHTML(authorDetail) + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
+      '<div class="publication-author"><a class="publication-author-name-link" href="' + escapeHTML(authorProfileUrl) + '">' + authorName + '</a><small>' + authorDetail + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
+      (currentUser && currentUser.tipo === 'candidato' && post.autor.tipo === 'empresa' && !post.minha
+        ? '<button type="button" class="follow-company-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
+        : '') +
       '</header>' + description + renderMedia(post.midias || []) +
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
@@ -443,6 +446,35 @@
     if (!button) return;
     const action = button.dataset.action;
     const id = button.dataset.id;
+    if (action === 'follow-company') {
+      if (!currentUser || currentUser.tipo !== 'candidato') {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+      const card = button.closest('.publication-card');
+      if (!card || button.disabled) return;
+      const wasFollowing = button.getAttribute('aria-pressed') === 'true';
+      const followerCount = card.querySelector('[data-followers-count]');
+      const previousCount = Number((followerCount?.textContent || '0').replace(/\\D/g, '')) || 0;
+      button.disabled = true;
+      button.textContent = wasFollowing ? 'Seguindo...' : 'Seguindo';
+      try {
+        const result = await api('/api/empresas/' + encodeURIComponent(id) + '/seguir', {
+          method: wasFollowing ? 'DELETE' : 'POST'
+        });
+        const following = Boolean(result.seguindo);
+        button.classList.toggle('is-following', following);
+        button.setAttribute('aria-pressed', String(following));
+        button.textContent = following ? 'Seguindo' : 'Seguir';
+        if (followerCount) followerCount.textContent = Number(result.total_seguidores ?? previousCount + (following ? 1 : -1)).toLocaleString('pt-BR');
+      } catch (error) {
+        button.textContent = wasFollowing ? 'Seguindo' : 'Seguir';
+        toast(error.message);
+      } finally {
+        button.disabled = false;
+      }
+      return;
+    }
     if (action === 'like') {
       if (!currentUser) {
         window.location.href = '/pages/login.html';
