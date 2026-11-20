@@ -108,7 +108,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     const cursor = Number(req.query.cursor) || 0;
     if (!Number.isSafeInteger(cursor) || cursor < 0) return res.status(400).json({ erro: 'Página inválida.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,COALESCE(NULLIF(u.nome_empresa,\'\'),NULLIF(u.nome_fantasia,\'\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
+      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,u.titulo_profissional,COALESCE(NULLIF(u.nome_empresa,\'\'),NULLIF(u.nome_fantasia,\'\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto,(SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
       [limit + 1, cursor]
     );
     const hasMore = posts.rows.length > limit;
@@ -141,6 +141,8 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
         autor: {
           id: post.autor_id, nome: post.nome_exibicao, tipo: post.tipo,
+          tituloProfissional: post.titulo_profissional,
+          totalSeguidores: Number(post.total_seguidores || 0),
           foto: (String(req.session.user?.id) === String(post.autor_id) || post.visibilidade_foto === 'todos' || (post.visibilidade_foto === 'usuarios' && req.session.user)) ? imageReference(post.autor_id, 'foto_perfil', post.foto_perfil) : null
         },
         midias: mediaByPost.get(post.id) || [],
