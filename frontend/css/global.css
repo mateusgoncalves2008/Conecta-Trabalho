@@ -1056,6 +1056,26 @@ body.page-leaving .listing-main {
   text-decoration: none;
 }
 
+/* Footer simples dos painéis: contraste adequado no modo escuro */
+html[data-theme="dark"] .site-footer.site-footer-simple{
+  background:#111d2d!important;
+  border-top:1px solid #2b3c52!important;
+  color:#c2ccda;
+}
+html[data-theme="dark"] .site-footer.site-footer-simple .footer-simple-link{
+  color:#c2ccda;
+}
+html[data-theme="dark"] .site-footer.site-footer-simple .footer-simple-link:hover{
+  color:#f09a70;
+}
+html[data-theme="dark"] .site-footer.site-footer-simple .footer-simple-copyright{
+  color:#aebdce;
+}
+html[data-theme="dark"] .site-footer.site-footer-simple .footer-simple-brand{
+  color:#f09a70;
+}
+
+
 @media (max-width: 600px) {
   .site-footer.site-footer-simple {
     padding: 22px 18px;
