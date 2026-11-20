@@ -61,3 +61,15 @@ html[data-theme=dark] .public-candidate-hero h1,html[data-theme=dark] .public-ca
 html[data-theme=dark] .public-candidate-avatar{background:#2b3b50;color:#e7edf5}
 html[data-theme=dark] .public-candidate-tags span{background:#2b3b50;color:#d7e0ec}
 @media(max-width:600px){.public-candidate-profile{padding:19px}.public-candidate-hero{align-items:flex-start;gap:14px}.public-candidate-avatar{flex-basis:76px;width:76px;height:76px;font-size:20px}.public-candidate-hero h1{font-size:22px}}
+
+
+/* Ações sociais do perfil público do candidato. */
+.public-candidate-heading{min-width:0;flex:1}
+.public-candidate-social{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.public-candidate-follow{display:inline-flex;align-items:center;justify-content:center;min-height:40px;min-width:112px;padding:0 18px;border:1px solid var(--orange);border-radius:24px;background:var(--orange);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.public-candidate-follow.is-following{background:transparent;color:var(--orange)}
+.public-candidate-follow:disabled{opacity:.65;cursor:wait}
+.public-candidate-followers{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px}
+.public-candidate-followers strong{color:var(--ink);font-size:14px}
+html[data-theme=dark] .public-candidate-followers strong{color:#e7edf5}
+@media(max-width:600px){.public-candidate-social{gap:8px}.public-candidate-follow{min-height:38px;min-width:100px}}
