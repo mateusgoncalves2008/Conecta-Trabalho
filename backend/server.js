@@ -996,7 +996,7 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
 
 app.post('/api/pesquisas/registrar', asyncRoute(async (req, res) => {
   await profileSchemaReady;
-  const termo = clean(req.body?.termo, 100).replace(/\\s+/g, ' ');
+  const termo = clean(req.body?.termo, 100).replace(/\s+/g, ' ');
   if (!termo || termo.length < 2) return res.status(400).json({ erro: 'Informe um termo de pesquisa válido.' });
   const normalized = termo.toLocaleLowerCase('pt-BR');
   await pool.query(
