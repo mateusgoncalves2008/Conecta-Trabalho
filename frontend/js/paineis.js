@@ -474,13 +474,15 @@
     const editorCanvas = document.getElementById('candidate-image-editor-canvas');
     const editorContext = editorCanvas.getContext('2d');
     const editorInput = document.getElementById('candidate-image-editor-input');
-    const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
+    const editorState = { image: null, previewSource: '', angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
     function updateImageFilterPreviews() {
       if (!editorState.image) return;
+      const source = editorState.previewSource || editorState.image.currentSrc || editorState.image.src;
+      if (!source) return;
       document.querySelectorAll('[data-image-filter]').forEach(button => {
         const preview = button.querySelector('.candidate-filter-preview');
         if (!preview) return;
-        preview.src = editorState.image.currentSrc || editorState.image.src;
+        preview.src = source;
         preview.style.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
       });
     }
@@ -554,6 +556,10 @@
       imageEditor.classList.remove('is-open');
       imageEditor.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('candidate-image-editor-open');
+      editorState.image?.close?.();
+      editorState.image = null;
+      editorState.previewSource = '';
+      editorContext.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
     }
     document.getElementById('candidate-photo-edit').addEventListener('click', () => {
       closePhotoViewer();
@@ -566,8 +572,11 @@
       document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
     }));
     document.getElementById('candidate-image-editor-choose')?.addEventListener('click', () => editorInput.click());
-    const openImageInEditor = image => {
-      editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+    const openImageInEditor = (image, previewSource = '') => {
+      if (editorState.image && editorState.image !== image) editorState.image.close?.();
+      editorState.image = image;
+      editorState.previewSource = previewSource || image.currentSrc || image.src || '';
+      editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
       editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
       ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`candidate-image-${key}`).value = '100'; document.getElementById(`candidate-image-${key}-value`).textContent = '100%'; });
       document.getElementById('candidate-image-vignette').value = '0';
@@ -578,17 +587,54 @@
       renderImageEditor();
       imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
     };
-    const loadImageIntoEditor = file => {
+    const loadImageIntoEditor = async file => {
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); return; }
-      const image = new Image();
-      const url = URL.createObjectURL(file);
-      image.onload = () => {
-        URL.revokeObjectURL(url);
-        openImageInEditor(image);
-      };
-      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Não foi possível abrir essa imagem. Tente selecionar outro arquivo.'); };
-      image.src = url;
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        Conecta.toast('Formato não permitido. Escolha PNG, JPG/JPEG ou WEBP.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        Conecta.toast('Escolha uma imagem de até 5 MB.');
+        return;
+      }
+      try {
+        let image;
+        let previewSource = '';
+        try {
+          image = await createImageBitmap(file);
+          const previewCanvas = document.createElement('canvas');
+          const previewScale = Math.min(1, 320 / Math.max(image.width, image.height));
+          previewCanvas.width = Math.max(1, Math.round(image.width * previewScale));
+          previewCanvas.height = Math.max(1, Math.round(image.height * previewScale));
+          const previewContext = previewCanvas.getContext('2d');
+          if (!previewContext) throw new Error('Não foi possível preparar a pré-visualização.');
+          previewContext.drawImage(image, 0, 0, previewCanvas.width, previewCanvas.height);
+          previewSource = previewCanvas.toDataURL('image/png');
+        } catch (bitmapError) {
+          image?.close?.();
+          image = await new Promise((resolve, reject) => {
+            const element = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            element.onload = () => {
+              URL.revokeObjectURL(objectUrl);
+              resolve(element);
+            };
+            element.onerror = () => {
+              URL.revokeObjectURL(objectUrl);
+              reject(new Error('O navegador não conseguiu decodificar esse arquivo. Verifique se a imagem PNG/JPG/WEBP não está danificada.'));
+            };
+            element.src = objectUrl;
+          });
+          previewSource = image.currentSrc || image.src;
+        }
+        if (!image || !(image.width || image.naturalWidth) || !(image.height || image.naturalHeight)) {
+          image?.close?.();
+          throw new Error('A imagem não possui dimensões válidas ou não pôde ser decodificada.');
+        }
+        openImageInEditor(image, previewSource);
+      } catch (error) {
+        Conecta.toast(error.message || 'Não foi possível abrir essa imagem. Tente selecionar outro arquivo.');
+      }
     };
     editorInput.addEventListener('change', event => {
       editorInput.removeAttribute('capture');
@@ -1505,13 +1551,19 @@
       const feedback = document.getElementById('company-image-editor-feedback');
       button.disabled = true; feedback.textContent = 'Salvando...';
       try {
-        let quality = 0.9;
-        let imageData = editorCanvas.toDataURL('image/jpeg', quality);
-        while (imageData.length > 1400000 && quality > 0.45) {
-          quality -= 0.1;
-          imageData = editorCanvas.toDataURL('image/jpeg', quality);
+        let imageData = editorCanvas.toDataURL('image/png');
+        if (imageData.length > 1400000) {
+          let quality = 0.92;
+          imageData = editorCanvas.toDataURL('image/webp', quality);
+          while (imageData.length > 1400000 && quality > 0.5) {
+            quality -= 0.08;
+            imageData = editorCanvas.toDataURL('image/webp', quality);
+          }
         }
-        if (imageData.length > 1400000) throw new Error('Não foi possível reduzir a imagem para o tamanho permitido.');
+        if (imageData.length > 1400000) throw new Error('A imagem editada ficou grande demais. Tente reduzir um pouco a imagem ou usar um arquivo menor.');
+        if (!imageData.startsWith('data:image/png;base64,') && !imageData.startsWith('data:image/webp;base64,')) {
+          throw new Error('Seu navegador não conseguiu preservar a transparência desta imagem. Atualize o navegador e tente novamente.');
+        }
         await Conecta.api('/api/empresa/perfil/imagem', { method: 'PUT', body: JSON.stringify({ campo: 'foto_perfil', imagem: imageData }) });
         await loadCompanyProfile();
         closeImageEditor();
