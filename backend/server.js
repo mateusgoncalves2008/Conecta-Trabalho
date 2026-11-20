@@ -242,7 +242,7 @@ const role = type => (req, res, next) => {
   next();
 };
 
-const publicacoesRoutes = createPublicacoesRouter({ pool, s3, storageBucket, auth, imageReference });
+const publicacoesRoutes = createPublicacoesRouter({ pool, s3, storageBucket, auth, imageReference, profileSchemaReady });
 app.use('/api/publicacoes', publicacoesRoutes.router);
 
 const normalizeCnpj = value => clean(value, 30).replace(/[^0-9a-z]/gi, '').toUpperCase();
