@@ -1108,9 +1108,39 @@
     document.getElementById('company-logo-edit').addEventListener('click', openCompanyLogoModal);
     companyLogoClose.addEventListener('click', closeCompanyLogoModal);
     companyLogoModal.addEventListener('click', event => { if (event.target === companyLogoModal) closeCompanyLogoModal(); });
-    companyLogoUpdate.addEventListener('click', () => {
+    const companyPhotoUpdateModal = document.getElementById('company-photo-update-modal');
+    const companyPhotoUpdatePreview = document.getElementById('company-photo-update-preview');
+    const closeCompanyPhotoUpdateModal = () => {
+      companyPhotoUpdateModal.classList.remove('is-open');
+      companyPhotoUpdateModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-photo-update-open');
+    };
+    const openCompanyPhotoUpdateModal = () => {
+      companyPhotoUpdatePreview.src = companyProfileCache.foto_perfil || '';
       closeCompanyLogoModal();
-      showImageGuidelines('profile', () => document.getElementById('company-logo-input').click());
+      companyPhotoUpdateModal.classList.add('is-open');
+      companyPhotoUpdateModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('candidate-photo-update-open');
+    };
+    companyLogoUpdate.addEventListener('click', openCompanyPhotoUpdateModal);
+    document.getElementById('company-photo-update-close').addEventListener('click', closeCompanyPhotoUpdateModal);
+    companyPhotoUpdateModal.addEventListener('click', event => {
+      if (event.target === companyPhotoUpdateModal) closeCompanyPhotoUpdateModal();
+    });
+    document.getElementById('company-photo-use-camera').addEventListener('click', () => {
+      const input = document.getElementById('company-logo-input');
+      input.setAttribute('capture', 'user');
+      closeCompanyPhotoUpdateModal();
+      showImageGuidelines('profile', () => input.click());
+    });
+    document.getElementById('company-photo-upload').addEventListener('click', () => {
+      const input = document.getElementById('company-logo-input');
+      input.removeAttribute('capture');
+      closeCompanyPhotoUpdateModal();
+      showImageGuidelines('profile', () => input.click());
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && companyPhotoUpdateModal.classList.contains('is-open')) closeCompanyPhotoUpdateModal();
     });
     companyLogoDelete.addEventListener('click', async () => {
       if (!companyProfileCache.foto_perfil) return;
