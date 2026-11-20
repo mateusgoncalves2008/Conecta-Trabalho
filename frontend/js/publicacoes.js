@@ -19,7 +19,6 @@
   const reportReason = document.getElementById('report-reason');
   const reportDetail = document.getElementById('report-detail');
   const reportDetailLabel = document.getElementById('report-detail-label');
-  const reactions = ['👍', '❤️', '😂', '👏', '🎉', '💡', '🔥'];
   let currentUser = null;
   let selectedFiles = [];
   let uploadedMedia = [];
@@ -82,19 +81,14 @@
   }
 
   function renderReactions(post) {
-    const summary = (post.reacoes || []).filter(item => item.total > 0);
-    const total = summary.reduce((sum, item) => sum + Number(item.total), 0);
-    const reactionButtons = reactions.map(emoji => {
-      const active = post.minhaReacao === emoji;
-      const count = summary.find(item => item.emoji === emoji);
-      return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" data-count="' + (count ? Number(count.total) : 0) + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + '</button>';
-    }).join('');
+    const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+    const liked = Boolean(post.minhaCurtida);
     return '<div class="publication-actions">' +
       '<div class="reaction-control">' +
-        '<button type="button" class="like-toggle-button" data-action="toggle-reactions" aria-expanded="false" aria-label="Abrir opções de reação">' +
-          '<svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1.5 10h4.2v11H1.5zM8 21h9.1c.9 0 1.7-.6 2-1.4l3-7.1c.2-.7-.3-1.5-1.1-1.5h-6.2l1-4.7c.1-.5-.1-1-.5-1.4L14.7 4 8 10.7V21z"/></svg><strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong>' +
+        '<button type="button" class="like-toggle-button' + (liked ? ' liked' : '') + '" data-action="like" data-id="' + post.id + '" aria-pressed="' + liked + '" aria-label="' + (liked ? 'Remover curtida' : 'Curtir publicação') + '">' +
+          '<svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+          '<strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong>' +
         '</button>' +
-        '<div class="reaction-picker" hidden>' + reactionButtons + '</div>' +
       '</div>' +
       (post.minha ? '<button type="button" class="report-button" data-action="delete" data-id="' + post.id + '">Excluir</button>' :
         '<button type="button" class="report-button" data-action="report" data-id="' + post.id + '">Denunciar</button>') +
@@ -124,29 +118,14 @@
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
 
-  function updateReactionUI(card, nextEmoji) {
-    const buttons = [...card.querySelectorAll('[data-action="react"]')];
-    const previous = buttons.find(item => item.getAttribute('aria-pressed') === 'true');
-    const previousEmoji = previous ? previous.dataset.emoji : null;
-    if (previousEmoji === nextEmoji) return previousEmoji;
-
-    const previousButton = previousEmoji ? buttons.find(item => item.dataset.emoji === previousEmoji) : null;
-    const nextButton = nextEmoji ? buttons.find(item => item.dataset.emoji === nextEmoji) : null;
-    if (previousButton) previousButton.dataset.count = String(Math.max(0, Number(previousButton.dataset.count || 0) - 1));
-    if (nextButton) nextButton.dataset.count = String(Number(nextButton.dataset.count || 0) + 1);
-
-    buttons.forEach(item => {
-      const active = item.dataset.emoji === nextEmoji;
-      const count = Number(item.dataset.count || 0);
-      item.classList.toggle('active', active);
-      item.setAttribute('aria-pressed', String(active));
-      item.textContent = item.dataset.emoji;
-    });
-
-    const total = buttons.reduce((sum, item) => sum + Number(item.dataset.count || 0), 0);
+  function updateLikeUI(card, liked, total) {
+    const button = card.querySelector('[data-action="like"]');
     const totalElement = card.querySelector('[data-reaction-total]');
-    if (totalElement) totalElement.textContent = total.toLocaleString('pt-BR');
-    return previousEmoji;
+    if (!button || !totalElement) return;
+    button.classList.toggle('liked', liked);
+    button.setAttribute('aria-pressed', String(liked));
+    button.setAttribute('aria-label', liked ? 'Remover curtida' : 'Curtir publicação');
+    totalElement.textContent = Math.max(0, total).toLocaleString('pt-BR');
   }
 
   async function loadPosts(reset) {
@@ -464,50 +443,37 @@
     if (!button) return;
     const action = button.dataset.action;
     const id = button.dataset.id;
-    if (action === 'toggle-reactions') {
-      const control = button.closest('.reaction-control');
-      const picker = control && control.querySelector('.reaction-picker');
-      if (picker) {
-        feed.querySelectorAll('.reaction-picker').forEach(item => {
-          if (item !== picker) {
-            item.hidden = true;
-            item.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
-          }
-        });
-        picker.hidden = !picker.hidden;
-        button.setAttribute('aria-expanded', String(!picker.hidden));
-      }
-      return;
-    }
-    if (action === 'react') {
+    if (action === 'like') {
       if (!currentUser) {
         window.location.href = '/pages/login.html';
         return;
       }
       const card = button.closest('.publication-card');
       if (!card || card.dataset.reacting === 'true') return;
-      const selectedEmoji = button.getAttribute('aria-pressed') === 'true' ? null : button.dataset.emoji;
-      const previousEmoji = card.querySelector('[data-action="react"][aria-pressed="true"]')?.dataset.emoji || null;
+      const wasLiked = button.getAttribute('aria-pressed') === 'true';
+      const totalElement = card.querySelector('[data-reaction-total]');
+      const previousTotal = Number((totalElement?.textContent || '0').replace(/\\D/g, '')) || 0;
+      const nextLiked = !wasLiked;
       card.dataset.reacting = 'true';
-      const reactionButtons = [...card.querySelectorAll('[data-action="react"]')];
-      reactionButtons.forEach(item => { item.disabled = true; });
-      updateReactionUI(card, selectedEmoji);
+      button.disabled = true;
+      updateLikeUI(card, nextLiked, Math.max(0, previousTotal + (nextLiked ? 1 : -1)));
       try {
-        if (selectedEmoji) {
+        if (nextLiked) {
           await api('/api/publicacoes/' + id + '/reacao', {
             method: 'PUT',
-            body: JSON.stringify({ emoji: selectedEmoji })
+            body: JSON.stringify({ emoji: '❤️' })
           });
         } else {
           await api('/api/publicacoes/' + id + '/reacao', { method: 'DELETE' });
         }
       } catch (error) {
-        updateReactionUI(card, previousEmoji);
+        updateLikeUI(card, wasLiked, previousTotal);
         toast(error.message);
       } finally {
         delete card.dataset.reacting;
-        reactionButtons.forEach(item => { item.disabled = false; });
+        button.disabled = false;
       }
+      return;
     }
     if (action === 'delete') {
       if (!window.confirm('Deseja excluir esta publicação? As fotos ou o vídeo e todas as reações também serão excluídos.')) return;
@@ -531,13 +497,7 @@
     }
   });
 
-  document.addEventListener('click', event => {
-    if (event.target.closest('[data-action="toggle-reactions"]')) return;
-    feed.querySelectorAll('.reaction-picker').forEach(picker => {
-      picker.hidden = true;
-      picker.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
-    });
-  });
+
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
