@@ -1801,10 +1801,20 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
 /* Com a redução de animações ativada, mantém a marca no formato tradicional */
 body.a11y-motion .site-header .brand {
   display: inline-flex;
+  align-items: center;
   flex: 0 0 auto;
   width: auto;
   min-width: 0;
-  gap: 10px;
+  height: 46px;
+  gap: 12px;
+  font-size: 21px;
+  letter-spacing: -.35px;
+}
+
+body.a11y-motion .site-header .brand .brand-mark-image {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
 }
 
 body.a11y-motion .site-header .brand > span {
