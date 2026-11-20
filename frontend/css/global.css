@@ -2018,3 +2018,27 @@ html[data-theme="dark"] .site-header-search input{color:#e7edf5}
   .site-header:has(.site-header-search){gap:0!important}
   .site-header:has(.site-header-search)>.site-header-search{margin:0 0 0 8px!important}
 }
+
+
+/* Pequeno respiro entre a navegação, a pesquisa e a foto do perfil */
+.site-header:has(.site-header-search) > .site-header-search {
+  margin-left: 10px !important;
+  margin-right: 0 !important;
+}
+
+.site-header:has(.site-header-search) > .dashboard-user,
+.site-header:has(.site-header-search) > .header-actions {
+  margin-left: 10px !important;
+}
+
+@media (max-width: 650px) {
+  .site-header:has(.site-header-search) > .site-header-search {
+    margin-left: 6px !important;
+    margin-right: 0 !important;
+  }
+
+  .site-header:has(.site-header-search) > .dashboard-user,
+  .site-header:has(.site-header-search) > .header-actions {
+    margin-left: 6px !important;
+  }
+}
