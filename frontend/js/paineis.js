@@ -1429,10 +1429,12 @@
     const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
     function updateImageFilterPreviews() {
       if (!editorState.image) return;
+      const source = editorState.previewSource || editorState.image.currentSrc || editorState.image.src;
+      if (!source) return;
       document.querySelectorAll('[data-image-filter]').forEach(button => {
         const preview = button.querySelector('.candidate-filter-preview');
         if (!preview) return;
-        preview.src = editorState.image.currentSrc || editorState.image.src;
+        preview.src = source;
         preview.style.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
       });
     }
