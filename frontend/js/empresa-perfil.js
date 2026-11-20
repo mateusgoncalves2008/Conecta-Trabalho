@@ -115,6 +115,11 @@
       return `<section class="company-public-panel company-public-posts-panel">
         <span class="company-public-section-kicker">ATUALIZAÇÕES</span>
         <h2>Publicações</h2>
+        <div class="company-public-media-filters" role="group" aria-label="Filtrar publicações">
+          <button type="button" data-company-media-filter="todos" class="is-active" aria-pressed="true">Todos</button>
+          <button type="button" data-company-media-filter="image" aria-pressed="false">Imagens</button>
+          <button type="button" data-company-media-filter="video" aria-pressed="false">Vídeos</button>
+        </div>
         <div class="company-public-post-grid" data-company-post-grid>
           <p class="company-public-post-loading">Carregando publicações...</p>
         </div>
@@ -292,6 +297,7 @@
       let companyPosts = [];
       let companyPostsLoaded = false;
       let companyPostsLoading = false;
+      let activeMediaFilter = 'todos';
       let postViewer = null;
 
       const formatViews = value => Number(value || 0).toLocaleString('pt-BR');
@@ -304,11 +310,20 @@
       const renderCompanyPosts = () => {
         const grid = tabContent.querySelector('[data-company-post-grid]');
         if (!grid) return;
+        const filteredPosts = companyPosts
+          .map((post, index) => ({ post, index }))
+          .filter(({ post }) => activeMediaFilter === 'todos' ||
+            (post.midias || []).some(media => activeMediaFilter === 'video' ? media.tipo === 'video' : media.tipo !== 'video'));
         if (!companyPosts.length) {
           grid.innerHTML = emptyState('Nenhuma publicação disponível', 'Esta empresa ainda não publicou fotos ou vídeos.');
           return;
         }
-        grid.innerHTML = companyPosts.map((post, index) => `
+        if (!filteredPosts.length) {
+          grid.innerHTML = emptyState(activeMediaFilter === 'video' ? 'Nenhum vídeo publicado' : 'Nenhuma imagem publicada',
+            activeMediaFilter === 'video' ? 'Esta empresa ainda não publicou vídeos.' : 'Esta empresa ainda não publicou imagens.');
+          return;
+        }
+        grid.innerHTML = filteredPosts.map(({ post, index }) => `
           <button class="company-public-post-tile" type="button" data-company-post-index="${index}" aria-label="Abrir publicação ${index + 1}, ${formatViews(post.visualizacoes)} visualizações">
             <span class="company-public-post-preview">${postPreview(post)}</span>
             <span class="company-public-post-views"><i class="fa-solid fa-eye" aria-hidden="true"></i><strong>${formatViews(post.visualizacoes)}</strong></span>
@@ -406,12 +421,19 @@
         postViewer.addEventListener('click', async event => {
           if (event.target.closest('[data-close-company-post-viewer]')) { closePostViewer(); return; }
           if (event.target.closest('[data-company-report-close],[data-company-report-cancel]')) { closeReportDialog(); return; }
-          const actionButton = event.target.closest('[data-post-action]');
+          const descriptionToggle = event.target.closest('[data-post-description-toggle]');
+          if (descriptionToggle) {
+            const description = descriptionToggle.parentElement.querySelector('[data-description]');
+            const expanded = description.classList.toggle('is-collapsed') === false;
+            descriptionToggle.textContent = expanded ? 'Ver menos' : 'Ver mais...';
+            return;
+          }
+          const actionButton = event.target.closest('[data-action]');
           if (!actionButton) return;
           const card = actionButton.closest('[data-post-index]');
           const post = card && companyPosts[Number(card.dataset.postIndex)];
           if (!post || actionButton.disabled) return;
-          const action = actionButton.dataset.postAction;
+          const action = actionButton.dataset.action;
           if (action === 'like') {
             if (!currentUser) { window.location.href = '/pages/login.html'; return; }
             const wasLiked = Boolean(post.minhaCurtida);
@@ -423,10 +445,14 @@
             post.reacoes = nextTotal ? [{ emoji: '❤️', total: nextTotal }] : [];
             updatePostLikeButton(card, post, nextTotal);
             try {
-              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
-                method: nextLiked ? 'PUT' : 'DELETE',
-                ...(nextLiked ? { body: JSON.stringify({ emoji: '❤️' }) } : {})
-              });
+              if (nextLiked) {
+                await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
+                  method: 'PUT',
+                  body: JSON.stringify({ emoji: '❤️' })
+                });
+              } else {
+                await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', { method: 'DELETE' });
+              }
             } catch (error) {
               post.minhaCurtida = wasLiked;
               post.reacoes = total ? [{ emoji: '❤️', total }] : [];
@@ -480,8 +506,8 @@
         return postViewer;
       };
       const updatePostLikeButton = (card, post, total) => {
-        const button = card.querySelector('[data-post-action="like"]');
-        const count = card.querySelector('[data-post-like-count]');
+        const button = card.querySelector('[data-action="like"]');
+        const count = card.querySelector('[data-reaction-total]');
         if (!button || !count) return;
         button.classList.toggle('liked', Boolean(post.minhaCurtida));
         button.setAttribute('aria-pressed', String(Boolean(post.minhaCurtida)));
@@ -496,19 +522,34 @@
           const mediaMarkup = post.midias.map(media => media.tipo === 'video'
             ? '<video src="' + esc(media.url) + '" controls playsinline preload="metadata"></video>'
             : '<img src="' + esc(media.url) + '" alt="Imagem da publicação" loading="lazy">').join('');
-          return `<article class="company-public-post-detail" data-post-index="${postIndex}">
-            <div class="company-public-post-detail-heading"><strong>${esc(name)}</strong><time>${esc(dateLabel(post.criadaEm))}</time></div>
+          const likeTotal = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+          const avatarMarkup = company.foto_perfil
+            ? '<img src="' + esc(company.foto_perfil) + '" alt="">'
+            : esc(initials(name));
+          const longDescription = (post.descricao || '').length > 260;
+          return `<article class="publication-card company-public-post-detail" data-post-index="${postIndex}" data-post-id="${esc(post.id)}">
+            <header class="publication-card-header">
+              <span class="publication-avatar publication-author-link">${avatarMarkup}</span>
+              <div class="publication-author">
+                <strong class="publication-author-name-link">${esc(name)}</strong>
+                <small><span data-followers-count>${Number(company.total_seguidores || 0).toLocaleString('pt-BR')}</span> seguidores · ${esc(dateLabel(post.criadaEm))}</small>
+              </div>
+            </header>
             <div class="company-public-post-detail-media">${mediaMarkup}</div>
-            ${post.descricao ? '<p class="company-public-post-description">' + esc(post.descricao) + '</p>' : ''}
+            ${post.descricao ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + esc(post.descricao) + '</div>' + (longDescription ? '<button type="button" class="description-toggle" data-post-description-toggle>Ver mais...</button>' : '') : ''}
             <div class="company-public-post-detail-stats"><span><i class="fa-solid fa-eye" aria-hidden="true"></i> <strong data-post-view-count>${formatViews(post.visualizacoes)}</strong> visualizações</span></div>
-            <footer class="company-public-post-actions">
-              <button type="button" class="company-public-post-like${post.minhaCurtida ? ' liked' : ''}" data-post-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
-                <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <strong data-post-like-count>${formatViews((post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0))}</strong>
-              </button>
-              ${post.minha
-                ? '<button type="button" class="company-public-post-danger" data-post-action="delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>'
-                : '<button type="button" class="company-public-post-danger" data-post-action="report"><i class="fa-solid fa-flag" aria-hidden="true"></i> Denunciar</button>'}
+            <footer class="publication-card-footer">
+              <div class="publication-actions">
+                <div class="reaction-control">
+                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
+                    <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <strong data-reaction-total>${formatViews(likeTotal)}</strong>
+                  </button>
+                </div>
+                ${post.minha
+                  ? '<button type="button" class="report-button" data-action="delete">Excluir</button>'
+                  : '<button type="button" class="report-button" data-action="report">Denunciar</button>'}
+              </div>
             </footer>
           </article>`;
         }).join('');
@@ -568,6 +609,17 @@
         if (tab) showSection(tab.dataset.companySection);
       });
       tabContent.addEventListener('click', event => {
+        const mediaFilter = event.target.closest('[data-company-media-filter]');
+        if (mediaFilter) {
+          activeMediaFilter = mediaFilter.dataset.companyMediaFilter;
+          tabContent.querySelectorAll('[data-company-media-filter]').forEach(button => {
+            const selected = button === mediaFilter;
+            button.classList.toggle('is-active', selected);
+            button.setAttribute('aria-pressed', String(selected));
+          });
+          renderCompanyPosts();
+          return;
+        }
         const postTile = event.target.closest('[data-company-post-index]');
         if (postTile) { openPostViewer(Number(postTile.dataset.companyPostIndex)); return; }
         const photoButton = event.target.closest('[data-company-photo-index]');
