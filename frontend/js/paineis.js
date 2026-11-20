@@ -1121,8 +1121,7 @@
     };
     document.getElementById('company-logo-edit').addEventListener('click', () => {
       if (!companyProfileCache.foto_perfil) {
-        const input = document.getElementById('company-logo-input');
-        showImageGuidelines('profile', () => input.click());
+        openCompanyPhotoUpdateModal();
         return;
       }
       openCompanyPhotoViewer();
