@@ -40,7 +40,7 @@ app.use(helmet({ contentSecurityPolicy: { directives }, crossOriginEmbedderPolic
 // CSS, JavaScript, imagens e demais arquivos existentes não precisam consultar o banco.
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-app.use(express.json({ limit: '3mb' }));
+app.use(express.json({ limit: '7mb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 app.use(session({
   store: new pgSession({ pool, tableName: 'sessoes', createTableIfMissing: true }),
@@ -95,6 +95,7 @@ const imageReference = (userId, field, value) => {
   }
   return value;
 };
+const MAX_COMPANY_IMAGE_BYTES = 5 * 1024 * 1024;
 const companyImageFormats = {
   'image/png': { extension: 'png', valid: body => body.length >= 8 && body.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) },
   'image/jpeg': { extension: 'jpg', valid: body => body.length >= 3 && body[0] === 0xff && body[1] === 0xd8 && body[2] === 0xff },
@@ -113,7 +114,7 @@ const uploadCompanyProfileImage = async (userId, field, dataUrl) => {
   const match = typeof dataUrl === 'string'
     ? /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl)
     : null;
-  if (!match || dataUrl.length > 1400000) {
+  if (!match || dataUrl.length > Math.ceil(MAX_COMPANY_IMAGE_BYTES / 3) * 4 + 32) {
     const error = new Error('Use uma imagem PNG, JPG/JPEG ou WEBP de até 5 MB.');
     error.statusCode = 400;
     throw error;
@@ -121,6 +122,11 @@ const uploadCompanyProfileImage = async (userId, field, dataUrl) => {
   const contentType = match[1];
   const format = companyImageFormats[contentType];
   const body = Buffer.from(match[2], 'base64');
+  if (body.length > MAX_COMPANY_IMAGE_BYTES) {
+    const error = new Error('A imagem deve ter no máximo 5 MB.');
+    error.statusCode = 400;
+    throw error;
+  }
   if (!format || !format.valid(body)) {
     const error = new Error('O conteúdo do arquivo não corresponde a uma imagem PNG, JPG/JPEG ou WEBP válida.');
     error.statusCode = 400;
@@ -885,8 +891,8 @@ app.put('/api/empresa/perfil/imagem', role('empresa'), asyncRoute(async (req, re
   const field = req.body.campo;
   const image = req.body.imagem;
   if (!['foto_perfil','banner_perfil'].includes(field)) return res.status(400).json({ erro: 'Tipo de imagem inválido.' });
-  if (image !== null && (typeof image !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(image) || image.length > 1400000)) {
-    return res.status(400).json({ erro: 'A imagem não pôde ser processada ou ultrapassou o limite permitido.' });
+  if (image !== null && typeof image !== 'string') {
+    return res.status(400).json({ erro: 'A imagem enviada é inválida.' });
   }
   const current = await pool.query('SELECT ' + field + ' FROM usuarios WHERE id=$1 AND tipo=\'empresa\'', [req.session.user.id]);
   if (!current.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
