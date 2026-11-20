@@ -1199,6 +1199,8 @@ body[data-a11y-font=larger] main :is(p,span,a,label,button,input,select,textarea
 .company-public-follow-action.is-following{background:transparent;color:#0a66c2}
 .company-public-follow-action.is-following:hover{background:#eef6ff}
 .company-public-follow-action:disabled{opacity:.65;cursor:wait}
-.company-public-followers{margin:8px 0 0;color:var(--muted);font-size:13px}
-.company-public-followers strong{color:var(--ink);font-weight:700}
-@media(max-width:760px){.company-public-follow-action{min-height:40px;min-width:112px;padding:0 16px;font-size:13px}.company-public-followers{margin-top:7px}}
+.company-public-followers{display:inline-flex;align-items:center;gap:6px;min-height:42px;margin:0 0 0 3px;padding:0 13px;border:1px solid var(--line);border-radius:24px;background:var(--surface-soft,#f6f8fb);color:var(--muted);font-size:12px;white-space:nowrap}
+.company-public-followers i{color:var(--orange);font-size:13px}
+.company-public-followers strong{color:var(--ink);font-size:13px;font-weight:750}
+.company-public-followers span{color:var(--muted)}
+@media(max-width:760px){.company-public-follow-action{min-height:40px;min-width:112px;padding:0 16px;font-size:13px}.company-public-followers{min-height:40px;margin-left:0;padding:0 11px}}
