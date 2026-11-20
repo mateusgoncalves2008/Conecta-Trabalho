@@ -1062,3 +1062,51 @@ body.candidate-photo-update-open{overflow:hidden}
 @media(max-width:600px){
   .company-photo-visibility-wrap .candidate-visibility-popover{left:-8px}
 }
+
+
+/* Reforço do tema escuro no painel da empresa.
+   A especificidade maior evita que estilos genéricos de formulários sobrescrevam estes campos. */
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields .field{
+  color:#dce5ef!important;
+}
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields input,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields select,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields textarea,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields input:disabled,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields select:disabled,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields textarea:disabled{
+  background-color:#1e3046!important;
+  border-color:#40536a!important;
+  color:#e8eef5!important;
+  -webkit-text-fill-color:#e8eef5!important;
+  opacity:1!important;
+}
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields input::placeholder,
+html[data-theme="dark"] body.dashboard-page .company-profile-card .company-profile-form .company-profile-fields textarea::placeholder{
+  color:#9eafc2!important;
+}
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form{
+  background-color:#172538!important;
+  border-color:#34465a!important;
+  color:#e8eef5!important;
+}
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field{
+  color:#dce5ef!important;
+}
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field input,
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field select,
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field textarea{
+  background-color:#1e3046!important;
+  border-color:#40536a!important;
+  color:#e8eef5!important;
+  -webkit-text-fill-color:#e8eef5!important;
+  color-scheme:dark;
+}
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field input::placeholder,
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field textarea::placeholder{
+  color:#9eafc2!important;
+}
+html[data-theme="dark"] body.dashboard-page form#job-form.job-form .field select option{
+  background:#1e3046;
+  color:#e8eef5;
+}
