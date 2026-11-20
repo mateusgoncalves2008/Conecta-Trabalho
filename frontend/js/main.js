@@ -20,7 +20,6 @@
           <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
             <a href="/">Início</a>
             <a href="/pages/vagas.html">Vagas</a>
-            <a href="/pages/pesquisar.html">Pesquisar</a>
             <a href="/pages/como-funciona.html">Como funciona</a>
             <a href="/pages/sobre.html">Sobre</a>
             <a class="mobile-login-link" href="/pages/login.html">Entrar</a>
