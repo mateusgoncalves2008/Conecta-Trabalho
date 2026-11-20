@@ -983,6 +983,72 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
   res.json({ empresa: profile, vagas: jobs.rows });
 }));
 
+
+app.get('/api/pesquisar', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const query = clean(req.query.q, 100);
+  const type = ['todos', 'pessoas', 'empresas'].includes(req.query.tipo) ? req.query.tipo : 'todos';
+  const term = '%' + query.replace(/[\\%_]/g, '\\app.post('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {') + '%';
+  const results = { pessoas: [], empresas: [] };
+
+  if (type !== 'empresas') {
+    const people = await pool.query(
+      `SELECT id,nome,cidade,titulo_profissional,resumo_profissional,competencias,foto_perfil,visibilidade_foto
+       FROM usuarios
+       WHERE tipo='candidato' AND perfil_publico=TRUE
+         AND ($1='' OR nome ILIKE $2 OR COALESCE(titulo_profissional,'') ILIKE $2 OR COALESCE(cidade,'') ILIKE $2)
+       ORDER BY nome LIMIT 40`,
+      [query, term]
+    );
+    results.pessoas = people.rows.map(person => ({
+      id: person.id, nome: person.nome, cidade: person.cidade,
+      titulo_profissional: person.titulo_profissional,
+      resumo_profissional: person.resumo_profissional,
+      competencias: person.competencias,
+      foto_perfil: person.visibilidade_foto === 'todos' || req.session.user
+        ? imageReference(person.id, 'foto_perfil', person.foto_perfil) : null
+    }));
+  }
+
+  if (type !== 'pessoas') {
+    const companies = await pool.query(
+      `SELECT u.id,COALESCE(NULLIF(u.nome_empresa,''),NULLIF(u.nome_fantasia,''),u.nome) AS nome,
+        u.cidade,u.empresa_setor,u.empresa_descricao_curta,u.foto_perfil,
+        (SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,
+        (SELECT COUNT(*)::int FROM vagas v WHERE v.empresa_id=u.id AND v.status='aberta') AS vagas_abertas,
+        EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$3) AS seguindo
+       FROM usuarios u WHERE u.tipo='empresa'
+         AND ($1='' OR COALESCE(u.nome_empresa,'') ILIKE $2 OR COALESCE(u.nome_fantasia,'') ILIKE $2
+           OR COALESCE(u.empresa_setor,'') ILIKE $2 OR COALESCE(u.cidade,'') ILIKE $2)
+       ORDER BY nome LIMIT 40`,
+      [query, term, req.session.user?.tipo === 'candidato' ? req.session.user.id : null]
+    );
+    results.empresas = companies.rows.map(company => ({
+      ...company, foto_perfil: imageReference(company.id, 'foto_perfil', company.foto_perfil)
+    }));
+  }
+  res.json(results);
+}));
+
+app.get('/api/candidatos/:id/publico', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const candidateId = Number(req.params.id);
+  if (!Number.isSafeInteger(candidateId) || candidateId < 1) return res.status(400).json({ erro: 'Perfil inválido.' });
+  const result = await pool.query(
+    `SELECT id,nome,cidade,titulo_profissional,resumo_profissional,objetivo_profissional,
+      tipo_oportunidade,modalidade_preferida,experiencias,formacao,competencias,
+      curriculo_url,foto_perfil,visibilidade_foto
+     FROM usuarios WHERE id=$1 AND tipo='candidato' AND perfil_publico=TRUE`,
+    [candidateId]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Este perfil não está disponível publicamente.' });
+  const profile = result.rows[0];
+  profile.foto_perfil = profile.visibilidade_foto === 'todos' || req.session.user
+    ? imageReference(profile.id, 'foto_perfil', profile.foto_perfil) : null;
+  delete profile.visibilidade_foto;
+  res.json({ perfil: profile });
+}));
+
 app.post('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const companyId = Number(req.params.id);
