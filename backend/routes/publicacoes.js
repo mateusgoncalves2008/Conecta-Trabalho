@@ -141,7 +141,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
         autor: {
           id: post.autor_id, nome: post.nome_exibicao, tipo: post.tipo,
-          foto: (post.tipo === 'empresa' || post.visibilidade_foto === 'todos' || (post.visibilidade_foto === 'usuarios' && req.session.user)) ? imageReference(post.autor_id, 'foto_perfil', post.foto_perfil) : null
+          foto: (String(req.session.user?.id) === String(post.autor_id) || post.visibilidade_foto === 'todos' || (post.visibilidade_foto === 'usuarios' && req.session.user)) ? imageReference(post.autor_id, 'foto_perfil', post.foto_perfil) : null
         },
         midias: mediaByPost.get(post.id) || [],
         reacoes: reactionsByPost.get(post.id) || [],
