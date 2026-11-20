@@ -260,8 +260,8 @@
   }
 
   fileInput.addEventListener('change', async () => {
-    clearPreview();
     const files = [...(fileInput.files || [])];
+    clearPreview();
     if (!files.length) return;
     const isVideo = file => file.type.startsWith('video/');
     const hasVideo = files.some(isVideo);
