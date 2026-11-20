@@ -112,10 +112,12 @@
     }
 
     if (section === 'publicacoes') {
-      return `<section class="company-public-panel">
+      return `<section class="company-public-panel company-public-posts-panel">
         <span class="company-public-section-kicker">ATUALIZAÇÕES</span>
         <h2>Publicações</h2>
-        ${emptyState('Nenhuma publicação disponível', 'As publicações desta empresa aparecerão aqui quando esse recurso estiver disponível.')}
+        <div class="company-public-post-grid" data-company-post-grid>
+          <p class="company-public-post-loading">Carregando publicações...</p>
+        </div>
       </section>`;
     }
 
@@ -287,6 +289,117 @@
       });
       const tabContent = root.querySelector('#company-public-tab-content');
       const tabs = [...root.querySelectorAll('[data-company-section]')];
+      let companyPosts = [];
+      let companyPostsLoaded = false;
+      let companyPostsLoading = false;
+      let postViewer = null;
+
+      const formatViews = value => Number(value || 0).toLocaleString('pt-BR');
+      const postPreview = post => {
+        const media = post.midias && post.midias[0];
+        if (!media) return '<span class="company-public-post-no-media">Sem mídia</span>';
+        if (media.tipo === 'video') return '<video src="' + esc(media.url) + '" muted playsinline preload="metadata"></video><span class="company-public-post-video-mark"><i class="fa-solid fa-play" aria-hidden="true"></i></span>';
+        return '<img src="' + esc(media.url) + '" alt="" loading="lazy">';
+      };
+      const renderCompanyPosts = () => {
+        const grid = tabContent.querySelector('[data-company-post-grid]');
+        if (!grid) return;
+        if (!companyPosts.length) {
+          grid.innerHTML = emptyState('Nenhuma publicação disponível', 'Esta empresa ainda não publicou fotos ou vídeos.');
+          return;
+        }
+        grid.innerHTML = companyPosts.map((post, index) => `
+          <button class="company-public-post-tile" type="button" data-company-post-index="${index}" aria-label="Abrir publicação ${index + 1}, ${formatViews(post.visualizacoes)} visualizações">
+            <span class="company-public-post-preview">${postPreview(post)}</span>
+            <span class="company-public-post-views"><i class="fa-solid fa-eye" aria-hidden="true"></i><strong>${formatViews(post.visualizacoes)}</strong></span>
+          </button>`).join('');
+      };
+      const loadCompanyPosts = async () => {
+        if (companyPostsLoaded || companyPostsLoading) return;
+        companyPostsLoading = true;
+        try {
+          const result = await Conecta.api('/api/publicacoes/empresa/' + encodeURIComponent(id));
+          companyPosts = Array.isArray(result.publicacoes) ? result.publicacoes : [];
+          companyPostsLoaded = true;
+          renderCompanyPosts();
+        } catch (error) {
+          const grid = tabContent.querySelector('[data-company-post-grid]');
+          if (grid) grid.innerHTML = emptyState('Não foi possível carregar', error.message || 'Tente novamente em instantes.');
+        } finally {
+          companyPostsLoading = false;
+        }
+      };
+      const ensurePostViewer = () => {
+        if (postViewer) return postViewer;
+        postViewer = document.createElement('div');
+        postViewer.className = 'company-public-post-viewer';
+        postViewer.setAttribute('aria-hidden', 'true');
+        postViewer.innerHTML = `
+          <div class="company-public-post-viewer-top">
+            <strong>Publicações</strong>
+            <button type="button" data-close-company-post-viewer aria-label="Fechar publicações"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+          </div>
+          <div class="company-public-post-stream" data-company-post-stream></div>`;
+        document.body.appendChild(postViewer);
+        const stream = postViewer.querySelector('[data-company-post-stream]');
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(async entry => {
+            if (!entry.isIntersecting || entry.intersectionRatio < .65) return;
+            const card = entry.target;
+            if (card.dataset.viewRegistered === 'true') return;
+            card.dataset.viewRegistered = 'true';
+            const post = companyPosts[Number(card.dataset.postIndex)];
+            if (!post) return;
+            try {
+              const result = await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/visualizacao', { method: 'POST' });
+              post.visualizacoes = Number(result.visualizacoes || post.visualizacoes || 0);
+              const count = card.querySelector('[data-post-view-count]');
+              if (count) count.textContent = formatViews(post.visualizacoes);
+              const tile = tabContent.querySelector('[data-company-post-index="' + Number(card.dataset.postIndex) + '"] .company-public-post-views strong');
+              if (tile) tile.textContent = formatViews(post.visualizacoes);
+            } catch (error) {
+              card.dataset.viewRegistered = 'false';
+            }
+          });
+        }, { root: stream, threshold: [.65] });
+        postViewer.addEventListener('click', event => {
+          if (event.target.closest('[data-close-company-post-viewer]')) closePostViewer();
+        });
+        postViewer._viewObserver = observer;
+        return postViewer;
+      };
+      const openPostViewer = index => {
+        const viewer = ensurePostViewer();
+        const stream = viewer.querySelector('[data-company-post-stream]');
+        stream.innerHTML = companyPosts.map((post, postIndex) => {
+          const mediaMarkup = post.midias.map(media => media.tipo === 'video'
+            ? '<video src="' + esc(media.url) + '" controls playsinline preload="metadata"></video>'
+            : '<img src="' + esc(media.url) + '" alt="Imagem da publicação" loading="lazy">').join('');
+          return `<article class="company-public-post-detail" data-post-index="${postIndex}">
+            <div class="company-public-post-detail-heading"><strong>${esc(name)}</strong><time>${esc(dateLabel(post.criadaEm))}</time></div>
+            <div class="company-public-post-detail-media">${mediaMarkup}</div>
+            ${post.descricao ? '<p class="company-public-post-description">' + esc(post.descricao) + '</p>' : ''}
+            <div class="company-public-post-detail-stats"><span><i class="fa-solid fa-eye" aria-hidden="true"></i> <strong data-post-view-count>${formatViews(post.visualizacoes)}</strong> visualizações</span></div>
+          </article>`;
+        }).join('');
+        [...stream.children].forEach((card, postIndex) => {
+          card.dataset.postIndex = String(postIndex);
+          viewer._viewObserver.observe(card);
+        });
+        viewer.classList.add('is-open');
+        viewer.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('company-public-post-viewer-open');
+        const selected = stream.children[index];
+        if (selected) selected.scrollIntoView({ block: 'start' });
+      };
+      const closePostViewer = () => {
+        if (!postViewer) return;
+        postViewer.classList.remove('is-open');
+        postViewer.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('company-public-post-viewer-open');
+        postViewer.querySelectorAll('video').forEach(video => video.pause());
+      };
+
       function showSection(section) {
         if (!['inicio', 'sobre', 'publicacoes', 'vagas', 'pessoas'].includes(section)) return;
         tabs.forEach(tab => {
@@ -294,6 +407,7 @@
           else tab.removeAttribute('aria-current');
         });
         tabContent.innerHTML = renderSection(section, company, jobs, info, website);
+        if (section === 'publicacoes') loadCompanyPosts();
       }
 
       const followButton = root.querySelector('[data-follow-company]');
@@ -322,6 +436,8 @@
         if (tab) showSection(tab.dataset.companySection);
       });
       tabContent.addEventListener('click', event => {
+        const postTile = event.target.closest('[data-company-post-index]');
+        if (postTile) { openPostViewer(Number(postTile.dataset.companyPostIndex)); return; }
         const photoButton = event.target.closest('[data-company-photo-index]');
         if (photoButton) { openPhoto(Number(photoButton.dataset.companyPhotoIndex)); return; }
         const descriptionToggle = event.target.closest('[data-toggle-description]');
@@ -342,6 +458,10 @@
           if (carousel) carousel.scrollBy({ left: (scrollButton.dataset.jobScroll === 'next' ? 1 : -1) * carousel.clientWidth * 0.8, behavior: 'smooth' });
         }
       });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && postViewer?.classList.contains('is-open')) closePostViewer();
+      });
+
       root.querySelector('.company-public-hero').addEventListener('click', event => {
         const action = event.target.closest('[data-open-section]');
         if (action) showSection(action.dataset.openSection);
