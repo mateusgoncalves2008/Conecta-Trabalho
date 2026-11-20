@@ -1172,7 +1172,7 @@
     function updateImageFilterPreviews() {
       if (!editorState.image) return;
       document.querySelectorAll('[data-image-filter]').forEach(button => {
-        const preview = button.querySelector('.company-filter-preview');
+        const preview = button.querySelector('.candidate-filter-preview');
         if (!preview) return;
         preview.src = editorState.image.currentSrc || editorState.image.src;
         preview.style.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
