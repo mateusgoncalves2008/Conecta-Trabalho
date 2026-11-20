@@ -156,7 +156,7 @@
         const duration = video.duration;
         URL.revokeObjectURL(url);
         if (!Number.isFinite(duration) || duration <= 0) reject(new Error('Não foi possível identificar a duração do vídeo.'));
-        else if (duration > 60.05) reject(new Error('O vídeo deve ter no máximo 60 segundos.'));
+        else if (duration > 60) reject(new Error('O vídeo deve ter no máximo 60 segundos.'));
         else resolve(duration);
       };
       video.onerror = () => {
@@ -425,6 +425,7 @@
       reportTarget = id;
       reportForm.reset();
       reportDetail.hidden = true;
+      reportDetail.required = false;
       reportDetailLabel.hidden = true;
       reportDialog.showModal();
     }
