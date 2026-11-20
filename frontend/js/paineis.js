@@ -1113,19 +1113,18 @@
     };
     const openCompanyPhotoViewer = () => {
       const image = companyProfileCache.foto_perfil;
-      if (!image) return;
-      companyPhotoViewerImage.src = image;
+      if (image) {
+        companyPhotoViewerImage.src = image;
+        companyPhotoViewerImage.hidden = false;
+      } else {
+        companyPhotoViewerImage.removeAttribute('src');
+        companyPhotoViewerImage.hidden = true;
+      }
       companyPhotoViewer.classList.add('is-open');
       companyPhotoViewer.setAttribute('aria-hidden', 'false');
       document.body.classList.add('candidate-photo-viewer-open');
     };
-    document.getElementById('company-logo-edit').addEventListener('click', () => {
-      if (!companyProfileCache.foto_perfil) {
-        openCompanyPhotoUpdateModal();
-        return;
-      }
-      openCompanyPhotoViewer();
-    });
+    document.getElementById('company-logo-edit').addEventListener('click', openCompanyPhotoViewer);
     document.getElementById('company-photo-viewer-close').addEventListener('click', closeCompanyPhotoViewer);
     const companyVisibilityButton = document.getElementById('company-photo-visibility');
     const companyVisibilityPopover = document.getElementById('company-photo-visibility-popover');
