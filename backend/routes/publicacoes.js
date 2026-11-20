@@ -357,6 +357,15 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     next();
   };
 
+  router.get('/moderacao/acesso', (req, res) => {
+    const allowedEmails = String(process.env.PUBLICACOES_ADMIN_EMAILS || '')
+      .split(',')
+      .map(email => email.trim().toLowerCase())
+      .filter(Boolean);
+    const email = String(req.session.user?.email || '').toLowerCase();
+    res.json({ autorizado: Boolean(email && allowedEmails.includes(email)) });
+  });
+
   router.get('/denuncias', moderator, asyncRoute(async (req, res) => {
     await schemaReady;
     const status = String(req.query.status || 'todas');
@@ -373,7 +382,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     await schemaReady;
     const id = Number(req.params.id);
     const status = String(req.body.status || '');
-    if (!Number.isSafeInteger(id) || id < 1 || !['em_analise', 'resolvida', 'descartada'].includes(status)) {
+    if (!Number.isSafeInteger(id) || id < 1 || !['pendente', 'em_analise', 'resolvida', 'descartada'].includes(status)) {
       return res.status(400).json({ erro: 'Informe uma situação válida para a denúncia.' });
     }
     const result = await pool.query(
