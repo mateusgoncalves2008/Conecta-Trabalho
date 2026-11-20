@@ -113,9 +113,13 @@
     const authorDetail = post.autor.tipo === 'empresa'
       ? Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + ' seguidores'
       : (post.autor.tituloProfissional || 'Título profissional não informado');
+    const authorProfileUrl = post.autor.tipo === 'empresa'
+      ? '/pages/empresa-perfil.html?id=' + encodeURIComponent(post.autor.id)
+      : '/pages/candidato-perfil.html?id=' + encodeURIComponent(post.autor.id);
+    const authorName = escapeHTML(post.autor.nome);
     return '<article class="publication-card" data-post-id="' + post.id + '">' +
-      '<header class="publication-card-header"><div class="publication-avatar">' + avatar + '</div>' +
-      '<div class="publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><small>' + escapeHTML(authorDetail) + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
+      '<header class="publication-card-header"><a class="publication-avatar publication-author-link" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Ver perfil de ' + authorName + '">' + avatar + '</a>' +
+      '<div class="publication-author"><a class="publication-author-name-link" href="' + escapeHTML(authorProfileUrl) + '">' + authorName + '</a><small>' + escapeHTML(authorDetail) + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
       '</header>' + description + renderMedia(post.midias || []) +
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
