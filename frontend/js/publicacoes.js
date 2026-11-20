@@ -304,8 +304,12 @@
       toast('Escolha somente 1 vídeo ou até 10 fotos por publicação.');
       return;
     }
+    fileInput.disabled = true;
+    progress.hidden = false;
     try {
-      for (const original of files) {
+      for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+        progressText.textContent = 'Preparando arquivo ' + (fileIndex + 1) + ' de ' + files.length + '...';
+        const original = files[fileIndex];
         const kind = isVideo(original) ? 'video' : 'image';
         const allowed = kind === 'video'
           ? ['video/mp4', 'video/webm']
@@ -333,6 +337,9 @@
     } catch (error) {
       clearPreview();
       toast(error.message);
+    } finally {
+      fileInput.disabled = false;
+      progress.hidden = true;
     }
   });
 
