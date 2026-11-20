@@ -1797,3 +1797,29 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
   .site-header .brand > span,
   .site-header .brand .brand-mark-image{transition:none}
 }
+
+/* Com a redução de animações ativada, mantém a marca no formato tradicional */
+body.a11y-motion .site-header .brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  gap: 10px;
+}
+
+body.a11y-motion .site-header .brand > span {
+  position: static;
+  clip-path: none;
+  transform: none;
+  opacity: 1;
+  white-space: nowrap;
+  transition: none;
+}
+
+body.a11y-motion .site-header .brand .brand-mark-image,
+body.a11y-motion .site-header .brand:hover .brand-mark-image,
+body.a11y-motion .site-header .brand:focus-visible .brand-mark-image {
+  rotate: 0deg;
+  transition: none;
+}
+
