@@ -993,12 +993,22 @@ body.candidate-photo-update-open{overflow:hidden}
 @media(max-width:600px){.company-photo-update-dialog{width:100%;max-height:94vh}.company-photo-update-header{padding:0 18px}.company-photo-update-content{padding:26px 18px 24px}.company-photo-update-content h3{font-size:19px}.company-photo-update-content>img{width:140px;height:140px}.company-photo-update-content>p{font-size:14px}.company-photo-update-actions{padding:14px;flex-wrap:wrap}.company-photo-update-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.company-photo-update-modal{transition:none}}
 
-/* Abre o seletor de visibilidade da empresa para cima */
+/* Abre o seletor de visibilidade da empresa para cima e mantém a rolagem dentro da caixa */
 .company-photo-visibility-wrap .candidate-visibility-popover{
   top:auto;
   bottom:calc(100% + 9px);
   left:0;
+  max-height:min(420px,calc(100vh - 140px));
+  max-height:min(420px,calc(100dvh - 140px));
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#c7d0da transparent;
 }
+.company-photo-visibility-wrap .candidate-visibility-popover::-webkit-scrollbar{width:7px}
+.company-photo-visibility-wrap .candidate-visibility-popover::-webkit-scrollbar-track{background:transparent}
+.company-photo-visibility-wrap .candidate-visibility-popover::-webkit-scrollbar-thumb{border-radius:8px;background:#c7d0da}
+.company-photo-visibility-wrap .candidate-visibility-popover::-webkit-scrollbar-thumb:hover{background:#9eabb9}
 @media(max-width:600px){
   .company-photo-visibility-wrap .candidate-visibility-popover{left:-8px}
 }
