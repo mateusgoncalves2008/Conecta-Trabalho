@@ -106,31 +106,31 @@
             <input type="file" id="company-logo-input" accept="image/png,image/jpeg,image/webp" hidden>
           </div>
           <div class="company-photo-viewer" id="company-photo-viewer" aria-hidden="true">
-            <section class="company-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="company-photo-dialog-title">
-              <header class="company-photo-dialog-header">
+            <section class="candidate-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="company-photo-dialog-title">
+              <header class="candidate-photo-dialog-header">
                 <h2 id="company-photo-dialog-title">Foto do perfil</h2>
                 <button type="button" id="company-photo-viewer-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
               </header>
-              <div class="company-photo-dialog-body">
+              <div class="candidate-photo-dialog-body">
                 <img id="company-photo-viewer-image" alt="Foto de perfil ampliada">
-                <div class="company-photo-visibility-wrap">
-                  <button type="button" class="company-photo-visibility" id="company-photo-visibility" aria-expanded="false" aria-controls="company-photo-visibility-popover">
+                <div class="candidate-photo-visibility-wrap">
+                  <button type="button" class="candidate-photo-visibility" id="company-photo-visibility" aria-expanded="false" aria-controls="company-photo-visibility-popover">
                     <i class="fa-regular fa-eye"></i><span id="company-photo-visibility-label">Todos</span><i class="fa-solid fa-chevron-down company-visibility-chevron"></i>
                   </button>
-                  <section class="company-visibility-popover" id="company-photo-visibility-popover" aria-labelledby="company-visibility-title" hidden>
+                  <section class="candidate-visibility-popover" id="company-photo-visibility-popover" aria-labelledby="company-visibility-title" hidden>
                     <h3 id="company-visibility-title">Visibilidade</h3>
                     <p>Selecione quem pode ver sua foto do perfil</p>
-                    <div class="company-visibility-options">
+                    <div class="candidate-visibility-options">
                       <label><input type="radio" name="company-photo-visibility-choice" value="conexoes" disabled><span><strong>Somente conexões de 1° grau</strong><small>Disponível quando o sistema de conexões estiver pronto.</small></span></label>
                       <label><input type="radio" name="company-photo-visibility-choice" value="rede" disabled><span><strong>Sua rede</strong><small>Disponível quando o sistema de conexões estiver pronto.</small></span></label>
                       <label><input type="radio" name="company-photo-visibility-choice" value="usuarios"><span><strong>Todos os usuários do ConectaTrabalho</strong><small>Usuários que entraram no ConectaTrabalho, inclusive todos da sua rede.</small></span></label>
                       <label><input type="radio" name="company-photo-visibility-choice" value="todos"><span><strong>Todos</strong><small>Qualquer pessoa, dentro ou fora do ConectaTrabalho.</small></span></label>
                     </div>
-                    <div class="company-visibility-footer"><button type="button" id="company-photo-visibility-save">Salvar</button></div>
-                    <p class="company-visibility-feedback" id="company-photo-visibility-feedback" role="status"></p>
+                    <div class="candidate-visibility-footer"><button type="button" id="company-photo-visibility-save">Salvar</button></div>
+                    <p class="candidate-visibility-feedback" id="company-photo-visibility-feedback" role="status"></p>
                   </section>
                 </div>
-                <div class="company-photo-actions">
+                <div class="candidate-photo-actions">
                   <button type="button" id="company-photo-edit"><i class="fa-solid fa-pen"></i><span>Editar</span></button>
                   <button type="button" id="company-photo-update"><i class="fa-solid fa-camera"></i><span>Atualizar</span></button>
                   <button type="button" id="company-photo-delete"><i class="fa-regular fa-trash-can"></i><span>Excluir</span></button>
@@ -157,24 +157,24 @@
             </section>
           </div>
           <div class="company-image-editor" id="company-image-editor" aria-hidden="true">
-            <section class="company-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="company-image-editor-title">
-              <header class="company-image-editor-header">
+            <section class="candidate-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="company-image-editor-title">
+              <header class="candidate-image-editor-header">
                 <h2 id="company-image-editor-title">Editar imagem</h2>
                 <button type="button" id="company-image-editor-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
               </header>
-              <div class="company-image-editor-main">
-                <div class="company-image-editor-stage">
+              <div class="candidate-image-editor-main">
+                <div class="candidate-image-editor-stage">
                   <canvas id="company-image-editor-canvas" width="600" height="600"></canvas>
-                  <div class="company-image-crop-guide" aria-hidden="true"></div>
+                  <div class="candidate-image-crop-guide" aria-hidden="true"></div>
                 </div>
-                <aside class="company-image-editor-tools">
-                  <nav class="company-image-editor-tabs" aria-label="Ferramentas de edição">
+                <aside class="candidate-image-editor-tools">
+                  <nav class="candidate-image-editor-tabs" aria-label="Ferramentas de edição">
                     <button type="button" class="active" data-editor-tab="crop">Recortar</button>
                     <button type="button" data-editor-tab="filter">Filtrar</button>
                     <button type="button" data-editor-tab="change">Alterar</button>
                   </nav>
-                  <div class="company-editor-panel active" data-editor-panel="crop">
-                    <div class="company-editor-transform">
+                  <div class="candidate-editor-panel active" data-editor-panel="crop">
+                    <div class="candidate-editor-transform">
                       <button type="button" id="company-image-rotate-left" aria-label="Girar para a esquerda"><i class="fa-solid fa-rotate-left"></i></button>
                       <button type="button" id="company-image-rotate-right" aria-label="Girar para a direita"><i class="fa-solid fa-rotate-right"></i></button>
                       <button type="button" id="company-image-flip-horizontal" aria-label="Inverter horizontalmente"><i class="fa-solid fa-arrows-left-right"></i></button>
@@ -183,19 +183,19 @@
                     <label>Zoom<input id="company-image-zoom" type="range" min="1" max="3" step="0.01" value="1"></label>
                     <label>Girar<input id="company-image-angle" type="range" min="-180" max="180" step="1" value="0"></label>
                   </div>
-                  <div class="company-editor-panel" data-editor-panel="filter">
+                  <div class="candidate-editor-panel" data-editor-panel="filter">
                     <p>Escolha um filtro e ajuste a aparência da imagem.</p>
-                    <div class="company-editor-filters">
-                      <button type="button" data-image-filter="none" class="active"><img class="company-filter-preview" alt=""><span>Original</span></button>
-                      <button type="button" data-image-filter="grayscale(1)"><img class="company-filter-preview" alt=""><span>Preto e branco</span></button>
-                      <button type="button" data-image-filter="sepia(.75)"><img class="company-filter-preview" alt=""><span>Sépia</span></button>
-                      <button type="button" data-image-filter="brightness(1.15) contrast(1.05)"><img class="company-filter-preview" alt=""><span>Claro</span></button>
-                      <button type="button" data-image-filter="contrast(1.2) saturate(1.2)"><img class="company-filter-preview" alt=""><span>Vívido</span></button>
+                    <div class="candidate-editor-filters">
+                      <button type="button" data-image-filter="none" class="active"><img class="candidate-filter-preview" alt=""><span>Original</span></button>
+                      <button type="button" data-image-filter="grayscale(1)"><img class="candidate-filter-preview" alt=""><span>Preto e branco</span></button>
+                      <button type="button" data-image-filter="sepia(.75)"><img class="candidate-filter-preview" alt=""><span>Sépia</span></button>
+                      <button type="button" data-image-filter="brightness(1.15) contrast(1.05)"><img class="candidate-filter-preview" alt=""><span>Claro</span></button>
+                      <button type="button" data-image-filter="contrast(1.2) saturate(1.2)"><img class="candidate-filter-preview" alt=""><span>Vívido</span></button>
                     </div>
 
                   </div>
-                  <div class="company-editor-panel" data-editor-panel="change">
-                    <div class="company-image-adjustments">
+                  <div class="candidate-editor-panel" data-editor-panel="change">
+                    <div class="candidate-image-adjustments">
                       <label for="company-image-brightness"><span>Brilho <output id="company-image-brightness-value">100%</output></span><input id="company-image-brightness" type="range" min="50" max="150" value="100"></label>
                       <label for="company-image-contrast"><span>Contraste <output id="company-image-contrast-value">100%</output></span><input id="company-image-contrast" type="range" min="50" max="150" value="100"></label>
                       <label for="company-image-saturation"><span>Saturação <output id="company-image-saturation-value">100%</output></span><input id="company-image-saturation" type="range" min="0" max="200" value="100"></label>
@@ -204,7 +204,7 @@
                   </div>
                 </aside>
               </div>
-              <footer class="company-image-editor-footer">
+              <footer class="candidate-image-editor-footer">
                 <span id="company-image-editor-feedback" role="status"></span>
                 <button type="button" class="button button-primary" id="company-image-editor-save">Salvar alterações</button>
               </footer>
