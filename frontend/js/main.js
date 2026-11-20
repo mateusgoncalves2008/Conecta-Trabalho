@@ -540,6 +540,22 @@
         });
         wrapper.append(trigger, dropdown);
         publicHeaderActions.prepend(wrapper);
+
+        // Barra de pesquisa posicionada entre a navegação e os controles da conta.
+        if (!document.querySelector('.site-header-search')) {
+          const searchForm = document.createElement('form');
+          searchForm.className = 'site-header-search';
+          searchForm.setAttribute('role', 'search');
+          searchForm.setAttribute('aria-label', 'Pesquisar pessoas e empresas');
+          searchForm.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" maxlength="100" placeholder="Pesquisar" aria-label="Pesquisar pessoas e empresas" autocomplete="off">';
+          searchForm.addEventListener('submit', event => {
+            event.preventDefault();
+            const value = searchForm.querySelector('input').value.trim();
+            window.location.href = '/pages/pesquisar.html' + (value ? '?q=' + encodeURIComponent(value) : '');
+          });
+          const header = document.querySelector('.site-header');
+          header.insertBefore(searchForm, publicHeaderActions.closest('.dashboard-user') || publicHeaderActions);
+        }
       }).catch(() => {}).finally(() => {
         publicHeaderActions.classList.remove('auth-checking');
       });
