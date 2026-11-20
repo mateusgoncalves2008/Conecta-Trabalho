@@ -1,0 +1,41 @@
+.search-directory-main{max-width:1040px}
+.search-directory-intro{margin:4px 0 28px}
+.search-directory-intro .eyebrow{color:var(--orange);font-size:11px;font-weight:750;letter-spacing:1.1px}
+.search-directory-intro h1{margin:9px 0;color:var(--navy);font-size:clamp(27px,4vw,36px);letter-spacing:-.8px}
+.search-directory-intro p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+.search-directory-panel{padding:26px;background:var(--surface,#fff);border:1px solid var(--line,#e1e7ee);border-radius:14px;box-shadow:0 8px 24px rgba(22,45,75,.035)}
+.directory-search-form{display:flex;align-items:center;gap:13px;min-height:54px;padding:5px 6px 5px 16px;border:1px solid var(--line,#d9e1e9);border-radius:10px;background:var(--surface,#fff)}
+.directory-search-form>i{color:var(--muted);font-size:16px}
+.directory-search-form input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:14px}
+.directory-search-form button{min-height:42px}
+.directory-filter-row{display:flex;gap:8px;margin-top:22px;border-bottom:1px solid var(--line,#e1e7ee);padding-bottom:13px}
+.directory-filter{border:1px solid transparent;border-radius:7px;padding:9px 15px;background:transparent;color:var(--muted);font:inherit;font-size:13px;cursor:pointer}
+.directory-filter:hover,.directory-filter.is-active{border-color:rgba(224,109,54,.28);background:rgba(224,109,54,.09);color:var(--orange)}
+.directory-filter.is-active{font-weight:700}
+.directory-result-summary{margin:17px 0 13px;color:var(--muted);font-size:12px}
+.directory-results{display:grid;gap:11px}
+.directory-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px;border:1px solid var(--line,#e1e7ee);border-radius:11px;background:var(--surface,#fff)}
+.directory-card-identity{display:flex;align-items:center;gap:15px;min-width:0}
+.directory-avatar{display:grid;place-items:center;flex:0 0 58px;width:58px;height:58px;border-radius:50%;object-fit:cover;background:#edf1f5}
+.directory-avatar-fallback{color:#31465e;font-weight:750;font-size:17px}
+.directory-avatar-fallback.is-company{border-radius:13px;background:#f8eee8;color:#bd6039}
+.directory-card-copy{min-width:0}
+.directory-card-type{display:block;margin-bottom:4px;color:var(--orange);font-size:10px;font-weight:750;letter-spacing:.7px;text-transform:uppercase}
+.directory-card-copy h2{margin:0 0 4px;color:var(--navy);font-size:16px;overflow-wrap:anywhere}
+.directory-card-copy p{margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.5}
+.directory-card-copy small{display:block;margin-top:4px;color:var(--muted);font-size:11px}
+.directory-card-copy small i{margin-right:4px}
+.directory-card-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+.directory-card .is-following{color:#28704f;border-color:#9bc8ae}
+.directory-loading,.directory-empty{padding:42px 18px;text-align:center;color:var(--muted);font-size:13px}
+.directory-loading i,.directory-empty>i{color:var(--orange);font-size:23px}
+.directory-empty h2{margin:12px 0 6px;color:var(--navy);font-size:17px}
+.directory-empty p{margin:0;line-height:1.6}
+.search-directory-page .site-footer{margin-top:10px}
+html[data-theme=dark] .search-directory-panel,html[data-theme=dark] .directory-card{background:#1c2838;border-color:#354255}
+html[data-theme=dark] .search-directory-intro h1,html[data-theme=dark] .directory-card-copy h2,html[data-theme=dark] .directory-empty h2{color:#e7edf5}
+html[data-theme=dark] .directory-search-form{background:#121c2a;border-color:#46566b}
+html[data-theme=dark] .directory-avatar{background:#2b3b50}
+html[data-theme=dark] .directory-avatar-fallback{color:#e7edf5}
+html[data-theme=dark] .directory-avatar-fallback.is-company{background:#3a2b29;color:#ffb18b}
+@media(max-width:650px){.search-directory-panel{padding:17px}.directory-search-form{flex-wrap:wrap;padding:10px}.directory-search-form input{min-height:40px}.directory-search-form button{width:100%}.directory-card{align-items:flex-start;flex-direction:column}.directory-card-actions{width:100%;justify-content:flex-start}.directory-card-actions .button{flex:1}.directory-avatar{flex-basis:48px;width:48px;height:48px}}
