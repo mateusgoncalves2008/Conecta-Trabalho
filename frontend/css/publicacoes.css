@@ -47,6 +47,12 @@
 .publication-author-name-link:hover{text-decoration:underline}
 .publication-author-name-link:focus-visible{border-radius:3px}
 .publication-author small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.follow-company-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:82px;min-height:34px;padding:7px 13px;border:1px solid var(--orange);border-radius:8px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.follow-company-button:hover{border-color:var(--orange-dark);background:var(--orange-dark)}
+.follow-company-button.is-following{border-color:var(--line);background:var(--page);color:var(--ink)}
+.follow-company-button.is-following:hover{border-color:#bd4a42;background:rgba(189,74,66,.08);color:#bd4a42}
+.follow-company-button:disabled{opacity:.65;cursor:wait}
+
 .publication-menu{position:relative}
 .publication-menu button{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:21px}
 .publication-menu button:hover{background:var(--page);color:var(--ink)}
@@ -86,6 +92,9 @@
 .report-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
 .report-dialog-actions .button{padding:10px 14px}
 @media(max-width:600px){
+ .publication-card-header{gap:9px;padding:15px 14px 11px}
+ .follow-company-button{min-width:72px;min-height:32px;padding:6px 10px;font-size:11px}
+
  .publicacoes-main{width:calc(100% - 24px);padding:38px 0 58px}
  .publication-composer{padding:17px}
  .visitor-note{align-items:flex-start;padding:16px}
@@ -133,7 +142,7 @@ html[data-theme=light] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,h4,p,sp
 html[data-theme=light] body.a11y-contrast .publicacoes-main :is(input,textarea,select){
   background:#fff!important;color:#111!important;border:2px solid #222!important;
 }
-html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.follow-company-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
   background:#111!important;color:#fff!important;border:2px solid #111!important;
 }
 html[data-theme=dark] body.a11y-contrast .publicacoes-main{
