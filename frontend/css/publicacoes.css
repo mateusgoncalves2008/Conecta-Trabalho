@@ -2,6 +2,7 @@
 .publicacoes-heading{margin:0 0 30px;padding:0 4px}
 .publicacoes-heading h1{margin:8px 0 8px;color:var(--navy);font-size:clamp(30px,4vw,42px);line-height:1.15;letter-spacing:-1.2px}
 .publicacoes-heading p{max-width:650px;margin:0;color:var(--muted);font-size:15px}
+.moderation-shortcut{display:inline-flex;margin-top:14px;padding:8px 12px;border:1px solid rgba(214,107,61,.4);border-radius:8px;color:var(--orange-dark);font-size:12px;font-weight:650}
 .publication-composer,.visitor-note,.publication-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(20,43,73,.055)}
 .publication-composer{padding:24px;margin-bottom:34px}
 .composer-heading,.feed-heading,.report-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
