@@ -25,9 +25,9 @@ const MIME_TYPES = {
   'video/webm': { kind: 'video', extension: 'webm' }
 };
 
-const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) => {
+const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, profileSchemaReady }) => {
   const router = express.Router();
-  const schemaReady = pool.query([
+  const publicationSchemaReady = pool.query([
     'CREATE TABLE IF NOT EXISTS publicacoes (id BIGSERIAL PRIMARY KEY, autor_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, descricao TEXT NOT NULL DEFAULT \'\', criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW())',
     'CREATE INDEX IF NOT EXISTS idx_publicacoes_data ON publicacoes (criada_em DESC)',
     'CREATE INDEX IF NOT EXISTS idx_publicacoes_autor_data ON publicacoes (autor_id, criada_em DESC)',
@@ -39,6 +39,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference }) =>
     'CREATE TABLE IF NOT EXISTS publicacao_denuncias (id BIGSERIAL PRIMARY KEY, publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, denunciante_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, motivo VARCHAR(100) NOT NULL, detalhe VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT \'pendente\' CHECK (status IN (\'pendente\',\'em_analise\',\'resolvida\',\'descartada\')), criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE (publicacao_id, denunciante_id))',
     'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)'
   ].join(';'));
+  const schemaReady = profileSchemaReady ? Promise.all([profileSchemaReady, publicationSchemaReady]) : publicationSchemaReady;
   const member = (req, res, next) => {
     const user = req.session.user;
     if (!user) return res.status(401).json({ erro: 'Faça login para continuar.' });
