@@ -1765,7 +1765,7 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
   clip-path:inset(0 100% 0 0);
   transform:translate(0,-50%);
   white-space:nowrap;
-  transition:clip-path .42s ease,transform .42s ease;
+  transition:clip-path .75s ease-in-out,transform .75s ease-in-out;
 }
 .site-header .brand:hover > span,
 .site-header .brand:focus-visible > span{
