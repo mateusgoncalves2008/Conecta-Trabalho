@@ -611,10 +611,77 @@
           searchForm.className = 'site-header-search';
           searchForm.setAttribute('role', 'search');
           searchForm.setAttribute('aria-label', 'Pesquisar pessoas e empresas');
-          searchForm.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" maxlength="100" placeholder="Pesquisar" aria-label="Pesquisar pessoas e empresas" autocomplete="off">';
-          searchForm.addEventListener('submit', event => {
+          searchForm.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" maxlength="100" placeholder="Pesquisar" aria-label="Pesquisar pessoas e empresas" autocomplete="off"><div class="search-suggestions" hidden><section class="search-suggestion-section" data-recent-section><h2><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Pesquisas recentes</h2><div class="search-suggestion-list" data-recent-list></div></section><section class="search-suggestion-section"><h2><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> Mais populares na comunidade CONECTRA</h2><div class="search-suggestion-list" data-popular-list><p class="search-suggestion-empty">Carregando pesquisas...</p></div></section></div>';
+          const searchInput = searchForm.querySelector('input');
+          const suggestions = searchForm.querySelector('.search-suggestions');
+          const recentList = searchForm.querySelector('[data-recent-list]');
+          const recentSection = searchForm.querySelector('[data-recent-section]');
+          const popularList = searchForm.querySelector('[data-popular-list]');
+          const recentKey = 'conecta-search-recent-' + String(user.id || 'visitante');
+          const readRecent = () => {
+            try {
+              const values = JSON.parse(localStorage.getItem(recentKey) || '[]');
+              return Array.isArray(values) ? values.filter(value => typeof value === 'string').slice(0, 6) : [];
+            } catch { return []; }
+          };
+          const renderSuggestionList = (host, values, emptyText, icon) => {
+            host.replaceChildren();
+            if (!values.length) {
+              const empty = document.createElement('p');
+              empty.className = 'search-suggestion-empty';
+              empty.textContent = emptyText;
+              host.appendChild(empty);
+              return;
+            }
+            values.forEach(value => {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'search-suggestion-item';
+              button.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i>';
+              const label = document.createElement('span');
+              label.textContent = value;
+              button.appendChild(label);
+              button.addEventListener('click', () => {
+                searchInput.value = value;
+                searchForm.requestSubmit();
+              });
+              host.appendChild(button);
+            });
+          };
+          const refreshRecent = () => {
+            const recent = readRecent();
+            recentSection.hidden = !recent.length;
+            renderSuggestionList(recentList, recent, 'Nenhuma pesquisa recente.', 'fa-clock-rotate-left');
+          };
+          const loadPopular = async () => {
+            try {
+              const data = await api('/api/pesquisas/populares');
+              renderSuggestionList(popularList, data.pesquisas || [], 'Ainda não há pesquisas populares.', 'fa-arrow-trend-up');
+            } catch {
+              renderSuggestionList(popularList, [], 'Não foi possível carregar as pesquisas populares.', 'fa-arrow-trend-up');
+            }
+          };
+          const openSuggestions = () => {
+            refreshRecent();
+            suggestions.hidden = false;
+            loadPopular();
+          };
+          searchInput.addEventListener('focus', openSuggestions);
+          searchInput.addEventListener('click', () => { if (suggestions.hidden) openSuggestions(); });
+          document.addEventListener('pointerdown', event => {
+            if (!searchForm.contains(event.target)) suggestions.hidden = true;
+          });
+          searchInput.addEventListener('keydown', event => {
+            if (event.key === 'Escape') suggestions.hidden = true;
+          });
+          searchForm.addEventListener('submit', async event => {
             event.preventDefault();
-            const value = searchForm.querySelector('input').value.trim();
+            const value = searchInput.value.trim().slice(0, 100);
+            if (value) {
+              const recent = [value, ...readRecent().filter(item => item.toLocaleLowerCase('pt-BR') !== value.toLocaleLowerCase('pt-BR'))].slice(0, 6);
+              try { localStorage.setItem(recentKey, JSON.stringify(recent)); } catch {}
+              try { await api('/api/pesquisas/registrar', { method: 'POST', body: JSON.stringify({ termo: value }) }); } catch (error) { console.warn('Não foi possível registrar a pesquisa:', error); }
+            }
             window.location.href = '/pages/pesquisar.html' + (value ? '?q=' + encodeURIComponent(value) : '');
           });
           const header = document.querySelector('.site-header');
