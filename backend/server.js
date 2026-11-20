@@ -988,7 +988,7 @@ app.get('/api/pesquisar', asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const query = clean(req.query.q, 100);
   const type = ['todos', 'pessoas', 'empresas'].includes(req.query.tipo) ? req.query.tipo : 'todos';
-  const term = '%' + query.replace(/[\\%_]/g, '\\app.post('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {') + '%';
+  const term = '%' + query + '%';
   const results = { pessoas: [], empresas: [] };
 
   if (type !== 'empresas') {
