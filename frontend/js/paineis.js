@@ -1114,6 +1114,8 @@
     };
     const openCompanyPhotoUpdateModal = () => {
       companyPhotoUpdatePreview.src = companyProfileCache.foto_perfil || '';
+      document.getElementById('company-photo-update-greeting').textContent =
+        companyProfileCache.nome ? companyProfileCache.nome + ', ajude outras pessoas a reconhecer sua empresa.' : 'Ajude outras pessoas a reconhecer sua empresa.';
       closeCompanyPhotoViewer();
       companyPhotoUpdateModal.classList.add('is-open');
       companyPhotoUpdateModal.setAttribute('aria-hidden', 'false');
