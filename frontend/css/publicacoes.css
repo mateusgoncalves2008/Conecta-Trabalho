@@ -63,21 +63,15 @@
 .publication-card-footer{padding:13px 18px 16px}
 .publication-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding-top:11px}
 .reaction-control{position:relative;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.like-toggle-button{display:inline-flex;align-items:center;gap:13px;min-height:44px;padding:7px 13px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);font-size:16px;cursor:pointer}
+.like-toggle-button{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:7px 13px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);font-size:16px;cursor:pointer}
+.like-toggle-button.liked{color:#e53950}
+.like-toggle-button.liked .like-icon{fill:#e53950;stroke:#e53950}
+.like-toggle-button:hover{background:var(--page);color:#e53950}
 .like-toggle-button .like-icon{display:block;width:27px;height:27px;flex:0 0 27px;fill:#fff;stroke:#171717;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
 .like-toggle-button strong{color:var(--ink);font-size:18px;font-weight:750}
-.like-toggle-button:hover,.like-toggle-button[aria-expanded=true]{background:var(--page);color:var(--navy)}
-.reaction-picker{position:absolute;z-index:6;left:0;bottom:calc(100% + 6px);display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:max-content;max-width:min(320px,calc(100vw - 56px));padding:7px;border:1px solid var(--line);border-radius:11px;background:var(--surface);box-shadow:0 8px 24px rgba(10,25,45,.16)}
-.reaction-picker[hidden]{display:none!important}
-.reaction-button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;font-size:20px;cursor:pointer}
 .report-button{min-height:36px;padding:6px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-size:12px}
 .report-button[data-action="delete"],.report-button[data-action="report"]{min-height:38px;padding:7px 12px;border:1px solid rgba(189,74,66,.32);border-radius:8px;background:rgba(189,74,66,.09);color:#bd4a42;font-size:13px;font-weight:700}
 .report-button[data-action="delete"]:hover,.report-button[data-action="report"]:hover{border-color:#bd4a42;background:rgba(189,74,66,.17);color:#a93630}
-.reaction-button:hover,.report-button:hover{background:var(--page);color:var(--navy)}
-.reaction-button.active{border-color:rgba(214,107,61,.28);background:rgba(214,107,61,.09);color:var(--orange-dark)}
-.reaction-options{display:flex;gap:3px}
-.reaction-options button{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;font-size:18px}
-.reaction-options button:hover{background:var(--page)}
 .report-button{margin-left:auto}
 .load-more-button{display:block;min-width:180px;margin:24px auto 0;padding:11px 18px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--navy);font-size:13px;font-weight:650}
 .load-more-button:hover{border-color:var(--orange);color:var(--orange-dark)}
@@ -109,9 +103,6 @@ html[data-theme=dark] .publicacoes-heading h1,html[data-theme=dark] .composer-he
 html[data-theme=dark] .publication-composer,html[data-theme=dark] .visitor-note,html[data-theme=dark] .publication-card,html[data-theme=dark] .report-dialog{background:#182638;border-color:#34465c;color:#e8eef5}
 html[data-theme=dark] #publication-description,html[data-theme=dark] .report-dialog textarea,html[data-theme=dark] .report-dialog select{background:#111e2e;border-color:#40536a;color:#edf2f7}
 html[data-theme=dark] .publication-avatar{background:#26384d;color:#edf2f7}
-html[data-theme=dark] .reaction-button:hover,html[data-theme=dark] .report-button:hover,html[data-theme=dark] .like-toggle-button:hover,html[data-theme=dark] .like-toggle-button[aria-expanded=true],html[data-theme=dark] .publication-menu button:hover,html[data-theme=dark] .load-more-button:hover{background:#26384d}
-html[data-theme=dark] .like-toggle-button strong{color:#edf2f7}
-html[data-theme=dark] .reaction-picker{background:#182638;border-color:#40536a}
 html[data-theme=dark] .load-more-button{background:#182638;border-color:#40536a;color:#edf2f7}
 html[data-theme=dark] .dialog-close{background:#26384d;color:#edf2f7}
 body.a11y-motion .publicacoes-main *,body.a11y-motion .publicacoes-main *::before,body.a11y-motion .publicacoes-main *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
@@ -142,10 +133,9 @@ html[data-theme=light] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,h4,p,sp
 html[data-theme=light] body.a11y-contrast .publicacoes-main :is(input,textarea,select){
   background:#fff!important;color:#111!important;border:2px solid #222!important;
 }
-html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.reaction-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
   background:#111!important;color:#fff!important;border:2px solid #111!important;
 }
-html[data-theme=light] body.a11y-contrast .publicacoes-main .like-icon{fill:#fff!important;stroke:#111!important}
 html[data-theme=dark] body.a11y-contrast .publicacoes-main{
   background:#000!important;color:#fff!important;
 }
@@ -158,13 +148,11 @@ html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,h4,p,spa
 html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(input,textarea,select){
   background:#000!important;color:#fff!important;border:2px solid #fff!important;
 }
-html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.reaction-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
+html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
   background:#fff!important;color:#000!important;border:2px solid #fff!important;
 }
-html[data-theme=dark] body.a11y-contrast .publicacoes-main .like-icon{fill:#fff!important;stroke:#000!important}
 body.a11y-contrast .publicacoes-main :is(a,button,input,select,textarea,[tabindex]):focus-visible{
   outline:4px solid #ff8a00!important;outline-offset:4px!important;
 }
-body.a11y-contrast .publicacoes-main :is(.reaction-picker,.upload-preview,.upload-progress){
-  border:2px solid currentColor!important;
+body.a11y-contrast .publicacoes-main :is(  border:2px solid currentColor!important;
 }
