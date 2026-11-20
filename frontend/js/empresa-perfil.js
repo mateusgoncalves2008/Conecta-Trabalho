@@ -219,8 +219,7 @@
               <p class="company-public-meta">${company.cidade ? esc(company.cidade) : 'Localização não informada'}${jobs.length ? ' · ' + jobs.length + (jobs.length === 1 ? ' vaga aberta' : ' vagas abertas') : ''}</p>
             </div>
             <div class="company-public-actions">
-              <button class="company-public-primary-action" type="button" data-open-section="vagas">Ver vagas</button>
-              ${website ? `<a class="company-public-secondary-action" href="${esc(website)}" target="_blank" rel="noopener noreferrer">Visite o site <span aria-hidden="true">↗</span></a>` : ''}
+              <a class="company-public-primary-action" href="${esc(website || 'https://conectatrabalho.vercel.app/')}" target="_blank" rel="noopener noreferrer">Visite o site <span aria-hidden="true">↗</span></a>
             </div>
           </div>
           <nav class="company-public-nav" aria-label="Navegação do perfil da empresa">
