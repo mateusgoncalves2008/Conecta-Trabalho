@@ -1,8 +1,8 @@
 (() => {
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
-  const currentPath = window.location.pathname.replace(/\\/+$/, '') || '/';
-  const isAuthPage = /\\/(login|cadastro)\\.html$/i.test(currentPath);
-  const isHomePage = currentPath === '/' || /\\/index\\.html$/i.test(currentPath);
+  const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  const isAuthPage = /\/(login|cadastro)\.html$/i.test(currentPath);
+  const isHomePage = currentPath === '/' || /\/index\.html$/i.test(currentPath);
 
   if (!isAuthPage && !isHomePage) {
     const currentHeader = document.querySelector('.site-header');
