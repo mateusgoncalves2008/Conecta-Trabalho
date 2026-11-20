@@ -339,7 +339,32 @@
             <strong>Publicações</strong>
             <button type="button" data-close-company-post-viewer aria-label="Fechar publicações"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
-          <div class="company-public-post-stream" data-company-post-stream></div>`;
+          <div class="company-public-post-stream" data-company-post-stream></div>
+          <dialog class="report-dialog company-post-report-dialog" data-company-post-report-dialog aria-labelledby="company-post-report-title">
+            <form data-company-post-report-form method="dialog">
+              <div class="report-dialog-heading">
+                <div><span class="eyebrow">AJUDE A MANTER A COMUNIDADE SEGURA</span><h2 id="company-post-report-title">Denunciar publicação</h2></div>
+                <button class="dialog-close" type="button" data-company-report-close aria-label="Fechar">×</button>
+              </div>
+              <p>Selecione o motivo que melhor descreve o problema. A denúncia será enviada para análise.</p>
+              <label for="company-post-report-reason">Motivo da denúncia</label>
+              <select id="company-post-report-reason" required>
+                <option value="">Selecione um motivo</option>
+                <option>Conteúdo ofensivo ou discriminatório</option>
+                <option>Informação falsa ou enganosa</option>
+                <option>Spam ou publicidade inadequada</option>
+                <option>Conteúdo impróprio</option>
+                <option>Fraude ou tentativa de golpe</option>
+                <option>Outro motivo</option>
+              </select>
+              <label for="company-post-report-detail" data-company-report-detail-label hidden>Conte o que aconteceu</label>
+              <textarea id="company-post-report-detail" maxlength="500" rows="3" placeholder="Explique brevemente o motivo..." hidden></textarea>
+              <div class="report-dialog-actions">
+                <button class="button button-outline" type="button" data-company-report-cancel>Cancelar</button>
+                <button class="button button-primary" type="submit">Enviar denúncia</button>
+              </div>
+            </form>
+          </dialog>`;
         document.body.appendChild(postViewer);
         const stream = postViewer.querySelector('[data-company-post-stream]');
         const observer = new IntersectionObserver(entries => {
@@ -362,12 +387,108 @@
             }
           });
         }, { root: stream, threshold: [.65] });
-        postViewer.addEventListener('click', event => {
-          if (event.target.closest('[data-close-company-post-viewer]')) closePostViewer();
+        let reportTargetId = null;
+        const reportDialog = postViewer.querySelector('[data-company-post-report-dialog]');
+        const reportForm = postViewer.querySelector('[data-company-post-report-form]');
+        const reportReason = postViewer.querySelector('#company-post-report-reason');
+        const reportDetail = postViewer.querySelector('#company-post-report-detail');
+        const reportDetailLabel = postViewer.querySelector('[data-company-report-detail-label]');
+        const closeReportDialog = () => {
+          reportDialog.close();
+          reportTargetId = null;
+        };
+        reportReason.addEventListener('change', () => {
+          const showDetail = reportReason.value === 'Outro motivo';
+          reportDetail.hidden = !showDetail;
+          reportDetailLabel.hidden = !showDetail;
+          reportDetail.required = showDetail;
+        });
+        postViewer.addEventListener('click', async event => {
+          if (event.target.closest('[data-close-company-post-viewer]')) { closePostViewer(); return; }
+          if (event.target.closest('[data-company-report-close],[data-company-report-cancel]')) { closeReportDialog(); return; }
+          const actionButton = event.target.closest('[data-post-action]');
+          if (!actionButton) return;
+          const card = actionButton.closest('[data-post-index]');
+          const post = card && companyPosts[Number(card.dataset.postIndex)];
+          if (!post || actionButton.disabled) return;
+          const action = actionButton.dataset.postAction;
+          if (action === 'like') {
+            if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+            const wasLiked = Boolean(post.minhaCurtida);
+            const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+            const nextLiked = !wasLiked;
+            actionButton.disabled = true;
+            post.minhaCurtida = nextLiked;
+            const nextTotal = Math.max(0, total + (nextLiked ? 1 : -1));
+            post.reacoes = nextTotal ? [{ emoji: '❤️', total: nextTotal }] : [];
+            updatePostLikeButton(card, post, nextTotal);
+            try {
+              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
+                method: nextLiked ? 'PUT' : 'DELETE',
+                ...(nextLiked ? { body: JSON.stringify({ emoji: '❤️' }) } : {})
+              });
+            } catch (error) {
+              post.minhaCurtida = wasLiked;
+              post.reacoes = total ? [{ emoji: '❤️', total }] : [];
+              updatePostLikeButton(card, post, total);
+              Conecta.toast(error.message);
+            } finally { actionButton.disabled = false; }
+            return;
+          }
+          if (action === 'report') {
+            if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+            reportTargetId = post.id;
+            reportForm.reset();
+            reportDetail.hidden = true;
+            reportDetail.required = false;
+            reportDetailLabel.hidden = true;
+            reportDialog.showModal();
+            return;
+          }
+          if (action === 'delete') {
+            if (!window.confirm('Deseja excluir esta publicação? As fotos ou o vídeo e todas as reações também serão excluídos.')) return;
+            actionButton.disabled = true;
+            try {
+              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id), { method: 'DELETE' });
+              companyPosts = companyPosts.filter(item => String(item.id) !== String(post.id));
+              closePostViewer();
+              renderCompanyPosts();
+              Conecta.toast('Publicação excluída.');
+            } catch (error) {
+              Conecta.toast(error.message);
+              actionButton.disabled = false;
+            }
+          }
+        });
+        reportForm.addEventListener('submit', async event => {
+          event.preventDefault();
+          if (!reportTargetId) return;
+          const submit = reportForm.querySelector('[type="submit"]');
+          submit.disabled = true;
+          try {
+            const result = await Conecta.api('/api/publicacoes/' + encodeURIComponent(reportTargetId) + '/denuncias', {
+              method: 'POST',
+              body: JSON.stringify({ motivo: reportReason.value, detalhe: reportDetail.value })
+            });
+            closeReportDialog();
+            Conecta.toast(result.mensagem || 'Denúncia enviada.');
+          } catch (error) {
+            Conecta.toast(error.message);
+          } finally { submit.disabled = false; }
         });
         postViewer._viewObserver = observer;
         return postViewer;
       };
+      const updatePostLikeButton = (card, post, total) => {
+        const button = card.querySelector('[data-post-action="like"]');
+        const count = card.querySelector('[data-post-like-count]');
+        if (!button || !count) return;
+        button.classList.toggle('liked', Boolean(post.minhaCurtida));
+        button.setAttribute('aria-pressed', String(Boolean(post.minhaCurtida)));
+        button.setAttribute('aria-label', post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação');
+        count.textContent = formatViews(total);
+      };
+
       const openPostViewer = index => {
         const viewer = ensurePostViewer();
         const stream = viewer.querySelector('[data-company-post-stream]');
@@ -380,6 +501,15 @@
             <div class="company-public-post-detail-media">${mediaMarkup}</div>
             ${post.descricao ? '<p class="company-public-post-description">' + esc(post.descricao) + '</p>' : ''}
             <div class="company-public-post-detail-stats"><span><i class="fa-solid fa-eye" aria-hidden="true"></i> <strong data-post-view-count>${formatViews(post.visualizacoes)}</strong> visualizações</span></div>
+            <footer class="company-public-post-actions">
+              <button type="button" class="company-public-post-like${post.minhaCurtida ? ' liked' : ''}" data-post-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
+                <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <strong data-post-like-count>${formatViews((post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0))}</strong>
+              </button>
+              ${post.minha
+                ? '<button type="button" class="company-public-post-danger" data-post-action="delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir</button>'
+                : '<button type="button" class="company-public-post-danger" data-post-action="report"><i class="fa-solid fa-flag" aria-hidden="true"></i> Denunciar</button>'}
+            </footer>
           </article>`;
         }).join('');
         [...stream.children].forEach((card, postIndex) => {
