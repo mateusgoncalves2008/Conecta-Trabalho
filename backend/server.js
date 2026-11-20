@@ -971,7 +971,7 @@ app.get('/api/empresas/:id', asyncRoute(async (req, res) => {
       (SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,
       EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$2) AS seguindo
      FROM usuarios u WHERE u.id=$1 AND u.tipo='empresa'`,
-    [companyId, req.session.user?.tipo === 'candidato' ? req.session.user.id : null]
+    [companyId, req.session.user?.id || null]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
   const profile = result.rows[0];
@@ -1041,9 +1041,11 @@ app.get('/api/candidatos/:id/publico', asyncRoute(async (req, res) => {
   const result = await pool.query(
     `SELECT id,nome,cidade,titulo_profissional,resumo_profissional,objetivo_profissional,
       tipo_oportunidade,modalidade_preferida,experiencias,formacao,competencias,
-      curriculo_url,foto_perfil,visibilidade_foto
+      curriculo_url,foto_perfil,visibilidade_foto,
+      (SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=usuarios.id) AS total_seguidores,
+      EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=usuarios.id AND es.usuario_id=$2) AS seguindo
      FROM usuarios WHERE id=$1 AND tipo='candidato' AND perfil_publico=TRUE`,
-    [candidateId]
+    [candidateId, req.session.user?.id || null]
   );
   if (!result.rowCount) return res.status(404).json({ erro: 'Este perfil não está disponível publicamente.' });
   const profile = result.rows[0];
@@ -1051,6 +1053,45 @@ app.get('/api/candidatos/:id/publico', asyncRoute(async (req, res) => {
     ? imageReference(profile.id, 'foto_perfil', profile.foto_perfil) : null;
   delete profile.visibilidade_foto;
   res.json({ perfil: profile });
+}));
+
+app.post('/api/perfis/:id/seguir', auth, asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const targetId = Number(req.params.id);
+  const follower = req.session.user;
+  if (!Number.isSafeInteger(targetId) || targetId < 1) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['candidato', 'empresa'].includes(follower.tipo)) return res.status(403).json({ erro: 'Somente candidatos e empresas podem seguir perfis.' });
+  if (follower.tipo === 'empresa' && !follower.emailVerificado) return res.status(403).json({ erro: 'Confirme o e-mail da empresa para continuar.' });
+  if (targetId === Number(follower.id)) return res.status(400).json({ erro: 'Você não pode seguir sua própria conta.' });
+  const target = await pool.query(
+    "SELECT id,tipo FROM usuarios WHERE id=$1 AND (tipo='empresa' OR (tipo='candidato' AND perfil_publico=TRUE))",
+    [targetId]
+  );
+  if (!target.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado ou indisponível.' });
+  await pool.query(
+    'INSERT INTO empresas_seguidoras (usuario_id,empresa_id) VALUES ($1,$2) ON CONFLICT (usuario_id,empresa_id) DO NOTHING',
+    [follower.id, targetId]
+  );
+  const count = await pool.query('SELECT COUNT(*)::int AS total FROM empresas_seguidoras WHERE empresa_id=$1', [targetId]);
+  res.json({ sucesso: true, seguindo: true, total_seguidores: count.rows[0].total });
+}));
+
+app.delete('/api/perfis/:id/seguir', auth, asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const targetId = Number(req.params.id);
+  const follower = req.session.user;
+  if (!Number.isSafeInteger(targetId) || targetId < 1) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['candidato', 'empresa'].includes(follower.tipo)) return res.status(403).json({ erro: 'Somente candidatos e empresas podem deixar de seguir perfis.' });
+  if (follower.tipo === 'empresa' && !follower.emailVerificado) return res.status(403).json({ erro: 'Confirme o e-mail da empresa para continuar.' });
+  if (targetId === Number(follower.id)) return res.status(400).json({ erro: 'Operação inválida.' });
+  const target = await pool.query(
+    "SELECT id FROM usuarios WHERE id=$1 AND (tipo='empresa' OR (tipo='candidato' AND perfil_publico=TRUE))",
+    [targetId]
+  );
+  if (!target.rowCount) return res.status(404).json({ erro: 'Perfil não encontrado ou indisponível.' });
+  await pool.query('DELETE FROM empresas_seguidoras WHERE usuario_id=$1 AND empresa_id=$2', [follower.id, targetId]);
+  const count = await pool.query('SELECT COUNT(*)::int AS total FROM empresas_seguidoras WHERE empresa_id=$1', [targetId]);
+  res.json({ sucesso: true, seguindo: false, total_seguidores: count.rows[0].total });
 }));
 
 app.post('/api/empresas/:id/seguir', role('candidato'), asyncRoute(async (req, res) => {
