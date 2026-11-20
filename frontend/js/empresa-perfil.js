@@ -191,7 +191,7 @@
       ]);
       const company = data.empresa;
       const currentUser = sessionData.usuario || null;
-      const canFollow = !currentUser || currentUser.tipo === 'candidato';
+      const canFollow = !currentUser || String(currentUser.id) !== String(id);
       const jobs = Array.isArray(data.vagas) ? data.vagas : [];
       const name = company.nome_empresa || company.nome_fantasia || 'Empresa';
       const logo = company.foto_perfil
@@ -298,11 +298,11 @@
       if (followButton) {
         followButton.addEventListener('click', async () => {
           if (!currentUser) { window.location.href = '/pages/login.html'; return; }
-          if (currentUser.tipo !== 'candidato' || followButton.disabled) return;
+          if (String(currentUser.id) === String(id) || followButton.disabled) return;
           followButton.disabled = true;
           try {
             const following = followButton.getAttribute('aria-pressed') === 'true';
-            const result = await Conecta.api('/api/empresas/' + encodeURIComponent(id) + '/seguir', { method: following ? 'DELETE' : 'POST' });
+            const result = await Conecta.api('/api/perfis/' + encodeURIComponent(id) + '/seguir', { method: following ? 'DELETE' : 'POST' });
             company.seguindo = result.seguindo;
             company.total_seguidores = result.total_seguidores;
             followButton.textContent = result.seguindo ? 'Seguindo' : 'Seguir';
