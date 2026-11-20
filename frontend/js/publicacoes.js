@@ -81,16 +81,23 @@
     }).join('') + '</div>';
   }
 
+  function renderReactionSummary(summary, total) {
+    const details = summary.length
+      ? summary.map(item => '<span class="reaction-tooltip-item">' + item.emoji + ' ' + Number(item.total).toLocaleString('pt-BR') + '</span>').join('')
+      : '<span class="reaction-tooltip-item">Seja a primeira pessoa a reagir</span>';
+    return '<div class="reaction-summary" tabindex="0" aria-label="' + total + ' reações. Passe o mouse ou foque para ver os tipos de reação.">' +
+      '<span class="reaction-total"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i><strong>' + total.toLocaleString('pt-BR') + '</strong></span>' +
+      '<span class="reaction-tooltip" role="tooltip">' + details + '</span></div>';
+  }
+
   function renderReactions(post) {
     const summary = (post.reacoes || []).filter(item => item.total > 0);
     const total = summary.reduce((sum, item) => sum + Number(item.total), 0);
-    const summaryHTML = total
-      ? '<div class="reaction-summary">' + summary.map(item => '<span>' + item.emoji + ' ' + item.total + '</span>').join('') + '</div>'
-      : '<div class="reaction-summary">Seja a primeira pessoa a reagir</div>';
+    const summaryHTML = renderReactionSummary(summary, total);
     const reactionButtons = reactions.map(emoji => {
       const active = post.minhaReacao === emoji;
       const count = summary.find(item => item.emoji === emoji);
-      return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" data-count="' + (count ? Number(count.total) : 0) + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + (count && Number(count.total) ? ' ' + count.total : '') + '</button>';
+      return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" data-count="' + (count ? Number(count.total) : 0) + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + '</button>';
     }).join('');
     return summaryHTML + '<div class="publication-actions"><div class="reaction-picker">' + reactionButtons + '</div>' +
       (post.minha ? '<button type="button" class="report-button" data-action="delete" data-id="' + post.id + '">Excluir</button>' :
@@ -141,9 +148,7 @@
       .map(item => ({ emoji: item.dataset.emoji, total: Number(item.dataset.count || 0) }))
       .filter(item => item.total > 0);
     const total = totals.reduce((sum, item) => sum + item.total, 0);
-    summary.textContent = total
-      ? totals.map(item => item.emoji + ' ' + item.total).join(' ')
-      : 'Seja a primeira pessoa a reagir';
+    summary.outerHTML = renderReactionSummary(totals, total);
     return previousEmoji;
   }
 
