@@ -821,6 +821,15 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
   const vaga = result.rows[0];
   vaga.empresa_logo = imageReference(vaga.empresa_id, 'foto_perfil', vaga.empresa_logo);
   vaga.empresa_banner = imageReference(vaga.empresa_id, 'banner_perfil', vaga.empresa_banner);
+  const gallery = await pool.query(
+    'SELECT id,criada_em FROM fotos_empresa WHERE empresa_id=$1 ORDER BY criada_em DESC LIMIT 4',
+    [vaga.empresa_id]
+  );
+  vaga.empresa_fotos = gallery.rows.map(photo => ({
+    id: photo.id,
+    criada_em: photo.criada_em,
+    url: '/api/imagens/empresa/' + vaga.empresa_id + '/' + photo.id
+  }));
   res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
   res.json({ vaga });
 }));
