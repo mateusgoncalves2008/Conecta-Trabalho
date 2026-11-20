@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS publicacao_reacoes (
   PRIMARY KEY (publicacao_id, usuario_id)
 );
 CREATE INDEX IF NOT EXISTS idx_publicacao_reacoes_post ON publicacao_reacoes (publicacao_id);
+UPDATE publicacao_reacoes SET emoji = '❤️' WHERE emoji <> '❤️';
 
 CREATE TABLE IF NOT EXISTS publicacao_denuncias (
   id BIGSERIAL PRIMARY KEY,
