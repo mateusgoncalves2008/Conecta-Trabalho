@@ -105,6 +105,23 @@
             <button type="button" id="company-logo-edit" class="company-logo-edit company-logo-change" aria-label="Alterar foto do perfil da empresa"><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Alterar foto</span></button>
             <input type="file" id="company-logo-input" accept="image/png,image/jpeg,image/webp" hidden>
           </div>
+          <div class="company-logo-modal" id="company-logo-modal" aria-hidden="true">
+            <section class="company-logo-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="company-logo-modal-title">
+              <header class="company-logo-modal-header">
+                <h2 id="company-logo-modal-title">Logotipo da empresa</h2>
+                <button type="button" id="company-logo-modal-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+              </header>
+              <div class="company-logo-modal-content">
+                <img id="company-logo-modal-image" alt="Logotipo atual da empresa" hidden>
+                <p>Gerencie a imagem que identifica sua empresa no ConectaTrabalho.</p>
+                <div class="company-logo-modal-actions">
+                  <button type="button" id="company-logo-modal-update"><i class="fa-solid fa-camera"></i><span>Atualizar</span></button>
+                  <button type="button" id="company-logo-modal-delete"><i class="fa-regular fa-trash-can"></i><span>Excluir</span></button>
+                </div>
+              </div>
+            </section>
+          </div>
+          </div>
           <div class="company-profile-heading-copy"><strong id="company-profile-name">Sua empresa</strong><span id="company-profile-location">Localização não informada</span></div>
         </div>
         <div class="company-profile-form-heading">
