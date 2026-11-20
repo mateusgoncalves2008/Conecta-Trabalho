@@ -1774,7 +1774,8 @@ html[data-theme="dark"] body[data-panel="empresa"] select option{
 }
 .site-header .brand:hover .brand-mark-image,
 .site-header .brand:focus-visible .brand-mark-image{
-  animation:brand-logo-spin .75s ease-in-out;
+  animation:brand-logo-spin .75s ease-in-out 1 both;
+  animation-iteration-count:1!important;
 }
 @keyframes brand-logo-spin{
   from{transform:rotate(0deg)}
