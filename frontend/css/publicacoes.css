@@ -125,12 +125,42 @@ body[data-a11y-font="larger"] .publicacoes-main :is(.publication-description,#pu
 
 body.a11y-spacing .publicacoes-main .publication-description{line-height:2.15!important;letter-spacing:.075em!important;word-spacing:.16em!important}
 body.a11y-spacing .publicacoes-main :is(.description-toggle,.publication-author small,.visitor-note p,.report-dialog p){line-height:2.05!important;letter-spacing:.075em!important;word-spacing:.16em!important;overflow-wrap:anywhere}
-html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){background:#fff!important;color:#111!important;border-color:#333!important}
-html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,p,strong,small,label,.publication-description,.publication-author strong,.visitor-note strong){color:#111!important}
-html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(input,textarea,select){background:#fff!important;color:#111!important;border:2px solid #222!important}
-html[data-theme="light"] body.a11y-contrast .publicacoes-main .description-toggle{color:#8b2f12!important}
-html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){background:#080808!important;color:#fff!important;border-color:#fff!important}
-html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,p,strong,small,label,.publication-description,.publication-author strong,.visitor-note strong){color:#fff!important}
-html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(input,textarea,select){background:#000!important;color:#fff!important;border:2px solid #fff!important}
-html[data-theme="dark"] body.a11y-contrast .publicacoes-main .description-toggle{color:#ffb18a!important}
-body.a11y-contrast .publicacoes-main :is(a,button,input,select,textarea):focus-visible{outline:4px solid #ff8a00!important;outline-offset:4px!important}
+/* Alto contraste no feed: mesma lógica visual usada nos painéis de perfil. */
+html[data-theme=light] body.a11y-contrast .publicacoes-main{
+  background:#fff!important;color:#111!important;
+}
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){
+  background:#fff!important;color:#111!important;border:1px solid #333!important;
+}
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,h4,p,span,label,strong,small,.publication-description,.publication-author strong,.visitor-note strong,.feed-heading span,.composer-limits,.composer-footer small){
+  color:#111!important;
+}
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(input,textarea,select){
+  background:#fff!important;color:#111!important;border:2px solid #222!important;
+}
+html[data-theme=light] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.reaction-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
+  background:#111!important;color:#fff!important;border:2px solid #111!important;
+}
+html[data-theme=light] body.a11y-contrast .publicacoes-main .like-icon{fill:#fff!important;stroke:#111!important}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main{
+  background:#000!important;color:#fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){
+  background:#080808!important;color:#fff!important;border:1px solid #fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,h4,p,span,label,strong,small,.publication-description,.publication-author strong,.visitor-note strong,.feed-heading span,.composer-limits,.composer-footer small){
+  color:#fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(input,textarea,select){
+  background:#000!important;color:#fff!important;border:2px solid #fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.reaction-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
+  background:#fff!important;color:#000!important;border:2px solid #fff!important;
+}
+html[data-theme=dark] body.a11y-contrast .publicacoes-main .like-icon{fill:#fff!important;stroke:#000!important}
+body.a11y-contrast .publicacoes-main :is(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:4px solid #ff8a00!important;outline-offset:4px!important;
+}
+body.a11y-contrast .publicacoes-main :is(.reaction-picker,.upload-preview,.upload-progress){
+  border:2px solid currentColor!important;
+}
