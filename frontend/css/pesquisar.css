@@ -1,3 +1,8 @@
+.directory-profile-link{color:inherit;text-decoration:none;cursor:pointer}
+.directory-profile-link:hover{text-decoration:underline;text-underline-offset:3px}
+.directory-avatar-link{display:grid;flex:0 0 58px;width:58px;height:58px;border-radius:50%;overflow:hidden}
+.directory-avatar-link .directory-avatar{flex:0 0 58px}
+.directory-avatar-link:focus-visible,.directory-profile-link:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:5px}
 .search-directory-main{max-width:1040px}
 .search-directory-intro{margin:4px 0 28px}
 .search-directory-intro .eyebrow{color:var(--orange);font-size:11px;font-weight:750;letter-spacing:1.1px}
