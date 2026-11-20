@@ -69,13 +69,23 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     if (!Number.isSafeInteger(id) || id < 1) return res.status(404).end();
     const result = await pool.query('SELECT m.storage_key,m.mime_type FROM publicacao_midias m JOIN publicacoes p ON p.id=m.publicacao_id WHERE m.id=$1', [id]);
     if (!result.rowCount || !s3) return res.status(404).end();
-    const object = await s3.send(new GetObjectCommand({ Bucket: storageBucket, Key: result.rows[0].storage_key }));
+    const rangeHeader = req.headers.range;
+    if (rangeHeader && !/^bytes=\d*-\d*$/.test(rangeHeader)) return res.status(416).end();
+    const object = await s3.send(new GetObjectCommand({
+      Bucket: storageBucket,
+      Key: result.rows[0].storage_key,
+      ...(rangeHeader ? { Range: rangeHeader } : {})
+    }));
+    res.status(rangeHeader ? 206 : 200);
     res.set({
       'Content-Type': result.rows[0].mime_type,
       'Content-Disposition': 'inline',
       'X-Content-Type-Options': 'nosniff',
+      'Accept-Ranges': 'bytes',
       'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'
     });
+    if (object.ContentLength != null) res.set('Content-Length', String(object.ContentLength));
+    if (object.ContentRange) res.set('Content-Range', object.ContentRange);
     if (object.Body && typeof object.Body.pipe === 'function') return object.Body.pipe(res);
     if (object.Body && typeof object.Body.transformToByteArray === 'function') return res.send(Buffer.from(await object.Body.transformToByteArray()));
     return res.status(502).end();
