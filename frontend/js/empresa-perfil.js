@@ -524,6 +524,8 @@
       };
       const closePostViewer = () => {
         if (!postViewer) return;
+        const reportDialog = postViewer.querySelector('[data-company-post-report-dialog]');
+        if (reportDialog?.open) reportDialog.close();
         postViewer.classList.remove('is-open');
         postViewer.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('company-public-post-viewer-open');
