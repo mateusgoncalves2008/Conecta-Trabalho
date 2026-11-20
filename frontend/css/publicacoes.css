@@ -118,7 +118,19 @@ body[data-a11y-font="large"] .publicacoes-main .publication-description{font-siz
 body[data-a11y-font="larger"] .publicacoes-main .publication-description{font-size:16.2px}
 body[data-a11y-font="large"] .publicacoes-main .description-toggle{font-size:14px}
 body[data-a11y-font="larger"] .publicacoes-main .description-toggle{font-size:15px}
-body[data-a11y-font="large"] .publicacoes-main :is(.publication-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.08em}
+body[data-a11y-font="large"] .publicacoes-main :is(.publicacoes-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.08em}
 body[data-a11y-font="larger"] .publicacoes-main :is(.publication-heading p,.publication-author small,.visitor-note p,.report-dialog p,.composer-limits,.composer-footer small){font-size:1.16em}
 body[data-a11y-font="large"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.75}
 body[data-a11y-font="larger"] .publicacoes-main :is(.publication-description,#publication-description,.report-dialog textarea,.report-dialog select){line-height:1.8}
+
+body.a11y-spacing .publicacoes-main .publication-description{line-height:2.15!important;letter-spacing:.075em!important;word-spacing:.16em!important}
+body.a11y-spacing .publicacoes-main :is(.description-toggle,.publication-author small,.visitor-note p,.report-dialog p){line-height:2.05!important;letter-spacing:.075em!important;word-spacing:.16em!important;overflow-wrap:anywhere}
+html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){background:#fff!important;color:#111!important;border-color:#333!important}
+html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,p,strong,small,label,.publication-description,.publication-author strong,.visitor-note strong){color:#111!important}
+html[data-theme="light"] body.a11y-contrast .publicacoes-main :is(input,textarea,select){background:#fff!important;color:#111!important;border:2px solid #222!important}
+html[data-theme="light"] body.a11y-contrast .publicacoes-main .description-toggle{color:#8b2f12!important}
+html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(.publication-composer,.visitor-note,.publication-card,.report-dialog){background:#080808!important;color:#fff!important;border-color:#fff!important}
+html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(h1,h2,h3,p,strong,small,label,.publication-description,.publication-author strong,.visitor-note strong){color:#fff!important}
+html[data-theme="dark"] body.a11y-contrast .publicacoes-main :is(input,textarea,select){background:#000!important;color:#fff!important;border:2px solid #fff!important}
+html[data-theme="dark"] body.a11y-contrast .publicacoes-main .description-toggle{color:#ffb18a!important}
+body.a11y-contrast .publicacoes-main :is(a,button,input,select,textarea):focus-visible{outline:4px solid #ff8a00!important;outline-offset:4px!important}
