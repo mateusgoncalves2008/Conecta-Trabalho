@@ -1082,32 +1082,29 @@
         finally { button.disabled = false; input.value = ''; }
       });
     };
-    const companyLogoModal = document.getElementById('company-logo-modal');
-    const companyLogoModalImage = document.getElementById('company-logo-modal-image');
-    const companyLogoClose = document.getElementById('company-logo-modal-close');
-    const companyLogoUpdate = document.getElementById('company-logo-modal-update');
-    const companyLogoDelete = document.getElementById('company-logo-modal-delete');
-    const openCompanyLogoModal = () => {
+    const companyPhotoViewer = document.getElementById('company-photo-viewer');
+    const companyPhotoViewerImage = document.getElementById('company-photo-viewer-image');
+    const closeCompanyPhotoViewer = () => {
+      companyPhotoViewer.classList.remove('is-open');
+      companyPhotoViewer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('candidate-photo-viewer-open');
+    };
+    const openCompanyPhotoViewer = () => {
       const image = companyProfileCache.foto_perfil;
-      if (image) {
-        companyLogoModalImage.src = image;
-        companyLogoModalImage.hidden = false;
-      } else {
-        companyLogoModalImage.removeAttribute('src');
-        companyLogoModalImage.hidden = true;
-      }
-      companyLogoModal.classList.add('is-open');
-      companyLogoModal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('company-logo-modal-open');
+      if (!image) return;
+      companyPhotoViewerImage.src = image;
+      companyPhotoViewer.classList.add('is-open');
+      companyPhotoViewer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('candidate-photo-viewer-open');
     };
-    const closeCompanyLogoModal = () => {
-      companyLogoModal.classList.remove('is-open');
-      companyLogoModal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('company-logo-modal-open');
-    };
-    document.getElementById('company-logo-edit').addEventListener('click', openCompanyLogoModal);
-    companyLogoClose.addEventListener('click', closeCompanyLogoModal);
-    companyLogoModal.addEventListener('click', event => { if (event.target === companyLogoModal) closeCompanyLogoModal(); });
+    document.getElementById('company-logo-edit').addEventListener('click', openCompanyPhotoViewer);
+    document.getElementById('company-photo-viewer-close').addEventListener('click', closeCompanyPhotoViewer);
+    companyPhotoViewer.addEventListener('click', event => { if (event.target === companyPhotoViewer) closeCompanyPhotoViewer(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && companyPhotoViewer.classList.contains('is-open')) closeCompanyPhotoViewer(); });
+    document.getElementById('company-photo-edit').addEventListener('click', () => {
+      closeCompanyPhotoViewer();
+      openCompanyImageEditor();
+    });
     const companyPhotoUpdateModal = document.getElementById('company-photo-update-modal');
     const companyPhotoUpdatePreview = document.getElementById('company-photo-update-preview');
     const closeCompanyPhotoUpdateModal = () => {
@@ -1117,16 +1114,14 @@
     };
     const openCompanyPhotoUpdateModal = () => {
       companyPhotoUpdatePreview.src = companyProfileCache.foto_perfil || '';
-      closeCompanyLogoModal();
+      closeCompanyPhotoViewer();
       companyPhotoUpdateModal.classList.add('is-open');
       companyPhotoUpdateModal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('candidate-photo-update-open');
     };
-    companyLogoUpdate.addEventListener('click', openCompanyPhotoUpdateModal);
+    document.getElementById('company-photo-update').addEventListener('click', openCompanyPhotoUpdateModal);
     document.getElementById('company-photo-update-close').addEventListener('click', closeCompanyPhotoUpdateModal);
-    companyPhotoUpdateModal.addEventListener('click', event => {
-      if (event.target === companyPhotoUpdateModal) closeCompanyPhotoUpdateModal();
-    });
+    companyPhotoUpdateModal.addEventListener('click', event => { if (event.target === companyPhotoUpdateModal) closeCompanyPhotoUpdateModal(); });
     document.getElementById('company-photo-use-camera').addEventListener('click', () => {
       const input = document.getElementById('company-logo-input');
       input.setAttribute('capture', 'user');
@@ -1139,27 +1134,21 @@
       closeCompanyPhotoUpdateModal();
       showImageGuidelines('profile', () => input.click());
     });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && companyPhotoUpdateModal.classList.contains('is-open')) closeCompanyPhotoUpdateModal();
-    });
-    companyLogoDelete.addEventListener('click', async () => {
+    document.getElementById('company-photo-delete').addEventListener('click', async () => {
       if (!companyProfileCache.foto_perfil) return;
       if (!window.confirm('Tem certeza de que deseja excluir o logotipo da empresa?')) return;
-      companyLogoDelete.disabled = true;
+      const button = document.getElementById('company-photo-delete');
+      button.disabled = true;
       try {
         await Conecta.api('/api/empresa/perfil/imagem', { method: 'PUT', body: JSON.stringify({ campo: 'foto_perfil', imagem: null }) });
         await loadCompanyProfile();
-        closeCompanyLogoModal();
+        closeCompanyPhotoViewer();
         Conecta.toast('Logotipo excluído.');
       } catch (error) {
         Conecta.toast(error.message || 'Não foi possível excluir o logotipo.');
-      } finally {
-        companyLogoDelete.disabled = false;
-      }
+      } finally { button.disabled = false; }
     });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && companyLogoModal.classList.contains('is-open')) closeCompanyLogoModal();
-    });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && companyPhotoUpdateModal.classList.contains('is-open')) closeCompanyPhotoUpdateModal(); });
     const bindCompanyLogoImage = () => {
       const input = document.getElementById('company-logo-input');
       input.addEventListener('change', async () => {
@@ -1175,6 +1164,154 @@
       });
     };
     bindCompanyLogoImage();
+    const imageEditor = document.getElementById('company-image-editor');
+    const editorCanvas = document.getElementById('company-image-editor-canvas');
+    const editorContext = editorCanvas.getContext('2d');
+    const editorInput = document.getElementById('company-image-editor-input');
+    const editorState = { image: null, angle: 0, zoom: 1, flipX: 1, flipY: 1, filter: 'none', brightness: 100, contrast: 100, saturation: 100, vignette: 0 };
+    function updateImageFilterPreviews() {
+      if (!editorState.image) return;
+      document.querySelectorAll('[data-image-filter]').forEach(button => {
+        const preview = button.querySelector('.company-filter-preview');
+        if (!preview) return;
+        preview.src = editorState.image.currentSrc || editorState.image.src;
+        preview.style.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
+      });
+    }
+    function renderImageEditor() {
+      const image = editorState.image;
+      if (!image) return;
+      updateImageFilterPreviews();
+      const size = editorCanvas.width;
+      const radians = editorState.angle * Math.PI / 180;
+      const cos = Math.abs(Math.cos(radians));
+      const sin = Math.abs(Math.sin(radians));
+      const rotatedWidth = image.width * cos + image.height * sin;
+      const rotatedHeight = image.width * sin + image.height * cos;
+      const scale = Math.max(size / rotatedWidth, size / rotatedHeight) * editorState.zoom;
+      editorContext.clearRect(0, 0, size, size);
+      editorContext.save();
+      editorContext.translate(size / 2, size / 2);
+      editorContext.rotate(radians);
+      editorContext.scale(editorState.flipX * scale, editorState.flipY * scale);
+      const brightnessEffect = Math.max(0, 100 + (editorState.brightness - 100) * 1.8);
+      const contrastEffect = Math.max(0, 100 + (editorState.contrast - 100) * 1.8);
+      const saturationEffect = Math.max(0, 100 + (editorState.saturation - 100) * 1.8);
+      editorContext.filter = `brightness(${brightnessEffect}%) contrast(${contrastEffect}%) saturate(${saturationEffect}%) ${editorState.filter}`;
+      editorContext.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
+      editorContext.restore();
+      if (editorState.vignette > 0) {
+        const gradient = editorContext.createRadialGradient(size / 2, size / 2, size * 0.18, size / 2, size / 2, size * 0.72);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, `rgba(0,0,0,${Math.min(0.95, editorState.vignette / 100 * 1.25)})`);
+        editorContext.save(); editorContext.fillStyle = gradient; editorContext.fillRect(0, 0, size, size); editorContext.restore();
+      }
+    }
+    function openCompanyImageEditor() {
+      const current = companyProfileCache.foto_perfil;
+      if (!current) return editorInput.click();
+      const image = new Image();
+      image.onload = () => {
+        editorState.image = image;
+        editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+        editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+        ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value`).textContent = '100%'; });
+        document.getElementById('company-image-vignette').value = '0';
+        document.getElementById('company-image-vignette-value').textContent = '0%';
+        document.getElementById('company-image-zoom').value = '1';
+        document.getElementById('company-image-angle').value = '0';
+        document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+        renderImageEditor();
+        imageEditor.classList.add('is-open');
+        imageEditor.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('company-image-editor-open');
+      };
+      image.onerror = () => Conecta.toast('Não foi possível abrir esta foto para edição.');
+      image.src = current;
+    }
+    function closeImageEditor() {
+      imageEditor.classList.remove('is-open');
+      imageEditor.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('company-image-editor-open');
+    }
+    document.getElementById('company-photo-edit').addEventListener('click', () => {
+      closeCompanyPhotoViewer();
+      openCompanyImageEditor();
+    });
+    document.getElementById('company-image-editor-close').addEventListener('click', closeImageEditor);
+    imageEditor.addEventListener('click', event => { if (event.target === imageEditor) closeImageEditor(); });
+    document.querySelectorAll('[data-editor-tab]').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-editor-tab]').forEach(item => item.classList.toggle('active', item === tab));
+      document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
+    }));
+    document.getElementById('company-image-editor-choose')?.addEventListener('click', () => editorInput.click());
+    const openImageInEditor = image => {
+      editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+      editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
+      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value`).textContent = '100%'; });
+      document.getElementById('company-image-vignette').value = '0';
+      document.getElementById('company-image-vignette-value').textContent = '0%';
+      document.getElementById('company-image-zoom').value = '1';
+      document.getElementById('company-image-angle').value = '0';
+      document.querySelectorAll('[data-image-filter]').forEach(button => button.classList.toggle('active', button.dataset.imageFilter === 'none'));
+      renderImageEditor();
+      imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('company-image-editor-open');
+    };
+    const loadImageIntoEditor = file => {
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); return; }
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        openImageInEditor(image);
+      };
+      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Não foi possível abrir essa imagem. Tente selecionar outro arquivo.'); };
+      image.src = url;
+    };
+    editorInput.addEventListener('change', event => {
+      editorInput.removeAttribute('capture');
+      loadImageIntoEditor(event.target.files[0]);
+      event.target.value = '';
+    });
+    document.getElementById('company-image-rotate-left').addEventListener('click', () => { editorState.angle = ((editorState.angle - 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('company-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('company-image-rotate-right').addEventListener('click', () => { editorState.angle = ((editorState.angle + 90 + 180) % 360 + 360) % 360 - 180; document.getElementById('company-image-angle').value = String(editorState.angle); renderImageEditor(); });
+    document.getElementById('company-image-flip-horizontal').addEventListener('click', () => { editorState.flipX *= -1; renderImageEditor(); });
+    document.getElementById('company-image-flip-vertical').addEventListener('click', () => { editorState.flipY *= -1; renderImageEditor(); });
+    document.getElementById('company-image-zoom').addEventListener('input', event => { editorState.zoom = Number(event.target.value); renderImageEditor(); });
+    document.getElementById('company-image-angle').addEventListener('input', event => { editorState.angle = Number(event.target.value); renderImageEditor(); });
+    document.querySelectorAll('[data-image-filter]').forEach(button => button.addEventListener('click', () => {
+      editorState.filter = button.dataset.imageFilter === 'none' ? 'none' : button.dataset.imageFilter;
+      document.querySelectorAll('[data-image-filter]').forEach(item => item.classList.toggle('active', item === button));
+      renderImageEditor();
+    }));
+    ['brightness','contrast','saturation','vignette'].forEach(key => {
+      document.getElementById(`company-image-${key}`).addEventListener('input', event => {
+        editorState[key] = Number(event.target.value);
+        document.getElementById(`company-image-${key}-value`).textContent = `${event.target.value}${key === 'vignette' ? '%' : '%'}`;
+        renderImageEditor();
+      });
+    });
+    document.getElementById('company-image-editor-save').addEventListener('click', async () => {
+      const button = document.getElementById('company-image-editor-save');
+      const feedback = document.getElementById('company-image-editor-feedback');
+      button.disabled = true; feedback.textContent = 'Salvando...';
+      try {
+        let quality = 0.9;
+        let imageData = editorCanvas.toDataURL('image/jpeg', quality);
+        while (imageData.length > 1400000 && quality > 0.45) {
+          quality -= 0.1;
+          imageData = editorCanvas.toDataURL('image/jpeg', quality);
+        }
+        if (imageData.length > 1400000) throw new Error('Não foi possível reduzir a imagem para o tamanho permitido.');
+        await Conecta.api('/api/empresa/perfil/imagem', { method: 'PUT', body: JSON.stringify({ campo: 'foto_perfil', imagem: imageData }) });
+        await loadCompanyProfile();
+        closeImageEditor();
+        closeCompanyPhotoViewer();
+      } catch (error) {
+        feedback.textContent = error.message || 'Não foi possível salvar a imagem.';
+      } finally { button.disabled = false; }
+    });
     const coverButton = document.getElementById('company-cover-edit');
     const coverInput = document.getElementById('company-cover-input');
     const coverModal = document.getElementById('company-cover-modal');
