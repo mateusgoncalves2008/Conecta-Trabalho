@@ -67,7 +67,7 @@
 .like-toggle-button.liked{color:#e53950}
 .like-toggle-button.liked .like-icon{fill:#e53950;stroke:#e53950}
 .like-toggle-button:hover{background:var(--page);color:#e53950}
-.like-toggle-button .like-icon{display:block;width:27px;height:27px;flex:0 0 27px;fill:#fff;stroke:#171717;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+.like-toggle-button .like-icon{display:block;width:27px;height:27px;flex:0 0 27px;fill:transparent;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .like-toggle-button strong{color:var(--ink);font-size:18px;font-weight:750}
 .report-button{min-height:36px;padding:6px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-size:12px}
 .report-button[data-action="delete"],.report-button[data-action="report"]{min-height:38px;padding:7px 12px;border:1px solid rgba(189,74,66,.32);border-radius:8px;background:rgba(189,74,66,.09);color:#bd4a42;font-size:13px;font-weight:700}
@@ -151,8 +151,9 @@ html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(input,textarea,se
 html[data-theme=dark] body.a11y-contrast .publicacoes-main :is(.button,.media-select-button,.load-more-button,.like-toggle-button,.report-button,.publication-menu button,.description-toggle,.dialog-close){
   background:#fff!important;color:#000!important;border:2px solid #fff!important;
 }
+body.a11y-contrast .publicacoes-main .like-toggle-button.liked{color:#e53950!important}
+body.a11y-contrast .publicacoes-main .like-toggle-button.liked .like-icon{fill:#e53950!important;stroke:#e53950!important}
 body.a11y-contrast .publicacoes-main :is(a,button,input,select,textarea,[tabindex]):focus-visible{
   outline:4px solid #ff8a00!important;outline-offset:4px!important;
 }
-body.a11y-contrast .publicacoes-main :is(  border:2px solid currentColor!important;
-}
+
