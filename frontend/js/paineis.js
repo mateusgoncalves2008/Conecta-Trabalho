@@ -1119,7 +1119,14 @@
       companyPhotoViewer.setAttribute('aria-hidden', 'false');
       document.body.classList.add('candidate-photo-viewer-open');
     };
-    document.getElementById('company-logo-edit').addEventListener('click', openCompanyPhotoViewer);
+    document.getElementById('company-logo-edit').addEventListener('click', () => {
+      if (!companyProfileCache.foto_perfil) {
+        const input = document.getElementById('company-logo-input');
+        showImageGuidelines('profile', () => input.click());
+        return;
+      }
+      openCompanyPhotoViewer();
+    });
     document.getElementById('company-photo-viewer-close').addEventListener('click', closeCompanyPhotoViewer);
     const companyVisibilityButton = document.getElementById('company-photo-visibility');
     const companyVisibilityPopover = document.getElementById('company-photo-visibility-popover');
