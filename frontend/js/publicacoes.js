@@ -499,13 +499,7 @@
 
 
 
-  document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
-    feed.querySelectorAll('.reaction-picker').forEach(picker => {
-      picker.hidden = true;
-      picker.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
-    });
-  });
+
 
   reportReason.addEventListener('change', () => {
     const show = reportReason.value === 'Outro motivo';
