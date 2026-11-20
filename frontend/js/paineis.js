@@ -1507,7 +1507,7 @@
       editorState.previewSource = previewSource || image.currentSrc || image.src || '';
       editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
       editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
-      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value').textContent = '100%'; });
+      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value`).textContent = '100%'; });
       document.getElementById('company-image-vignette').value = '0';
       document.getElementById('company-image-vignette-value').textContent = '0%';
       document.getElementById('company-image-zoom').value = '1';
