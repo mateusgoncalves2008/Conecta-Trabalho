@@ -1499,10 +1499,13 @@
       document.querySelectorAll('[data-editor-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.editorPanel === tab.dataset.editorTab));
     }));
     document.getElementById('company-image-editor-choose')?.addEventListener('click', () => editorInput.click());
-    const openImageInEditor = image => {
-      editorState.image = image; editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
+    const openImageInEditor = (image, previewSource = '') => {
+      editorState.image?.close?.();
+      editorState.image = image;
+      editorState.previewSource = previewSource || image.currentSrc || image.src || '';
+      editorState.angle = 0; editorState.zoom = 1; editorState.flipX = 1; editorState.flipY = 1; editorState.filter = 'none';
       editorState.brightness = 100; editorState.contrast = 100; editorState.saturation = 100; editorState.vignette = 0;
-      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value`).textContent = '100%'; });
+      ['brightness','contrast','saturation'].forEach(key => { document.getElementById(`company-image-${key}`).value = '100'; document.getElementById(`company-image-${key}-value').textContent = '100%'; });
       document.getElementById('company-image-vignette').value = '0';
       document.getElementById('company-image-vignette-value').textContent = '0%';
       document.getElementById('company-image-zoom').value = '1';
@@ -1511,17 +1514,51 @@
       renderImageEditor();
       imageEditor.classList.add('is-open'); imageEditor.setAttribute('aria-hidden','false'); document.body.classList.add('candidate-image-editor-open');
     };
-    const loadImageIntoEditor = file => {
+    const loadImageIntoEditor = async file => {
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { Conecta.toast('Escolha uma imagem de até 5 MB.'); return; }
-      const image = new Image();
-      const url = URL.createObjectURL(file);
-      image.onload = () => {
-        URL.revokeObjectURL(url);
-        openImageInEditor(image);
-      };
-      image.onerror = () => { URL.revokeObjectURL(url); Conecta.toast('Não foi possível abrir essa imagem. Tente selecionar outro arquivo.'); };
-      image.src = url;
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        Conecta.toast('Formato não permitido. Escolha PNG, JPG/JPEG ou WEBP.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        Conecta.toast('Escolha uma imagem de até 5 MB.');
+        return;
+      }
+      let image = null;
+      try {
+        let previewSource = '';
+        try {
+          image = await createImageBitmap(file);
+          const previewCanvas = document.createElement('canvas');
+          const scale = Math.min(1, 320 / Math.max(image.width, image.height));
+          previewCanvas.width = Math.max(1, Math.round(image.width * scale));
+          previewCanvas.height = Math.max(1, Math.round(image.height * scale));
+          const context = previewCanvas.getContext('2d');
+          if (!context) throw new Error('Não foi possível preparar a pré-visualização.');
+          context.drawImage(image, 0, 0, previewCanvas.width, previewCanvas.height);
+          previewSource = previewCanvas.toDataURL('image/png');
+        } catch (bitmapError) {
+          image?.close?.();
+          image = await new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const element = new Image();
+            element.onload = () => { URL.revokeObjectURL(objectUrl); resolve(element); };
+            element.onerror = () => {
+              URL.revokeObjectURL(objectUrl);
+              reject(new Error('O navegador não conseguiu decodificar esse arquivo. Verifique se a imagem não está danificada.'));
+            };
+            element.src = objectUrl;
+          });
+          previewSource = image.currentSrc || image.src;
+        }
+        if (!image || !(image.width || image.naturalWidth) || !(image.height || image.naturalHeight)) {
+          throw new Error('A imagem não possui dimensões válidas ou não pôde ser decodificada.');
+        }
+        openImageInEditor(image, previewSource);
+      } catch (error) {
+        image?.close?.();
+        Conecta.toast(error.message || 'Não foi possível abrir essa imagem. Tente selecionar outro arquivo.');
+      }
     };
     editorInput.addEventListener('change', event => {
       editorInput.removeAttribute('capture');
