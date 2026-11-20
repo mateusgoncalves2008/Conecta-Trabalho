@@ -9,6 +9,54 @@
     aberta: 'Aberta', pausada: 'Pausada', encerrada: 'Encerrada'
   })[status] || status;
 
+  function showBannerGuidelines(onChoose) {
+    let modal = document.getElementById('banner-guidelines-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'banner-guidelines-modal';
+      modal.className = 'banner-guidelines-backdrop';
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <section class="banner-guidelines-dialog" role="dialog" aria-modal="true" aria-labelledby="banner-guidelines-title">
+          <button type="button" class="banner-guidelines-close" data-banner-guidelines-close aria-label="Fechar">×</button>
+          <span class="banner-guidelines-eyebrow">IMAGEM DE CAPA</span>
+          <h2 id="banner-guidelines-title">Requisitos do banner</h2>
+          <p>Para garantir uma boa apresentação do seu perfil, escolha uma imagem com estas características:</p>
+          <div class="banner-guidelines-list">
+            <div><i class="fa-regular fa-image" aria-hidden="true"></i><span><strong>Formatos permitidos</strong><small>PNG, JPG/JPEG ou WEBP</small></span></div>
+            <div><i class="fa-solid fa-expand" aria-hidden="true"></i><span><strong>Dimensão recomendada</strong><small>1600 × 600 pixels (proporção 8:3)</small></span></div>
+            <div><i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i><span><strong>Tamanho máximo</strong><small>5 MB por imagem</small></span></div>
+          </div>
+          <p class="banner-guidelines-note">A imagem será ajustada automaticamente para se adaptar à área do banner. Para um melhor resultado, use uma imagem horizontal.</p>
+          <div class="banner-guidelines-actions">
+            <button type="button" class="button button-outline" data-banner-guidelines-close>Cancelar</button>
+            <button type="button" class="button button-primary" data-banner-guidelines-choose>Escolher imagem</button>
+          </div>
+        </section>`;
+      document.body.appendChild(modal);
+      const close = () => {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('banner-guidelines-open');
+      };
+      modal.querySelectorAll('[data-banner-guidelines-close]').forEach(button => button.addEventListener('click', close));
+      modal.addEventListener('click', event => { if (event.target === modal) close(); });
+      modal.querySelector('[data-banner-guidelines-choose]').addEventListener('click', () => {
+        close();
+        if (typeof modal._onChoose === 'function') modal._onChoose();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) close();
+      });
+      modal._close = close;
+    }
+    modal._onChoose = onChoose;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('banner-guidelines-open');
+    modal.querySelector('[data-banner-guidelines-choose]').focus();
+  }
+
   async function initPanel() {
     const page = document.body.dataset.panel;
     if (!page) return;
@@ -754,7 +802,7 @@
         button.disabled = false;
       }
     });
-    document.getElementById('candidate-change-cover').addEventListener('click', () => quickCoverInput.click());
+    document.getElementById('candidate-change-cover').addEventListener('click', () => showBannerGuidelines(() => quickCoverInput.click()));
 
     async function handleQuickImage(input, field, maxDimension) {
       input.addEventListener('change', async event => {
@@ -1195,7 +1243,7 @@
         coverEditorSave.disabled = false;
       }
     });
-    coverChangeAction.addEventListener('click', () => coverInput.click());
+    coverChangeAction.addEventListener('click', () => showBannerGuidelines(() => coverInput.click()));
     coverInput.addEventListener('change', async () => {
       const file = coverInput.files[0];
       if (!file) return;
