@@ -498,8 +498,9 @@ html[data-theme="dark"] .cta-section p {
 
 .job-company {
   color: #52647a;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 600;
   letter-spacing: .15px;
 }
 
@@ -509,8 +510,9 @@ html[data-theme="dark"] .cta-section p {
   border-radius: 999px;
   background: #f1f5f9;
   color: #294765;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 11px;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .job-card-content {
@@ -554,9 +556,10 @@ html[data-theme="dark"] .cta-section p {
 
 .job-detail strong {
   color: #8995a3;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 10px;
-  font-weight: 750;
-  letter-spacing: .55px;
+  font-weight: 600;
+  letter-spacing: .4px;
   text-transform: uppercase;
 }
 
@@ -583,10 +586,11 @@ html[data-theme="dark"] .cta-section p {
   text-transform: uppercase;
 }
 
-.job-card .job-salary {
+ .job-card .job-salary {
   color: #142b49;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .job-card-bottom .button {
