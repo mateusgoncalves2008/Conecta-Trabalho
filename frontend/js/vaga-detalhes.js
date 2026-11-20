@@ -8,6 +8,20 @@
     if (Number.isNaN(date.getTime())) return 'Data não informada';
     return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(date);
   };
+  const photoDateLabel = value => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Data não informada';
+    const elapsed = Date.now() - date.getTime();
+    if (elapsed >= 0 && elapsed < 24 * 60 * 60 * 1000) {
+      if (elapsed < 60 * 60 * 1000) {
+        const minutes = Math.max(1, Math.floor(elapsed / 60000));
+        return 'Há ' + minutes + (minutes === 1 ? ' minuto' : ' minutos');
+      }
+      const hours = Math.floor(elapsed / 3600000);
+      return 'Há ' + hours + (hours === 1 ? ' hora' : ' horas');
+    }
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+  };
   const initials = value => String(value || 'Empresa').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase();
   const savedKey = 'conecta-vagas-salvas';
   const getLegacySaved = () => {
@@ -85,6 +99,15 @@
             <div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div>
             <a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil completo da empresa</a>
           </section>
+          <section class="job-detail-panel job-detail-gallery-panel">
+            <div class="job-detail-gallery-heading">
+              <div><h2>Fotos da empresa</h2><p>Conheça um pouco mais sobre o ambiente e a equipe.</p></div>
+              <a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil da empresa</a>
+            </div>
+            ${Array.isArray(vaga.empresa_fotos) && vaga.empresa_fotos.length
+              ? `<div class="job-detail-gallery">${vaga.empresa_fotos.slice(0, 4).map((photo, index) => `<button class="job-detail-gallery-photo" type="button" data-job-photo-index="${index}" aria-label="Ampliar foto ${index + 1}"><img src="${escapeHTML(photo.url)}" alt="Foto ${index + 1} de ${escapeHTML(company)}" loading="lazy" decoding="async"><span class="job-detail-gallery-photo-date">${escapeHTML(photoDateLabel(photo.criada_em))}</span></button>`).join('')}</div>`
+              : '<p class="job-detail-gallery-empty">Esta empresa ainda não publicou fotos.</p>'}
+          </section>
         </div>
         <aside class="job-detail-aside">
           <section class="job-detail-panel job-detail-facts">
@@ -97,15 +120,6 @@
             <p class="job-detail-status">As informações exibidas foram fornecidas pela empresa anunciante.</p>
           </section>
         </aside>
-          <section class="job-detail-panel job-detail-gallery-panel">
-            <div class="job-detail-gallery-heading">
-              <div><h2>Fotos da empresa</h2><p>Conheça um pouco mais sobre o ambiente e a equipe.</p></div>
-              <a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil da empresa</a>
-            </div>
-            ${Array.isArray(vaga.empresa_fotos) && vaga.empresa_fotos.length
-              ? `<div class="job-detail-gallery">${vaga.empresa_fotos.slice(0, 4).map((photo, index) => `<a class="job-detail-gallery-photo" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}" aria-label="Ver foto ${index + 1} no perfil da empresa"><img src="${escapeHTML(photo.url)}" alt="Foto ${index + 1} de ${escapeHTML(company)}" loading="lazy" decoding="async"></a>`).join('')}</div>`
-              : '<p class="job-detail-gallery-empty">Esta empresa ainda não publicou fotos.</p>'}
-          </section>
       </div>`;
       document.getElementById('apply-job').addEventListener('click', event => apply(vaga.id, event.currentTarget));
       document.getElementById('save-job').addEventListener('click', async event => {
@@ -134,6 +148,45 @@
           button.disabled = false;
         }
       });
+      const galleryPhotos = (vaga.empresa_fotos || []).slice(0, 4);
+      if (galleryPhotos.length) {
+        const lightbox = document.createElement('div');
+        lightbox.className = 'company-photo-lightbox';
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightbox.innerHTML = '<button type="button" class="company-photo-lightbox-close" aria-label="Fechar">&times;</button><button type="button" class="company-photo-lightbox-arrow is-prev" aria-label="Foto anterior">&#10094;</button><img class="company-photo-lightbox-image" alt=""><button type="button" class="company-photo-lightbox-arrow is-next" aria-label="Próxima foto">&#10095;</button><span class="company-photo-lightbox-counter"></span>';
+        document.body.appendChild(lightbox);
+        let activePhotoIndex = 0;
+        const openPhoto = index => {
+          activePhotoIndex = (index + galleryPhotos.length) % galleryPhotos.length;
+          const photo = galleryPhotos[activePhotoIndex];
+          const image = lightbox.querySelector('.company-photo-lightbox-image');
+          image.src = photo.url;
+          image.alt = 'Foto ' + (activePhotoIndex + 1) + ' de ' + company;
+          lightbox.querySelector('.company-photo-lightbox-counter').textContent = (activePhotoIndex + 1) + ' / ' + galleryPhotos.length;
+          lightbox.classList.add('is-open');
+          lightbox.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('company-photo-lightbox-open');
+        };
+        const closePhoto = () => {
+          lightbox.classList.remove('is-open');
+          lightbox.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('company-photo-lightbox-open');
+        };
+        lightbox.addEventListener('click', event => {
+          if (event.target === lightbox || event.target.closest('.company-photo-lightbox-close')) closePhoto();
+          if (event.target.closest('.company-photo-lightbox-arrow.is-prev')) openPhoto(activePhotoIndex - 1);
+          if (event.target.closest('.company-photo-lightbox-arrow.is-next')) openPhoto(activePhotoIndex + 1);
+        });
+        root.querySelectorAll('[data-job-photo-index]').forEach(button => {
+          button.addEventListener('click', () => openPhoto(Number(button.dataset.jobPhotoIndex) || 0));
+        });
+        document.addEventListener('keydown', event => {
+          if (!lightbox.classList.contains('is-open')) return;
+          if (event.key === 'Escape') closePhoto();
+          if (event.key === 'ArrowLeft') openPhoto(activePhotoIndex - 1);
+          if (event.key === 'ArrowRight') openPhoto(activePhotoIndex + 1);
+        });
+      }
       document.title = vaga.titulo + ' | ConectaTrabalho';
     } catch (error) {
       root.className = 'empty-state';
