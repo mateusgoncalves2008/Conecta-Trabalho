@@ -77,6 +77,15 @@
             <div class="job-detail-section"><h2>Requisitos</h2><div class="job-detail-copy">${escapeHTML(vaga.requisitos || 'A empresa não informou requisitos específicos.')}</div></div>
             <div class="job-detail-section"><h2>Sobre a empresa</h2><div class="job-detail-copy">${escapeHTML(vaga.empresa_descricao || 'A empresa ainda não adicionou uma apresentação institucional.')}</div><a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil completo da empresa</a></div>
           </section>
+          <section class="job-detail-panel job-detail-gallery-panel">
+            <div class="job-detail-gallery-heading">
+              <div><h2>Fotos da empresa</h2><p>Conheça um pouco mais sobre o ambiente e a equipe.</p></div>
+              <a class="job-detail-company-profile-link" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}">Ver perfil da empresa</a>
+            </div>
+            ${Array.isArray(vaga.empresa_fotos) && vaga.empresa_fotos.length
+              ? `<div class="job-detail-gallery">${vaga.empresa_fotos.slice(0, 4).map((photo, index) => `<a class="job-detail-gallery-photo" href="/pages/empresa-perfil.html?id=${encodeURIComponent(vaga.empresa_id)}" aria-label="Ver foto ${index + 1} no perfil da empresa"><img src="${escapeHTML(photo.url)}" alt="Foto ${index + 1} de ${escapeHTML(company)}" loading="lazy" decoding="async"></a>`).join('')}</div>`
+              : '<p class="job-detail-gallery-empty">Esta empresa ainda não publicou fotos.</p>'}
+          </section>
         </div>
         <aside class="job-detail-aside">
           <section class="job-detail-panel job-detail-facts">
