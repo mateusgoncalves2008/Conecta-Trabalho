@@ -81,25 +81,21 @@
     }).join('') + '</div>';
   }
 
-  function renderReactionSummary(summary, total) {
-    const details = summary.length
-      ? summary.map(item => '<span class="reaction-tooltip-item">' + item.emoji + ' ' + Number(item.total).toLocaleString('pt-BR') + '</span>').join('')
-      : '<span class="reaction-tooltip-item">Seja a primeira pessoa a reagir</span>';
-    return '<div class="reaction-summary" tabindex="0" aria-label="' + total + ' reações. Passe o mouse ou foque para ver os tipos de reação.">' +
-      '<span class="reaction-total"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i><strong>' + total.toLocaleString('pt-BR') + '</strong></span>' +
-      '<span class="reaction-tooltip" role="tooltip">' + details + '</span></div>';
-  }
-
   function renderReactions(post) {
     const summary = (post.reacoes || []).filter(item => item.total > 0);
     const total = summary.reduce((sum, item) => sum + Number(item.total), 0);
-    const summaryHTML = renderReactionSummary(summary, total);
     const reactionButtons = reactions.map(emoji => {
       const active = post.minhaReacao === emoji;
       const count = summary.find(item => item.emoji === emoji);
       return '<button type="button" class="reaction-button' + (active ? ' active' : '') + '" data-action="react" data-id="' + post.id + '" data-emoji="' + emoji + '" data-count="' + (count ? Number(count.total) : 0) + '" aria-pressed="' + active + '" aria-label="Reagir com ' + emoji + '">' + emoji + '</button>';
     }).join('');
-    return summaryHTML + '<div class="publication-actions"><div class="reaction-picker">' + reactionButtons + '</div>' +
+    return '<div class="publication-actions">' +
+      '<div class="reaction-control">' +
+        '<button type="button" class="like-toggle-button" data-action="toggle-reactions" aria-expanded="false" aria-label="Abrir opções de reação">' +
+          '<i class="fa-solid fa-thumbs-up" aria-hidden="true"></i><strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong>' +
+        '</button>' +
+        '<div class="reaction-picker" hidden>' + reactionButtons + '</div>' +
+      '</div>' +
       (post.minha ? '<button type="button" class="report-button" data-action="delete" data-id="' + post.id + '">Excluir</button>' :
         '<button type="button" class="report-button" data-action="report" data-id="' + post.id + '">Denunciar</button>') +
       '</div>';
@@ -143,12 +139,9 @@
       item.textContent = item.dataset.emoji + (count > 0 ? ' ' + count : '');
     });
 
-    const summary = card.querySelector('.reaction-summary');
-    const totals = buttons
-      .map(item => ({ emoji: item.dataset.emoji, total: Number(item.dataset.count || 0) }))
-      .filter(item => item.total > 0);
-    const total = totals.reduce((sum, item) => sum + item.total, 0);
-    summary.outerHTML = renderReactionSummary(totals, total);
+    const total = buttons.reduce((sum, item) => sum + Number(item.dataset.count || 0), 0);
+    const totalElement = card.querySelector('[data-reaction-total]');
+    if (totalElement) totalElement.textContent = total.toLocaleString('pt-BR');
     return previousEmoji;
   }
 
@@ -467,6 +460,15 @@
     if (!button) return;
     const action = button.dataset.action;
     const id = button.dataset.id;
+    if (action === 'toggle-reactions') {
+      const control = button.closest('.reaction-control');
+      const picker = control && control.querySelector('.reaction-picker');
+      if (picker) {
+        picker.hidden = !picker.hidden;
+        button.setAttribute('aria-expanded', String(!picker.hidden));
+      }
+      return;
+    }
     if (action === 'react') {
       if (!currentUser) {
         window.location.href = '/pages/login.html';
