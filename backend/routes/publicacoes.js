@@ -73,8 +73,8 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
     if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,COUNT(v.usuario_id)::int AS visualizacoes FROM publicacoes p LEFT JOIN publicacao_visualizacoes v ON v.publicacao_id=p.id WHERE p.autor_id=$1 GROUP BY p.id ORDER BY p.criada_em DESC,p.id DESC',
-      [companyId]
+      'SELECT p.id,p.descricao,p.criada_em,COUNT(v.usuario_id)::int AS visualizacoes,(SELECT COUNT(*)::int FROM publicacao_reacoes r WHERE r.publicacao_id=p.id) AS total_curtidas,EXISTS(SELECT 1 FROM publicacao_reacoes r WHERE r.publicacao_id=p.id AND r.usuario_id=$2) AS minha_curtida,(p.autor_id=$3) AS minha FROM publicacoes p LEFT JOIN publicacao_visualizacoes v ON v.publicacao_id=p.id WHERE p.autor_id=$1 GROUP BY p.id ORDER BY p.criada_em DESC,p.id DESC',
+      [companyId, req.session.user?.id || null, req.session.user?.id || null]
     );
     if (!posts.rowCount) return res.json({ publicacoes: [] });
     const ids = posts.rows.map(post => post.id);
@@ -89,7 +89,10 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     }
     res.json({ publicacoes: posts.rows.map(post => ({
       id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
-      visualizacoes: Number(post.visualizacoes || 0), midias: mediaByPost.get(post.id) || []
+      visualizacoes: Number(post.visualizacoes || 0),
+      reacoes: Number(post.total_curtidas || 0) ? [{ emoji: '❤️', total: Number(post.total_curtidas) }] : [],
+      minhaCurtida: Boolean(post.minha_curtida), minha: Boolean(post.minha),
+      midias: mediaByPost.get(post.id) || []
     })) });
   }));
 
