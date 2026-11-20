@@ -630,13 +630,13 @@ app.get('/api/imagens/perfil/:id/:tipo', asyncRoute(async (req, res) => {
   if (!result.rowCount) return res.status(404).end();
   const profile = result.rows[0];
   const owner = req.session.user && String(req.session.user.id) === String(profile.id);
-  if (profile.tipo === 'candidato' && !owner) {
-    if (field === 'banner_perfil') return res.status(403).end();
+  if (!owner && field === 'foto_perfil') {
     const visibility = profile.visibilidade_foto || 'todos';
     if (!(visibility === 'todos' || (visibility === 'usuarios' && Boolean(req.session.user)))) {
       return res.status(403).end();
     }
   }
+  if (profile.tipo === 'candidato' && !owner && field === 'banner_perfil') return res.status(403).end();
   const value = profile[field];
   if (!value) return res.status(404).end();
   res.set('Cache-Control', profile.tipo === 'empresa'
@@ -852,6 +852,20 @@ app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   profile.foto_perfil = imageReference(req.session.user.id, 'foto_perfil', profile.foto_perfil);
   profile.banner_perfil = imageReference(req.session.user.id, 'banner_perfil', profile.banner_perfil);
   res.json({ perfil: profile });
+}));
+
+app.put('/api/empresa/perfil/visibilidade-foto', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const visibility = clean(req.body.visibilidade, 20);
+  if (!['usuarios', 'todos'].includes(visibility)) {
+    return res.status(409).json({ erro: 'As opções de conexões estarão disponíveis quando o sistema de conexões for implementado. Escolha Todos ou Todos os usuários.' });
+  }
+  const result = await pool.query(
+    "UPDATE usuarios SET visibilidade_foto=$1 WHERE id=$2 AND tipo='empresa' RETURNING visibilidade_foto",
+    [visibility, req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Perfil empresarial não encontrado.' });
+  res.json({ sucesso: true, visibilidade: result.rows[0].visibilidade_foto });
 }));
 
 app.put('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
