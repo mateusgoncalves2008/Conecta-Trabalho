@@ -107,10 +107,12 @@
     const avatar = post.autor.foto
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
       : escapeHTML(initials(post.autor.nome));
-    const accountType = post.autor.tipo === 'empresa' ? 'Empresa' : 'Candidato';
+    const authorDetail = post.autor.tipo === 'empresa'
+      ? Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + ' seguidores'
+      : (post.autor.tituloProfissional || 'Título profissional não informado');
     return '<article class="publication-card" data-post-id="' + post.id + '">' +
       '<header class="publication-card-header"><div class="publication-avatar">' + avatar + '</div>' +
-      '<div class="publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><small>' + accountType + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
+      '<div class="publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><small>' + escapeHTML(authorDetail) + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
       '</header>' + description + renderMedia(post.midias || []) +
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
