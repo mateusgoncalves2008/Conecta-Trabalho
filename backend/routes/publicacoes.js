@@ -203,6 +203,21 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
     }
   }));
 
+  router.delete('/upload/:id', auth, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Arquivo inválido.' });
+    const found = await pool.query(
+      'SELECT storage_key FROM publicacao_midias WHERE id=$1 AND autor_id=$2 AND publicacao_id IS NULL',
+      [id, req.session.user.id]
+    );
+    if (!found.rowCount) return res.status(404).json({ erro: 'Arquivo temporário não encontrado.' });
+    if (!s3) return res.status(503).json({ erro: 'O armazenamento de arquivos não está configurado.' });
+    await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: found.rows[0].storage_key }));
+    await pool.query('DELETE FROM publicacao_midias WHERE id=$1 AND autor_id=$2 AND publicacao_id IS NULL', [id, req.session.user.id]);
+    res.json({ sucesso: true });
+  }));
+
   router.post('/', auth, asyncRoute(async (req, res) => {
     await schemaReady;
     const description = typeof req.body.descricao === 'string' ? req.body.descricao.trim() : '';
@@ -229,7 +244,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, auth, imageReference
       const inserted = await client.query('INSERT INTO publicacoes (autor_id,descricao) VALUES ($1,$2) RETURNING id,descricao,criada_em', [req.session.user.id, description]);
       post = inserted.rows[0];
       await client.query(
-        'UPDATE publicacao_midias SET publicacao_id=$1,ordem=ordered.position FROM (SELECT id,(ROW_NUMBER() OVER (ORDER BY array_position($2::bigint[],id))-1)::smallint AS position FROM publicacao_midias WHERE id=ANY($2::bigint[])) ordered WHERE publicacao_midias.id=ordered.id',
+        'UPDATE publicacao_midias SET publicacao_id=$1,ordem=ordered.ordem_numero FROM (SELECT id,(ROW_NUMBER() OVER (ORDER BY array_position($2::bigint[],id))-1)::smallint AS ordem_numero FROM publicacao_midias WHERE id=ANY($2::bigint[])) ordered WHERE publicacao_midias.id=ordered.id',
         [post.id, mediaIds]
       );
       await client.query('COMMIT');
