@@ -229,10 +229,17 @@
     }
   }
 
+  function discardStagedMedia() {
+    const staged = uploadedMedia.splice(0);
+    staged.forEach(item => {
+      api('/api/publicacoes/upload/' + item.id, { method: 'DELETE' }).catch(() => {});
+    });
+  }
+
   function clearPreview() {
     selectedFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
     selectedFiles = [];
-    uploadedMedia = [];
+    discardStagedMedia();
     preview.innerHTML = '';
     preview.hidden = true;
     publishButton.disabled = true;
@@ -344,10 +351,12 @@
         })
       });
       descriptionInput.value = '';
+      uploadedMedia = [];
       clearPreview();
       toast('Publicação criada com sucesso.');
       await loadPosts(true);
     } catch (error) {
+      discardStagedMedia();
       toast(error.message);
       publishButton.disabled = false;
     } finally {
