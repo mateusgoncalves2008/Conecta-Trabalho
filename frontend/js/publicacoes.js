@@ -528,7 +528,7 @@
   });
 
   document.addEventListener('click', event => {
-    if (event.target.closest('.reaction-control')) return;
+    if (event.target.closest('[data-action="toggle-reactions"]')) return;
     feed.querySelectorAll('.reaction-picker').forEach(picker => {
       picker.hidden = true;
       picker.closest('.reaction-control')?.querySelector('[data-action="toggle-reactions"]')?.setAttribute('aria-expanded', 'false');
