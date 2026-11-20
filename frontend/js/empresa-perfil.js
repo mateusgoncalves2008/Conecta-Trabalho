@@ -250,8 +250,8 @@
         const followers = document.createElement('p');
         followers.className = 'company-public-followers';
         followers.setAttribute('aria-live', 'polite');
-        followers.innerHTML = '<strong data-followers-count>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + '</strong> seguidores';
-        actions.insertAdjacentElement('afterend', followers);
+        followers.innerHTML = '<i class="fa-solid fa-users" aria-hidden="true"></i><strong data-followers-count>' + Number(company.total_seguidores || 0).toLocaleString('pt-BR') + '</strong><span>seguidores</span>';
+        actions.appendChild(followers);
       }
 
       const lightbox = document.createElement('div');
