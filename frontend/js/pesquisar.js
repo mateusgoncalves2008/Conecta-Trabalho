@@ -72,7 +72,25 @@
     }
   }
 
-  form.addEventListener('submit', event => { event.preventDefault(); loadResults(); });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const term = input.value.trim().slice(0, 100);
+    if (term.length >= 2) {
+      try {
+        const session = await Conecta.api('/api/me');
+        const key = 'conecta-search-recent-' + String(session.usuario?.id || 'visitante');
+        let recent = [];
+        try { recent = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+        if (!Array.isArray(recent)) recent = [];
+        recent = [term, ...recent.filter(item => typeof item === 'string' && item.toLocaleLowerCase('pt-BR') !== term.toLocaleLowerCase('pt-BR'))].slice(0, 6);
+        try { localStorage.setItem(key, JSON.stringify(recent)); } catch {}
+        await Conecta.api('/api/pesquisas/registrar', { method: 'POST', body: JSON.stringify({ termo: term }) });
+      } catch (error) {
+        console.warn('Não foi possível registrar a pesquisa:', error);
+      }
+    }
+    loadResults();
+  });
   let debounce;
   input.addEventListener('input', () => {
     clearTimeout(debounce);
