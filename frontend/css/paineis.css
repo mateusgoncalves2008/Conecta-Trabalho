@@ -929,3 +929,26 @@ html[data-theme="dark"] .company-profile-edit-dialog-heading h3{color:#f4f7fb}
 .saved-posts-empty p{max-width:520px;margin:0;color:var(--muted);font-size:14px;line-height:1.6}
 html[data-theme="dark"] .account-settings-card,html[data-theme="dark"] .saved-posts-empty{background:#1b2b3d;border-color:#34465c}
 html[data-theme="dark"] .saved-posts-empty h2{color:#edf2f7}
+
+
+/* Modal com orientações para envio de banners */
+.banner-guidelines-backdrop{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,25,42,.58);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
+.banner-guidelines-backdrop.is-open{opacity:1;visibility:visible}
+.banner-guidelines-dialog{position:relative;width:min(100%,490px);padding:30px;border:1px solid var(--line);border-radius:18px;background:var(--surface,#fff);color:var(--text,#172b45);box-shadow:0 24px 70px rgba(0,0,0,.22);transform:translateY(8px);transition:transform .18s ease}
+.banner-guidelines-backdrop.is-open .banner-guidelines-dialog{transform:translateY(0)}
+.banner-guidelines-close{position:absolute;top:14px;right:16px;width:36px;height:36px;border:0;border-radius:50%;background:var(--soft,#f1f4f7);color:inherit;font-size:25px;cursor:pointer}
+.banner-guidelines-eyebrow{color:var(--orange,#d9653b);font-size:11px;font-weight:800;letter-spacing:.1em}
+.banner-guidelines-dialog h2{margin:8px 42px 8px 0;font-size:23px;line-height:1.25}
+.banner-guidelines-dialog>p{margin:0;color:var(--muted,#68788c);font-size:14px;line-height:1.6}
+.banner-guidelines-list{display:grid;gap:0;margin:20px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.banner-guidelines-list>div{display:flex;align-items:center;gap:14px;padding:14px 16px}
+.banner-guidelines-list>div+div{border-top:1px solid var(--line)}
+.banner-guidelines-list i{width:22px;color:var(--orange,#d9653b);font-size:18px;text-align:center}
+.banner-guidelines-list span{display:grid;gap:3px}
+.banner-guidelines-list strong{font-size:13px}
+.banner-guidelines-list small{color:var(--muted,#68788c);font-size:13px}
+.banner-guidelines-dialog .banner-guidelines-note{padding:12px 14px;border-radius:9px;background:var(--soft,#f4f6f8);font-size:12px}
+.banner-guidelines-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+@media(max-width:520px){.banner-guidelines-dialog{padding:24px 19px}.banner-guidelines-actions{flex-direction:column-reverse}.banner-guidelines-actions .button{width:100%}}
+html[data-theme="dark"] .banner-guidelines-dialog{background:#182b42;color:#f3f6fa;border-color:#34465a}
+html[data-theme="dark"] .banner-guidelines-close,html[data-theme="dark"] .banner-guidelines-dialog .banner-guidelines-note{background:#263b53}
