@@ -136,7 +136,7 @@
       const count = Number(item.dataset.count || 0);
       item.classList.toggle('active', active);
       item.setAttribute('aria-pressed', String(active));
-      item.textContent = item.dataset.emoji + (count > 0 ? ' ' + count : '');
+      item.textContent = item.dataset.emoji;
     });
 
     const total = buttons.reduce((sum, item) => sum + Number(item.dataset.count || 0), 0);
