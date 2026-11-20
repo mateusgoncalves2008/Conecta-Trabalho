@@ -520,10 +520,11 @@ html[data-theme="dark"] .cta-section p {
 .job-card h3 {
   margin: 17px 0 8px;
   color: #142b49;
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.22;
-  letter-spacing: -.45px;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.2px;
 }
 
 .job-description {
@@ -642,7 +643,8 @@ html[data-theme="dark"] .job-salary-label {
   }
 
   .job-card h3 {
-    font-size: 21px;
+    font-size: 20px;
+    line-height: 1.3;
   }
 
   .job-details {
