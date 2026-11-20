@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Veja publicações de candidatos e empresas no ConectaTrabalho.">
+  <meta name="theme-color" content="#142b49">
+  <link rel="icon" href="/img/logo-conectatrabalho.svg" type="image/svg+xml">
+  <title>Publicações | ConectaTrabalho</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/publicacoes.css">
+  <script src="/js/main.js" defer></script>
+  <script src="/js/publicacoes.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ConectaTrabalho - início">
+      <img class="brand-mark-image" src="/img/logo-conectatrabalho.svg" alt="" width="38" height="38">
+      <span>Conecta<span class="brand-light">Trabalho</span></span>
+    </a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+      <a href="/">Início</a><a href="/pages/vagas.html">Vagas</a><a class="active" href="/pages/publicacoes.html" aria-current="page">Publicações</a>
+      <a href="/pages/como-funciona.html">Como funciona</a><a href="/pages/sobre.html">Sobre</a>
+      <a class="mobile-login-link" href="/pages/login.html">Entrar</a><a class="mobile-register-link" href="/pages/cadastro.html">Cadastrar</a>
+    </nav>
+    <div class="header-actions"><a class="button button-outline button-small" href="/pages/login.html">Entrar</a><a class="button button-primary button-small" href="/pages/cadastro.html">Cadastrar</a></div>
+  </header>
+
+  <main class="publicacoes-main">
+    <section class="publicacoes-heading">
+      <div>
+        <span class="eyebrow">COMUNIDADE CONECTATRABALHO</span>
+        <h1>Publicações</h1>
+        <p>Acompanhe novidades, projetos e momentos compartilhados por candidatos e empresas.</p>
+      </div>
+    </section>
+
+    <section class="publication-composer" id="publication-composer" hidden aria-labelledby="composer-title">
+      <div class="composer-heading">
+        <div><span class="eyebrow">COMPARTILHE COM A COMUNIDADE</span><h2 id="composer-title">Criar publicação</h2></div>
+        <span class="composer-account" id="composer-account"></span>
+      </div>
+      <form id="publication-form">
+        <label class="publication-description-label" for="publication-description">Descrição <span>(opcional)</span></label>
+        <textarea id="publication-description" maxlength="2000" rows="3" placeholder="O que você gostaria de compartilhar?"></textarea>
+        <div class="composer-upload-row">
+          <label class="media-select-button" for="publication-files"><i class="fa-regular fa-image" aria-hidden="true"></i> Adicionar fotos ou vídeo</label>
+          <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple hidden>
+          <span class="composer-limits">Até 10 fotos ou 1 vídeo de até 60 segundos</span>
+        </div>
+        <div class="upload-preview" id="upload-preview" hidden></div>
+        <div class="upload-progress" id="upload-progress" hidden><span></span><small id="upload-progress-text">Preparando arquivos...</small></div>
+        <div class="composer-footer">
+          <small>Fotos: até 20 MB cada. Vídeos: até 150 MB.</small>
+          <button class="button button-primary" id="publish-button" type="submit" disabled>Publicar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="visitor-note" id="visitor-note" hidden>
+      <div><strong>Veja o que a comunidade está compartilhando.</strong><p>Entre na sua conta para publicar e reagir às publicações.</p></div>
+      <a class="button button-primary" href="/pages/login.html">Entrar</a>
+    </section>
+
+    <section class="feed-section" aria-label="Feed de publicações">
+      <div class="feed-heading"><h2>Mais recentes</h2><span id="feed-count-label">Publicações da comunidade</span></div>
+      <div class="publication-feed" id="publication-feed" aria-live="polite">
+        <div class="feed-loading">Carregando publicações...</div>
+      </div>
+      <button class="load-more-button" id="load-more" type="button" hidden>Carregar mais</button>
+    </section>
+  </main>
+
+  <dialog class="report-dialog" id="report-dialog" aria-labelledby="report-title">
+    <form id="report-form" method="dialog">
+      <div class="report-dialog-heading"><div><span class="eyebrow">AJUDE A MANTER A COMUNIDADE SEGURA</span><h2 id="report-title">Denunciar publicação</h2></div><button class="dialog-close" type="button" id="report-close" aria-label="Fechar">×</button></div>
+      <p>Selecione o motivo que melhor descreve o problema. A denúncia será enviada para análise.</p>
+      <label for="report-reason">Motivo da denúncia</label>
+      <select id="report-reason" required>
+        <option value="">Selecione um motivo</option>
+        <option>Conteúdo ofensivo ou discriminatório</option>
+        <option>Informação falsa ou enganosa</option>
+        <option>Spam ou publicidade inadequada</option>
+        <option>Conteúdo impróprio</option>
+        <option>Fraude ou tentativa de golpe</option>
+        <option>Outro motivo</option>
+      </select>
+      <label for="report-detail" id="report-detail-label" hidden>Conte o que aconteceu</label>
+      <textarea id="report-detail" maxlength="500" rows="3" placeholder="Explique brevemente o motivo..." hidden></textarea>
+      <div class="report-dialog-actions"><button class="button button-outline" type="button" id="report-cancel">Cancelar</button><button class="button button-primary" type="submit">Enviar denúncia</button></div>
+    </form>
+  </dialog>
+
+  <footer class="site-footer site-footer-simple">
+    <nav class="footer-simple-links" aria-label="Links institucionais">
+      <a href="/pages/sobre.html" class="footer-simple-link">Sobre</a>
+      <a href="/pages/acessibilidade.html" class="footer-simple-link">Acessibilidade</a>
+      <a href="/pages/central-ajuda.html" class="footer-simple-link">Central de Ajuda</a>
+      <a href="/pages/termos-privacidade.html" class="footer-simple-link">Termos e Privacidade</a>
+      <a href="/pages/publicidade.html" class="footer-simple-link">Publicidade</a>
+      <a href="/pages/solucoes-corporativas.html" class="footer-simple-link">Soluções corporativas</a>
+      <a href="/pages/aplicativo.html" class="footer-simple-link">Baixe o aplicativo</a>
+      <a href="/pages/mais.html" class="footer-simple-link">Mais</a>
+    </nav>
+    <div class="footer-simple-copyright"><a class="footer-simple-brand" href="/">ConectaTrabalho</a><span>ConectaTrabalho © <span class="current-year"></span></span></div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
