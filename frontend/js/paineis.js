@@ -1082,7 +1082,69 @@
         finally { button.disabled = false; input.value = ''; }
       });
     };
-    bindImage('company-logo-edit','company-logo-input','foto_perfil',600,600,'Logotipo');
+    const companyLogoModal = document.getElementById('company-logo-modal');
+    const companyLogoModalImage = document.getElementById('company-logo-modal-image');
+    const companyLogoClose = document.getElementById('company-logo-modal-close');
+    const companyLogoUpdate = document.getElementById('company-logo-modal-update');
+    const companyLogoDelete = document.getElementById('company-logo-modal-delete');
+    const openCompanyLogoModal = () => {
+      const image = companyProfileCache.foto_perfil;
+      if (image) {
+        companyLogoModalImage.src = image;
+        companyLogoModalImage.hidden = false;
+      } else {
+        companyLogoModalImage.removeAttribute('src');
+        companyLogoModalImage.hidden = true;
+      }
+      companyLogoModal.classList.add('is-open');
+      companyLogoModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('company-logo-modal-open');
+    };
+    const closeCompanyLogoModal = () => {
+      companyLogoModal.classList.remove('is-open');
+      companyLogoModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('company-logo-modal-open');
+    };
+    document.getElementById('company-logo-edit').addEventListener('click', openCompanyLogoModal);
+    companyLogoClose.addEventListener('click', closeCompanyLogoModal);
+    companyLogoModal.addEventListener('click', event => { if (event.target === companyLogoModal) closeCompanyLogoModal(); });
+    companyLogoUpdate.addEventListener('click', () => {
+      closeCompanyLogoModal();
+      showImageGuidelines('profile', () => document.getElementById('company-logo-input').click());
+    });
+    companyLogoDelete.addEventListener('click', async () => {
+      if (!companyProfileCache.foto_perfil) return;
+      if (!window.confirm('Tem certeza de que deseja excluir o logotipo da empresa?')) return;
+      companyLogoDelete.disabled = true;
+      try {
+        await Conecta.api('/api/empresa/perfil/imagem', { method: 'PUT', body: JSON.stringify({ campo: 'foto_perfil', imagem: null }) });
+        await loadCompanyProfile();
+        closeCompanyLogoModal();
+        Conecta.toast('Logotipo excluído.');
+      } catch (error) {
+        Conecta.toast(error.message || 'Não foi possível excluir o logotipo.');
+      } finally {
+        companyLogoDelete.disabled = false;
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && companyLogoModal.classList.contains('is-open')) closeCompanyLogoModal();
+    });
+    const bindCompanyLogoImage = () => {
+      const input = document.getElementById('company-logo-input');
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        try {
+          const image = await prepareCompanyProfileImage(file,600,600);
+          await Conecta.api('/api/empresa/perfil/imagem',{method:'PUT',body:JSON.stringify({campo:'foto_perfil',imagem:image})});
+          await loadCompanyProfile();
+          Conecta.toast('Logotipo atualizado com sucesso.');
+        } catch (error) { Conecta.toast(error.message); }
+        finally { input.value = ''; }
+      });
+    };
+    bindCompanyLogoImage();
     const coverButton = document.getElementById('company-cover-edit');
     const coverInput = document.getElementById('company-cover-input');
     const coverModal = document.getElementById('company-cover-modal');
