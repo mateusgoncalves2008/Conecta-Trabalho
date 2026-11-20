@@ -923,7 +923,7 @@
     });
     renderCompanyInstitutionalInfo(profile);
     const publicPreview = document.getElementById('company-public-preview');
-    if (publicPreview) publicPreview.href = '/pages/empresa-perfil.html?id=' + encodeURIComponent(profile.id);
+    if (publicPreview) publicPreview.href = '/pages/empresa-perfil.html?id=' + encodeURIComponent(profile.id) + '&origem=meu-perfil';
     const form = document.getElementById('company-profile-form');
     ['nome_empresa','cidade','telefone','empresa_setor','empresa_descricao_curta','empresa_porte','empresa_site','descricao'].forEach(key => {
       if (form.elements[key]) form.elements[key].value = profile[key] || '';
