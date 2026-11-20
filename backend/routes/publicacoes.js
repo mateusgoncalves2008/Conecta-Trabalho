@@ -345,6 +345,45 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     res.status(201).json({ sucesso: true, mensagem: 'Denúncia enviada para análise.' });
   }));
 
+  const moderator = (req, res, next) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Faça login para continuar.' });
+    const allowedEmails = String(process.env.PUBLICACOES_ADMIN_EMAILS || '')
+      .split(',')
+      .map(email => email.trim().toLowerCase())
+      .filter(Boolean);
+    if (!allowedEmails.includes(String(req.session.user.email || '').toLowerCase())) {
+      return res.status(403).json({ erro: 'Esta conta não tem acesso à moderação de publicações.' });
+    }
+    next();
+  };
+
+  router.get('/denuncias', moderator, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const status = String(req.query.status || 'todas');
+    const validStatuses = ['todas', 'pendente', 'em_analise', 'resolvida', 'descartada'];
+    if (!validStatuses.includes(status)) return res.status(400).json({ erro: 'Filtro de situação inválido.' });
+    const result = await pool.query(
+      'SELECT d.id,d.motivo,d.detalhe,d.status,d.criada_em,p.id AS publicacao_id,p.descricao,p.criada_em AS publicacao_criada_em,denunciante.nome AS denunciante_nome,COALESCE(NULLIF(autor.nome_empresa,\'\'),NULLIF(autor.nome_fantasia,\'\'),autor.nome) AS autor_nome FROM publicacao_denuncias d JOIN publicacoes p ON p.id=d.publicacao_id JOIN usuarios denunciante ON denunciante.id=d.denunciante_id JOIN usuarios autor ON autor.id=p.autor_id WHERE ($1=\'todas\' OR d.status=$1) ORDER BY CASE d.status WHEN \'pendente\' THEN 0 WHEN \'em_analise\' THEN 1 ELSE 2 END,d.criada_em DESC LIMIT 200',
+      [status]
+    );
+    res.json({ denuncias: result.rows });
+  }));
+
+  router.patch('/denuncias/:id', moderator, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const id = Number(req.params.id);
+    const status = String(req.body.status || '');
+    if (!Number.isSafeInteger(id) || id < 1 || !['em_analise', 'resolvida', 'descartada'].includes(status)) {
+      return res.status(400).json({ erro: 'Informe uma situação válida para a denúncia.' });
+    }
+    const result = await pool.query(
+      'UPDATE publicacao_denuncias SET status=$1 WHERE id=$2 RETURNING id,status',
+      [status, id]
+    );
+    if (!result.rowCount) return res.status(404).json({ erro: 'Denúncia não encontrada.' });
+    res.json({ sucesso: true, denuncia: result.rows[0] });
+  }));
+
   return { router, schemaReady };
 };
 
