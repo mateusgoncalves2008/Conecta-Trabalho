@@ -385,7 +385,26 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
       'SELECT d.id,d.motivo,d.detalhe,d.status,d.criada_em,p.id AS publicacao_id,p.descricao,p.criada_em AS publicacao_criada_em,denunciante.nome AS denunciante_nome,COALESCE(NULLIF(autor.nome_empresa,\'\'),NULLIF(autor.nome_fantasia,\'\'),autor.nome) AS autor_nome FROM publicacao_denuncias d JOIN publicacoes p ON p.id=d.publicacao_id JOIN usuarios denunciante ON denunciante.id=d.denunciante_id JOIN usuarios autor ON autor.id=p.autor_id WHERE ($1=\'todas\' OR d.status=$1) ORDER BY CASE d.status WHEN \'pendente\' THEN 0 WHEN \'em_analise\' THEN 1 ELSE 2 END,d.criada_em DESC LIMIT 200',
       [status]
     );
-    res.json({ denuncias: result.rows });
+    const postIds = [...new Set(result.rows.map(row => row.publicacao_id))];
+    const mediaResult = postIds.length
+      ? await pool.query('SELECT id,publicacao_id,tipo,mime_type FROM publicacao_midias WHERE publicacao_id=ANY($1::bigint[]) ORDER BY ordem,id', [postIds])
+      : { rows: [] };
+    const mediaByPost = new Map();
+    for (const media of mediaResult.rows) {
+      if (!mediaByPost.has(media.publicacao_id)) mediaByPost.set(media.publicacao_id, []);
+      mediaByPost.get(media.publicacao_id).push({
+        id: media.id,
+        tipo: media.tipo,
+        mimeType: media.mime_type,
+        url: mediaUrl(media.id)
+      });
+    }
+    res.json({
+      denuncias: result.rows.map(report => ({
+        ...report,
+        midias: mediaByPost.get(report.publicacao_id) || []
+      }))
+    });
   }));
 
   router.patch('/denuncias/:id', moderator, asyncRoute(async (req, res) => {
