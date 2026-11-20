@@ -39,3 +39,25 @@ html[data-theme=dark] .directory-avatar{background:#2b3b50}
 html[data-theme=dark] .directory-avatar-fallback{color:#e7edf5}
 html[data-theme=dark] .directory-avatar-fallback.is-company{background:#3a2b29;color:#ffb18b}
 @media(max-width:650px){.search-directory-panel{padding:17px}.directory-search-form{flex-wrap:wrap;padding:10px}.directory-search-form input{min-height:40px}.directory-search-form button{width:100%}.directory-card{align-items:flex-start;flex-direction:column}.directory-card-actions{width:100%;justify-content:flex-start}.directory-card-actions .button{flex:1}.directory-avatar{flex-basis:48px;width:48px;height:48px}}
+
+
+/* Perfil público do candidato */
+.public-candidate-profile{width:min(900px,calc(100% - 40px));margin:34px auto 70px;padding:28px;background:var(--surface,#fff);border:1px solid var(--line,#e1e7ee);border-radius:14px}
+.public-candidate-hero{display:flex;align-items:center;gap:22px;padding-bottom:24px;border-bottom:1px solid var(--line,#e1e7ee)}
+.public-candidate-avatar{display:grid;place-items:center;flex:0 0 112px;width:112px;height:112px;overflow:hidden;border-radius:50%;background:#edf1f5;color:#31465e;font-size:25px;font-weight:750}
+.public-candidate-avatar img{width:100%;height:100%;object-fit:cover}
+.public-candidate-hero .eyebrow{color:var(--orange);font-size:11px;font-weight:750;letter-spacing:1px}
+.public-candidate-hero h1{margin:6px 0;color:var(--navy);font-size:28px}
+.public-candidate-hero p{margin:0 0 5px;color:var(--ink)}
+.public-candidate-hero small{color:var(--muted)}
+.public-candidate-tags{display:flex;gap:8px;flex-wrap:wrap;padding:18px 0}
+.public-candidate-tags span{padding:7px 11px;border-radius:20px;background:#f3f5f8;color:#536174;font-size:12px}
+.public-candidate-section{padding:20px 0;border-bottom:1px solid var(--line,#e1e7ee)}
+.public-candidate-section h2{margin:0 0 9px;color:var(--navy);font-size:18px}
+.public-candidate-section p{margin:0;color:var(--muted);font-size:14px;line-height:1.75;overflow-wrap:anywhere}
+.public-candidate-cv{padding-top:22px}
+html[data-theme=dark] .public-candidate-profile{background:#1c2838;border-color:#354255}
+html[data-theme=dark] .public-candidate-hero h1,html[data-theme=dark] .public-candidate-section h2{color:#e7edf5}
+html[data-theme=dark] .public-candidate-avatar{background:#2b3b50;color:#e7edf5}
+html[data-theme=dark] .public-candidate-tags span{background:#2b3b50;color:#d7e0ec}
+@media(max-width:600px){.public-candidate-profile{padding:19px}.public-candidate-hero{align-items:flex-start;gap:14px}.public-candidate-avatar{flex-basis:76px;width:76px;height:76px;font-size:20px}.public-candidate-hero h1{font-size:22px}}
