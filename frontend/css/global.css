@@ -1682,3 +1682,34 @@ html[data-theme="dark"] .account-menu-profile{border-color:#34465c;color:#edf2f7
 html[data-theme="dark"] .account-menu-item{color:#edf2f7}
 html[data-theme="dark"] .account-menu-item:hover{background:#26384d}
 html[data-theme="dark"] .account-menu-logout{border-top-color:#34465c}
+
+
+/* Correção definitiva: campos do painel da empresa no tema escuro */
+html[data-theme="dark"] body[data-panel="empresa"] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea),
+html[data-theme="dark"] body[data-panel="empresa"] .company-profile-fields :is(input,select,textarea),
+html[data-theme="dark"] body[data-panel="empresa"] #job-form :is(input,select,textarea){
+  background-color:#1e3046!important;
+  color:#e8eef5!important;
+  -webkit-text-fill-color:#e8eef5!important;
+  border:1px solid #40536a!important;
+  color-scheme:dark;
+  opacity:1!important;
+}
+html[data-theme="dark"] body[data-panel="empresa"] :is(input,textarea)::placeholder{
+  color:#9eafc2!important;
+  -webkit-text-fill-color:#9eafc2!important;
+  opacity:1!important;
+}
+html[data-theme="dark"] body[data-panel="empresa"] :is(.field,label){
+  color:#dce5ef;
+}
+html[data-theme="dark"] body[data-panel="empresa"] #job-form,
+html[data-theme="dark"] body[data-panel="empresa"] .company-profile-edit-dialog{
+  background-color:#172538;
+  color:#e8eef5;
+  border-color:#34465a;
+}
+html[data-theme="dark"] body[data-panel="empresa"] select option{
+  background-color:#1e3046;
+  color:#e8eef5;
+}
