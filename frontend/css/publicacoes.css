@@ -535,7 +535,7 @@ body.publication-viewer-open:not(.a11y-contrast) .short-publication-media .publi
 .short-follow-button.is-following{border:1px solid currentColor;background:transparent;color:inherit}
 .short-video-player{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:transparent}
 .short-video-player>video{width:100%!important;height:100%!important;object-fit:contain!important}
-.short-video-controls{position:absolute;right:0;bottom:0;left:0;display:flex;align-items:center;gap:9px;min-height:52px;padding:8px 12px;background:linear-gradient(transparent,rgba(0,0,0,.82));color:#fff}
+.short-video-controls{position:absolute;right:0;bottom:0;left:0;display:flex;align-items:center;gap:9px;min-height:52px;padding:8px 12px;background:rgba(0,0,0,.78);color:#fff}
 .short-video-controls button{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:0;background:transparent;color:#fff;cursor:pointer}
 .short-video-controls span{font-size:11px;white-space:nowrap}
 .short-video-controls input[type=range]{min-width:35px;accent-color:#c95730}
