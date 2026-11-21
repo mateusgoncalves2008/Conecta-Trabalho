@@ -358,6 +358,27 @@
             </footer>
           </article>`;
         }).join('');
+        if ('IntersectionObserver' in window) {
+          const feedObserver = new IntersectionObserver(entries => {
+            entries.forEach(async entry => {
+              if (!entry.isIntersecting || entry.intersectionRatio < .65) return;
+              const card = entry.target;
+              if (card.dataset.viewRegistered === 'true') return;
+              card.dataset.viewRegistered = 'true';
+              const post = companyPosts[Number(card.dataset.postIndex)];
+              if (!post) return;
+              try {
+                const result = await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/visualizacao', { method: 'POST' });
+                post.visualizacoes = Number(result.visualizacoes || post.visualizacoes || 0);
+                const count = card.querySelector('[data-post-view-count]');
+                if (count) count.textContent = formatViews(post.visualizacoes);
+              } catch (error) {
+                card.dataset.viewRegistered = 'false';
+              }
+            });
+          }, { threshold: [.65] });
+          grid.querySelectorAll('[data-post-index]').forEach(card => feedObserver.observe(card));
+        }
         grid.querySelectorAll('[data-post-index]').forEach(card => {
           const post = companyPosts[Number(card.dataset.postIndex)];
           if (!post || post._viewRegistered) return;
