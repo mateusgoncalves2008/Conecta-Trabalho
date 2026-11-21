@@ -310,6 +310,8 @@
     preview.innerHTML = '';
     preview.hidden = true;
     editorLayout.hidden = true;
+    photoGuidelines.hidden = false;
+    videoGuidelines.hidden = true;
     composer.querySelector('.composer-media-tabs').hidden = false;
     titleInput.value = '';
     phoneMedia.innerHTML = '<i class="fa-regular fa-image"></i>';
@@ -338,6 +340,8 @@
     preview.hidden = !selectedFiles.length;
     dropzone.hidden = selectedFiles.length > 0;
     editorLayout.hidden = !selectedFiles.length;
+    photoGuidelines.hidden = selectedFiles.length > 0;
+    videoGuidelines.hidden = true;
     composer.querySelector('.composer-media-tabs').hidden = selectedFiles.length > 0;
     descriptionField.hidden = !selectedFiles.length;
     mediaHeading.textContent = isVideo ? 'Vídeo' : 'Fotos';
