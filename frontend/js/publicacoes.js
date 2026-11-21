@@ -437,7 +437,7 @@
     if (!button) return;
     const index = Number(button.dataset.removeFile);
     const item = selectedFiles[index];
-    if (item) URL.revokeObjectURL(item.previewUrl);
+    if (item && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     selectedFiles.splice(index, 1);
     renderPreview();
   });
