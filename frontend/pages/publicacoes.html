@@ -37,26 +37,37 @@
       </div>
     </section>
 
-    <section class="publication-composer" id="publication-composer" hidden aria-labelledby="composer-title">
-      <div class="composer-heading">
-        <div><span class="eyebrow">COMPARTILHE COM A COMUNIDADE</span><h2 id="composer-title">Criar publicação</h2></div>
-        <span class="composer-account" id="composer-account"></span>
-      </div>
-      <form id="publication-form">
-        <label class="publication-description-label" for="publication-description">Descrição <span>(opcional)</span></label>
-        <textarea id="publication-description" maxlength="2000" rows="3" placeholder="O que você gostaria de compartilhar?"></textarea>
-        <div class="composer-upload-row">
-          <label class="media-select-button" for="publication-files">Adicionar fotos ou vídeo</label>
+    <div class="create-publication-entry" id="create-publication-entry" hidden>
+      <button class="create-publication-button" id="open-publication-composer" type="button"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Criar</span></button>
+    </div>
+    <section class="publication-composer publication-composer-fullscreen" id="publication-composer" hidden aria-labelledby="composer-title" aria-modal="true" role="dialog">
+      <header class="composer-fullscreen-header">
+        <button class="composer-close-button" id="close-publication-composer" type="button" aria-label="Fechar criação de publicação"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <strong>Criar publicação</strong>
+        <div class="composer-profile-avatar" id="composer-profile-avatar" aria-label="Foto do usuário"></div>
+      </header>
+      <div class="composer-fullscreen-content">
+        <div class="composer-fullscreen-intro"><span class="eyebrow">COMPARTILHE COM A COMUNIDADE</span><h2 id="composer-title">O que você gostaria de compartilhar?</h2><span class="composer-account" id="composer-account"></span></div>
+        <form id="publication-form">
+          <label class="publication-description-label" for="publication-description">Descrição <span>(opcional)</span></label>
+          <textarea id="publication-description" maxlength="2000" rows="4" placeholder="Escreva uma descrição para sua publicação..."></textarea>
+          <div class="composer-media-actions" role="group" aria-label="Adicionar mídia">
+            <button class="composer-media-option" type="button" data-open-picker="photos"><i class="fa-regular fa-images" aria-hidden="true"></i><span>Escolher fotos</span></button>
+            <button class="composer-media-option" type="button" data-open-picker="camera"><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Tirar foto</span></button>
+            <button class="composer-media-option" type="button" data-open-picker="video"><i class="fa-solid fa-video" aria-hidden="true"></i><span>Escolher vídeo</span></button>
+            <button class="composer-media-option" type="button" id="start-video-recording"><i class="fa-solid fa-circle-dot" aria-hidden="true"></i><span>Gravar vídeo</span></button>
+          </div>
           <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple hidden>
-          <span class="composer-limits">Até 10 fotos ou 1 vídeo de até 60 segundos</span>
-        </div>
-        <div class="upload-preview" id="upload-preview" hidden></div>
-        <div class="upload-progress" id="upload-progress" hidden><span></span><small id="upload-progress-text">Preparando arquivos...</small></div>
-        <div class="composer-footer">
-          <small>Fotos: até 20 MB cada. Vídeos: até 150 MB.</small>
-          <button class="button button-primary" id="publish-button" type="submit" disabled>Publicar</button>
-        </div>
-      </form>
+          <input id="publication-photo-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <input id="publication-camera-picker" type="file" accept="image/*" capture="environment" hidden>
+          <input id="publication-video-picker" type="file" accept="video/mp4,video/webm,video/*" hidden>
+          <div class="recording-controls" id="recording-controls" hidden><span id="recording-time">00:00 / 01:00</span><button type="button" id="stop-video-recording"><i class="fa-solid fa-stop" aria-hidden="true"></i> Finalizar gravação</button></div>
+          <p class="composer-limits">Até 10 fotos por publicação ou 1 vídeo com duração máxima de 60 segundos.</p>
+          <div class="upload-preview" id="upload-preview" hidden></div>
+          <div class="upload-progress" id="upload-progress" hidden><span></span><small id="upload-progress-text">Preparando arquivos...</small></div>
+          <div class="composer-footer"><small>Fotos: até 20 MB cada. Vídeos: até 150 MB.</small><button class="button button-primary" id="publish-button" type="submit" disabled>Publicar</button></div>
+        </form>
+      </div>
     </section>
 
     <section class="visitor-note" id="visitor-note" hidden>
