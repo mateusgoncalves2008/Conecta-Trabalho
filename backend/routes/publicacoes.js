@@ -22,7 +22,17 @@ const MIME_TYPES = {
   'image/png': { kind: 'image', extension: 'png' },
   'image/webp': { kind: 'image', extension: 'webp' },
   'video/mp4': { kind: 'video', extension: 'mp4' },
-  'video/webm': { kind: 'video', extension: 'webm' }
+  'video/quicktime': { kind: 'video', extension: 'mov' },
+  'video/webm': { kind: 'video', extension: 'webm' },
+  'video/x-matroska': { kind: 'video', extension: 'mkv' },
+  'video/x-msvideo': { kind: 'video', extension: 'avi' },
+  'video/x-ms-wmv': { kind: 'video', extension: 'wmv' },
+  'video/x-flv': { kind: 'video', extension: 'flv' },
+  'video/mpeg': { kind: 'video', extension: 'mpeg' },
+  'video/x-m4v': { kind: 'video', extension: 'm4v' },
+  'video/3gpp': { kind: 'video', extension: '3gp' },
+  'video/ogg': { kind: 'video', extension: 'ogv' },
+  'video/mp2t': { kind: 'video', extension: 'ts' }
 };
 
 const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, profileSchemaReady }) => {
@@ -60,8 +70,14 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     if (mime === 'image/jpeg') return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
     if (mime === 'image/png') return buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
     if (mime === 'image/webp') return buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
-    if (mime === 'video/mp4') return buffer.toString('ascii', 4, 8) === 'ftyp';
-    if (mime === 'video/webm') return buffer.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+    if (['video/mp4', 'video/quicktime', 'video/x-m4v', 'video/3gpp'].includes(mime)) return buffer.toString('ascii', 4, 8) === 'ftyp';
+    if (mime === 'video/webm' || mime === 'video/x-matroska') return buffer.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+    if (mime === 'video/x-msvideo') return buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'AVI ';
+    if (mime === 'video/x-flv') return buffer.toString('ascii', 0, 3) === 'FLV';
+    if (mime === 'video/x-ms-wmv') return buffer.subarray(0, 4).equals(Buffer.from([0x30, 0x26, 0xb2, 0x75]));
+    if (mime === 'video/mpeg') return buffer[0] === 0x00 && buffer[1] === 0x00 && buffer[2] === 0x01 && [0xb3, 0xba, 0xb8].includes(buffer[3]);
+    if (mime === 'video/ogg') return buffer.toString('ascii', 0, 4) === 'OggS';
+    if (mime === 'video/mp2t') return buffer[0] === 0x47;
     return false;
   };
   const mediaUrl = id => '/api/publicacoes/midia/' + encodeURIComponent(id);
