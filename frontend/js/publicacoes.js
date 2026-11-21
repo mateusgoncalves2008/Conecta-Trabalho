@@ -325,6 +325,9 @@
     preview.hidden = true;
     publishButton.disabled = true;
     fileInput.value = '';
+    photoPicker.value = '';
+    cameraPicker.value = '';
+    videoPicker.value = '';
   }
 
   function renderPreview() {
@@ -405,10 +408,12 @@
       mediaRecorder.ondataavailable = event => { if (event.data && event.data.size) recordingChunks.push(event.data); };
       mediaRecorder.onerror = () => { stopRecordingTracks(); toast('Não foi possível gravar o vídeo neste dispositivo.'); };
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(recordingChunks, { type: mimeType || 'video/webm' });
+        const recordedType = mediaRecorder?.mimeType || mimeType || 'video/webm';
+        const blob = new Blob(recordingChunks, { type: recordedType });
         stopRecordingTracks();
         if (!blob.size) return;
-        const file = new File([blob], 'video-conectatrabalho.webm', { type: 'video/webm', lastModified: Date.now() });
+        const isMp4 = recordedType.includes('mp4');
+        const file = new File([blob], 'video-conectatrabalho.' + (isMp4 ? 'mp4' : 'webm'), { type: isMp4 ? 'video/mp4' : 'video/webm', lastModified: Date.now() });
         await processSelectedFiles([file]);
       };
       recordingStartedAt = Date.now();
@@ -674,6 +679,7 @@
       return;
     }
     await loadUser();
+    if (currentUser && new URLSearchParams(location.search).get('criar') === '1') openComposer();
     await loadPosts(true);
   })();
 })();
