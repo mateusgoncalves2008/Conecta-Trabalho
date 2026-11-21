@@ -755,3 +755,18 @@ body.publication-viewer-open .short-publication-media .publication-media,
 body.publication-viewer-open .short-publication-media .publication-media-item {
   background-color: #182638 !important;
 }
+
+
+/* Destaque azul-claro somente no bloco de informações da publicação. */
+body.publication-viewer-open .short-publication-caption {
+  background: rgba(173, 216, 244, .94) !important;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .16) !important;
+  color: #183047 !important;
+  text-shadow: none !important;
+}
+body.publication-viewer-open .short-publication-caption :is(a, strong, span, .publication-description, .description-toggle) {
+  color: #183047 !important;
+  text-shadow: none !important;
+}
