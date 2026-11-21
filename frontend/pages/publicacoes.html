@@ -53,9 +53,9 @@
             <button class="composer-media-tab is-active" type="button" data-open-picker="photos"><i class="fa-regular fa-images" aria-hidden="true"></i> Fotos</button>
             <button class="composer-media-tab" type="button" data-open-picker="video"><i class="fa-solid fa-video" aria-hidden="true"></i> Vídeos</button>
           </div>
-          <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple hidden>
+          <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/*,.mp4,.mov,.webm,.mkv,.avi,.wmv,.flv,.mpeg,.mpg,.m4v,.3gp,.ogv,.ts" multiple hidden>
           <input id="publication-photo-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
-          <input id="publication-video-picker" type="file" accept="video/mp4,video/webm,video/*" hidden>
+          <input id="publication-video-picker" type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.avi,.wmv,.flv,.mpeg,.mpg,.m4v,.3gp,.ogv,.ts" hidden>
           <div class="composer-dropzone" id="composer-dropzone">
             <img class="composer-dropzone-illustration" src="/img/icone-upload-publicacao.svg" alt="" width="72" height="72">
             <strong id="composer-dropzone-title">Selecione fotos para carregar</strong>
@@ -86,7 +86,7 @@
             </div>
             <div class="composer-guideline">
               <h3>Formatos de arquivo</h3>
-              <p>MP4 recomendado. WebM também é suportado.</p>
+              <p>MP4, MOV, WebM, MKV, AVI, WMV, FLV, MPEG, M4V, 3GP, OGV e TS. MP4 é recomendado.</p>
             </div>
             <div class="composer-guideline">
               <h3>Resoluções recomendadas</h3>
