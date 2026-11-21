@@ -1347,22 +1347,22 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
 .company-public-post-detail .publication-card-header{
   display:flex;
   align-items:center;
-  gap:11px;
+  gap:13px;
   min-width:0;
   padding:18px 20px 12px;
 }
 .company-public-post-detail .publication-avatar{
   display:grid;
   place-items:center;
-  width:44px;
-  height:44px;
-  min-width:44px;
-  flex:0 0 44px;
+  width:54px;
+  height:54px;
+  min-width:54px;
+  flex:0 0 54px;
   overflow:hidden;
   border-radius:50%;
   background:var(--soft);
   color:var(--navy);
-  font-size:14px;
+  font-size:16px;
   font-weight:750;
 }
 .company-public-post-detail .publication-avatar img{
@@ -1386,16 +1386,16 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
   display:block;
   overflow:hidden;
   color:var(--navy);
-  font-size:13px;
+  font-size:16px;
   font-weight:750;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
 .company-public-post-detail .publication-author small{
   display:block;
-  margin-top:2px;
+  margin-top:3px;
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
 }
 .company-public-post-detail .publication-description{
   padding:15px 20px 15px;
@@ -1530,8 +1530,21 @@ html[data-theme=dark] .company-public-post-detail .company-public-post-detail-st
     margin-bottom:0;
   }
   .company-public-post-detail .publication-card-header{
-    gap:9px;
+    gap:10px;
     padding:15px 14px 11px;
+  }
+  .company-public-post-detail .publication-avatar{
+    width:48px;
+    height:48px;
+    min-width:48px;
+    flex-basis:48px;
+    font-size:15px;
+  }
+  .company-public-post-detail .publication-author-name-link{
+    font-size:15px;
+  }
+  .company-public-post-detail .publication-author small{
+    font-size:12px;
   }
   .company-public-post-detail .publication-description{
     padding:13px 14px 13px;
