@@ -157,6 +157,14 @@ CREATE TABLE IF NOT EXISTS publicacao_visualizacoes (
   PRIMARY KEY (publicacao_id, usuario_id)
 );
 CREATE INDEX IF NOT EXISTS idx_publicacao_visualizacoes_post ON publicacao_visualizacoes (publicacao_id);
+
+CREATE TABLE IF NOT EXISTS publicacoes_salvas (
+  publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE,
+  usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  salva_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (publicacao_id, usuario_id)
+);
+CREATE INDEX IF NOT EXISTS idx_publicacoes_salvas_usuario_data ON publicacoes_salvas (usuario_id, salva_em DESC);
 UPDATE publicacao_reacoes SET emoji = '❤️' WHERE emoji <> '❤️';
 
 CREATE TABLE IF NOT EXISTS publicacao_denuncias (
