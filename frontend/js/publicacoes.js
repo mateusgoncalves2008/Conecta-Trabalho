@@ -19,6 +19,8 @@
   const dropzone = document.getElementById('composer-dropzone');
   const dropzoneTitle = document.getElementById('composer-dropzone-title');
   const dropzoneDescription = document.getElementById('composer-dropzone-description');
+  const photoGuidelines = document.getElementById('composer-photo-guidelines');
+  const videoGuidelines = document.getElementById('composer-video-guidelines');
   const publishButton = document.getElementById('publish-button');
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
@@ -385,7 +387,10 @@
       composer.querySelectorAll('.composer-dropzone-actions [data-open-picker]').forEach(option => {
         option.hidden = option.dataset.openPicker !== selectedType;
       });
-      if (selectedType === 'photos') {
+      const selectingPhotos = selectedType === 'photos';
+      photoGuidelines.hidden = !selectingPhotos;
+      videoGuidelines.hidden = selectingPhotos;
+      if (selectingPhotos) {
         dropzoneTitle.textContent = 'Selecione fotos para carregar';
         dropzoneDescription.textContent = 'Ou arraste e solte-as aqui. Carregue até 10 fotos por publicação.';
       } else {
