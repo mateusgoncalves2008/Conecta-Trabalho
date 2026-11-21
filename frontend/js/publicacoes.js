@@ -327,7 +327,7 @@
   function renderPreview() {
     preview.innerHTML = selectedFiles.map((item, index) => {
       const media = item.kind === 'video'
-        ? '<video muted playsinline src="' + item.previewUrl + '"></video>'
+        ? '<video controls muted playsinline preload="metadata" src="' + item.previewUrl + '"></video>'
         : '<img src="' + item.previewUrl + '" alt="">';
       return '<div class="upload-preview-item">' + media +
         '<span>' + escapeHTML(formatBytes(item.file.size)) + '</span>' +
@@ -362,7 +362,6 @@
         } else {
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB.');
           duration = await readVideoDuration(file);
-          file = await compressVideo(file);
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB mesmo depois da compressão.');
         }
         selectedFiles.push({ file, kind, duration, previewUrl: URL.createObjectURL(file) });
