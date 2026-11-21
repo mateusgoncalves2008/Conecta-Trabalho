@@ -51,6 +51,21 @@
   let cursor = 0;
   let reportTarget = null;
   let loading = false;
+  const postObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const card = entry.target;
+      const video = card.querySelector('video');
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+        if (video) video.play().catch(() => {});
+        if (currentUser && card.dataset.viewRegistered !== 'true') {
+          card.dataset.viewRegistered = 'true';
+          api('/api/publicacoes/' + encodeURIComponent(card.dataset.postId) + '/visualizacao', { method: 'POST' }).catch(() => {});
+        }
+      } else if (video) {
+        video.pause();
+      }
+    });
+  }, { threshold: [0, 0.65, 1] }) : null;
 
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -100,7 +115,7 @@
         ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
         : '';
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><video controls playsinline preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
+        return '<div class="publication-media-item"><video controls playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
       return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
@@ -181,6 +196,10 @@
         feed.innerHTML = '<div class="feed-empty">' + (followingOnly ? 'Ainda não há publicações de perfis que você segue.' : 'Ainda não há publicações. Volte em breve para conferir as novidades.') + '</div>';
       } else {
         feed.insertAdjacentHTML('beforeend', posts.map(renderPost).join(''));
+        if (postObserver) feed.querySelectorAll('.short-publication-card:not([data-observed])').forEach(card => {
+          card.dataset.observed = 'true';
+          postObserver.observe(card);
+        });
       }
       cursor = result.proximoCursor;
       loadMoreButton.hidden = cursor === null;
