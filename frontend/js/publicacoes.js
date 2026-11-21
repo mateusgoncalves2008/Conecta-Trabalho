@@ -141,7 +141,7 @@
     const longDescription = (post.descricao || '').length > 260;
     const description = post.descricao
       ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
-        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">Ver mais...</button>' : '')
+        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">Ler mais</button>' : '')
       : '';
     const avatar = post.autor.foto
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
@@ -662,7 +662,7 @@
     if (expandButton) {
       const description = expandButton.parentElement.querySelector('[data-description]');
       const expanded = description.classList.toggle('is-collapsed') === false;
-      expandButton.textContent = expanded ? 'Ver menos' : 'Ver mais...';
+      expandButton.textContent = expanded ? 'Ler menos' : 'Ler mais';
       return;
     }
     const videoControl = event.target.closest('[data-video-action]');
