@@ -102,7 +102,9 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     'CREATE INDEX IF NOT EXISTS idx_publicacao_visualizacoes_post ON publicacao_visualizacoes (publicacao_id)',
     "UPDATE publicacao_reacoes SET emoji='❤️' WHERE emoji <> '❤️'",
     'CREATE TABLE IF NOT EXISTS publicacao_denuncias (id BIGSERIAL PRIMARY KEY, publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, denunciante_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, motivo VARCHAR(100) NOT NULL, detalhe VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT \'pendente\' CHECK (status IN (\'pendente\',\'em_analise\',\'resolvida\',\'descartada\')), criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE (publicacao_id, denunciante_id))',
-    'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)'
+    'CREATE INDEX IF NOT EXISTS idx_publicacao_denuncias_status_data ON publicacao_denuncias (status, criada_em DESC)',
+    'CREATE TABLE IF NOT EXISTS publicacoes_salvas (publicacao_id BIGINT NOT NULL REFERENCES publicacoes(id) ON DELETE CASCADE, usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, salva_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY (publicacao_id, usuario_id))',
+    'CREATE INDEX IF NOT EXISTS idx_publicacoes_salvas_usuario_data ON publicacoes_salvas (usuario_id, salva_em DESC)'
   ].join(';'));
   const schemaReady = profileSchemaReady ? Promise.all([profileSchemaReady, publicationSchemaReady]) : publicationSchemaReady;
   const member = (req, res, next) => {
@@ -140,9 +142,11 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
     const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
     if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
+    const followingOnly = req.query.seguindo === '1';
+    if (followingOnly && !req.session.user) return res.status(401).json({ erro: 'Faça login para ver os perfis que você segue.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,COUNT(v.usuario_id)::int AS visualizacoes,(SELECT COUNT(*)::int FROM publicacao_reacoes r WHERE r.publicacao_id=p.id) AS total_curtidas,EXISTS(SELECT 1 FROM publicacao_reacoes r WHERE r.publicacao_id=p.id AND r.usuario_id=$2) AS minha_curtida,(p.autor_id=$3) AS minha FROM publicacoes p LEFT JOIN publicacao_visualizacoes v ON v.publicacao_id=p.id WHERE p.autor_id=$1 GROUP BY p.id ORDER BY p.criada_em DESC,p.id DESC',
-      [companyId, req.session.user?.id || null, req.session.user?.id || null]
+      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,u.titulo_profissional,COALESCE(NULLIF(u.nome_empresa,\\'\\'),NULLIF(u.nome_fantasia,\\'\\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto,(SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$3) AS seguindo FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id WHERE (NOT $4::boolean OR EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.usuario_id=$3 AND es.empresa_id=p.autor_id)) ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
+      [limit + 1, cursor, req.session.user?.id || null, followingOnly]
     );
     if (!posts.rowCount) return res.json({ publicacoes: [] });
     const ids = posts.rows.map(post => post.id);
@@ -228,10 +232,11 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     const rows = posts.rows.slice(0, limit);
     if (!rows.length) return res.json({ publicacoes: [], proximoCursor: null });
     const ids = rows.map(post => post.id);
-    const [mediaResult, reactionResult, myReactionResult] = await Promise.all([
+    const [mediaResult, reactionResult, myReactionResult, mySavedResult] = await Promise.all([
       pool.query('SELECT id,publicacao_id,tipo,mime_type,tamanho_bytes,duracao_segundos,ordem FROM publicacao_midias WHERE publicacao_id=ANY($1::bigint[]) ORDER BY ordem,id', [ids]),
       pool.query('SELECT publicacao_id,emoji,COUNT(*)::int AS total FROM publicacao_reacoes WHERE publicacao_id=ANY($1::bigint[]) GROUP BY publicacao_id,emoji ORDER BY emoji', [ids]),
-      req.session.user ? pool.query('SELECT publicacao_id FROM publicacao_reacoes WHERE usuario_id=$1 AND publicacao_id=ANY($2::bigint[])', [req.session.user.id, ids]) : Promise.resolve({ rows: [] })
+      req.session.user ? pool.query('SELECT publicacao_id FROM publicacao_reacoes WHERE usuario_id=$1 AND publicacao_id=ANY($2::bigint[])', [req.session.user.id, ids]) : Promise.resolve({ rows: [] }),
+      req.session.user ? pool.query('SELECT publicacao_id FROM publicacoes_salvas WHERE usuario_id=$1 AND publicacao_id=ANY($2::bigint[])', [req.session.user.id, ids]) : Promise.resolve({ rows: [] })
     ]);
     const mediaByPost = new Map();
     for (const media of mediaResult.rows) {
@@ -249,6 +254,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
       reactionsByPost.get(reaction.publicacao_id).push({ emoji: reaction.emoji, total: reaction.total });
     }
     const myReactions = new Set(myReactionResult.rows.map(item => String(item.publicacao_id)));
+    const mySaved = new Set(mySavedResult.rows.map(item => String(item.publicacao_id)));
     res.json({
       publicacoes: rows.map(post => ({
         id: post.id, descricao: post.descricao, criadaEm: post.criada_em,
@@ -262,10 +268,29 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         midias: mediaByPost.get(post.id) || [],
         reacoes: reactionsByPost.get(post.id) || [],
         minhaCurtida: myReactions.has(String(post.id)),
+        minhaSalva: mySaved.has(String(post.id)),
         minha: Boolean(req.session.user && String(req.session.user.id) === String(post.autor_id))
       })),
       proximoCursor: hasMore ? cursor + limit : null
     });
+  }));
+
+  router.post('/:id/salvar', member, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Publicação inválida.' });
+    const post = await pool.query('SELECT id FROM publicacoes WHERE id=$1', [id]);
+    if (!post.rowCount) return res.status(404).json({ erro: 'Publicação não encontrada.' });
+    await pool.query('INSERT INTO publicacoes_salvas (publicacao_id,usuario_id) VALUES ($1,$2) ON CONFLICT (publicacao_id,usuario_id) DO NOTHING', [id, req.session.user.id]);
+    res.json({ sucesso: true, salva: true });
+  }));
+
+  router.delete('/:id/salvar', member, asyncRoute(async (req, res) => {
+    await schemaReady;
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Publicação inválida.' });
+    await pool.query('DELETE FROM publicacoes_salvas WHERE publicacao_id=$1 AND usuario_id=$2', [id, req.session.user.id]);
+    res.json({ sucesso: true, salva: false });
   }));
 
   router.post('/upload', member, uploadLimit, asyncRoute(async (req, res) => {
