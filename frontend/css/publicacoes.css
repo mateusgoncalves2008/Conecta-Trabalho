@@ -678,3 +678,28 @@ body.publication-viewer-open .short-publication-caption .description-toggle {
     width: 32px;
   }
 }
+
+
+/* Feed: textos claros e carregamento contínuo, sem botão "Carregar mais". */
+body.publication-viewer-open .publicacoes-main.publication-viewer-main,
+body.publication-viewer-open .publicacoes-main.publication-viewer-main :is(h1,h2,h3,h4,p,span,strong,small,label,a,button,div),
+body.publication-viewer-open .publication-viewer-sidebar,
+body.publication-viewer-open .publication-viewer-sidebar :is(span,strong,label,button,i),
+body.publication-viewer-open .publication-feed-navigation button {
+  color: #fff !important;
+}
+body.publication-viewer-open .publication-search input {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff;
+}
+body.publication-viewer-open .publication-search input::placeholder {
+  color: rgba(255,255,255,.72) !important;
+  -webkit-text-fill-color: rgba(255,255,255,.72);
+}
+body.publication-viewer-open .publication-viewer-main .feed-loading,
+body.publication-viewer-open .publication-viewer-main .feed-empty {
+  color: #fff !important;
+}
+body.publication-viewer-open .publication-viewer-main .load-more-button {
+  display: none !important;
+}
