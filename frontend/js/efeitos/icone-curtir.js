@@ -15,6 +15,15 @@
         --icone-curtir-faisca: #f08a9b;
         -webkit-tap-highlight-color: transparent;
       }
+      .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-alvo {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 27px;
+        width: 27px;
+        height: 27px;
+      }
       .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-svg {
         display: block;
         width: 27px;
@@ -87,19 +96,23 @@
   function prepare(button) {
     const svg = button.querySelector('svg.like-icon');
     if (!svg || svg.classList.contains('ef-curtir-svg')) return;
+    const target = document.createElement('span');
+    target.className = 'ef-curtir-alvo';
+    svg.parentNode.insertBefore(target, svg);
+    target.appendChild(svg);
     svg.classList.add('ef-curtir-svg');
     svg.innerHTML = '<path class="ef-curtir-cheio" d="' + HEART + '"></path>' +
       '<path class="ef-curtir-contorno" d="' + HEART + '"></path>';
   }
 
-  function burst(button) {
+  function burst(target) {
     const remove = element => {
       element.getAnimations().forEach(animation => animation.cancel());
       element.remove();
     };
     const ring = document.createElement('span');
     ring.className = 'ef-curtir-anel';
-    button.appendChild(ring);
+    target.appendChild(ring);
     ring.animate(
       [
         { transform: 'scale(.2)', opacity: 1, borderWidth: '.5em' },
@@ -108,14 +121,14 @@
       { duration: 450, easing: 'cubic-bezier(.2,.7,.3,1)' }
     ).finished.then(() => remove(ring), () => remove(ring));
 
-    const em = parseFloat(getComputedStyle(button).fontSize) || 16;
+    const em = parseFloat(getComputedStyle(target).fontSize) || 16;
     for (let i = 0; i < 16; i++) {
       const pair = i % 2;
       const angle = (Math.floor(i / 2) / 8) * Math.PI * 2 - Math.PI / 2 + (pair ? .28 : 0);
       const spark = document.createElement('span');
       spark.className = 'ef-curtir-faisca';
       if (pair) spark.style.background = 'var(--icone-curtir-cor)';
-      button.appendChild(spark);
+      target.appendChild(spark);
       const start = em * 1.05;
       const end = em * (pair ? 1.6 : 1.95);
       const x = Math.cos(angle);
@@ -144,7 +157,8 @@
       if (!liked || reduceMotion.matches || !button.isConnected) return;
       void button.offsetWidth;
       button.classList.add('ef-curtir-pulo');
-      burst(button);
+      const target = button.querySelector('.ef-curtir-alvo');
+      if (target) burst(target);
     });
   });
 
