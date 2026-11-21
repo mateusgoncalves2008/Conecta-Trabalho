@@ -116,7 +116,7 @@
     const classes = media.length === 1 ? 'publication-media single' : 'publication-media';
     return '<div class="' + classes + '">' + media.map(item => {
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><div class="short-video-player"><video playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video><div class="short-video-controls"><button type="button" data-video-action="play" aria-label="Reproduzir vídeo"><i class="fa-solid fa-play"></i></button><span data-video-time>00:00 / 00:00</span><input data-video-action="seek" type="range" min="0" max="1000" value="0" aria-label="Progresso do vídeo"><button type="button" data-video-action="volume" aria-label="Ativar som"><i class="fa-solid fa-volume-xmark"></i></button><input data-video-action="volume-level" type="range" min="0" max="1" step="0.05" value="0" aria-label="Volume"><select data-video-action="speed" aria-label="Velocidade"><option value="0.5">0,5x</option><option value="0.75">0,75x</option><option value="1" selected>1x</option><option value="1.25">1,25x</option><option value="1.5">1,5x</option><option value="2">2x</option></select></div></div></div>';
+        return '<div class="publication-media-item"><div class="short-video-player"><video playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video><div class="short-video-controls"><input data-video-action="seek" type="range" min="0" max="1000" value="0" aria-label="Progresso do vídeo"><div class="short-video-control-row"><button type="button" data-video-action="play" aria-label="Reproduzir vídeo"><i class="fa-solid fa-play"></i></button><span data-video-time>00:00 / 00:00</span><select data-video-action="speed" aria-label="Velocidade"><option value="0.5">0,5x</option><option value="0.75">0,75x</option><option value="1" selected>1,0x</option><option value="1.25">1,25x</option><option value="1.5">1,5x</option><option value="2">2,0x</option></select><button type="button" data-video-action="volume" aria-label="Ativar som"><i class="fa-solid fa-volume-xmark"></i></button><input data-video-action="volume-level" type="range" min="0" max="1" step="0.05" value="0" aria-label="Volume"><button type="button" class="short-video-fullscreen" data-video-action="fullscreen" aria-label="Tela cheia"><i class="fa-solid fa-expand"></i></button></div></div></div></div>';
       }
       return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação"></div>';
     }).join('') + '</div>';
@@ -140,8 +140,8 @@
   function renderPost(post) {
     const longDescription = (post.descricao || '').length > 100;
     const description = post.descricao
-      ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
-        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">Ler mais</button>' : '')
+      ? '<div class="short-description-row"><div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
+        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">mais</button>' : '') + '</div>'
       : '';
     const avatar = post.autor.foto
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
@@ -685,6 +685,10 @@
         video.muted = video.volume === 0;
         player.querySelector('[data-video-action="volume"]').innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
       } else if (action === 'speed') video.playbackRate = Number(videoControl.value);
+      else if (action === 'fullscreen') {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+        else player.requestFullscreen?.().catch(() => {});
+      }
       return;
     }
     const button = event.target.closest('[data-action]');
