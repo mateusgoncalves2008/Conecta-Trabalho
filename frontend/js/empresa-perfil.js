@@ -245,6 +245,13 @@
         </div>`;
 
       const actions = root.querySelector('.company-public-actions');
+      if (actions && currentUser && String(currentUser.id) === String(id)) {
+        const createLink = document.createElement('a');
+        createLink.className = 'company-public-primary-action company-public-create-post';
+        createLink.href = '/pages/publicacoes.html?criar=1';
+        createLink.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i> Criar';
+        actions.prepend(createLink);
+      }
       if (actions && canFollow) {
         const followButton = document.createElement('button');
         followButton.type = 'button';
