@@ -674,7 +674,7 @@
         const tab = event.target.closest('[data-company-section]');
         if (tab) showSection(tab.dataset.companySection);
       });
-      tabContent.addEventListener('click', event => {
+      tabContent.addEventListener('click', async event => {
         const mediaFilter = event.target.closest('[data-company-media-filter]');
         if (mediaFilter) {
           activeMediaFilter = mediaFilter.dataset.companyMediaFilter;
