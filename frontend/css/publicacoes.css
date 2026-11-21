@@ -333,7 +333,7 @@ body.publication-viewer-open .site-header,body.publication-viewer-open .publicat
 .short-publication-media .publication-media.single{grid-template-columns:minmax(0,1fr)}
 .short-publication-media .publication-media-item{display:flex;align-items:center;justify-content:center;width:100%;height:100%;max-height:none;background:#050505}
 .short-publication-media .publication-media-item img,.short-publication-media .publication-media-item video,.short-publication-media .publication-media.single img,.short-publication-media .publication-media.single video{display:block;width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:contain;background:#050505}
-.short-publication-caption{position:absolute;z-index:2;left:clamp(120px,13vw,220px);bottom:34px;width:min(620px,calc(100% - 290px));max-height:28vh;overflow:auto;padding:18px 20px 14px;border-radius:10px;background:linear-gradient(transparent,rgba(0,0,0,.58));color:#fff}
+.short-publication-caption{position:absolute;z-index:2;left:clamp(120px,13vw,220px);bottom:34px;width:min(620px,calc(100% - 290px));max-height:28vh;overflow:auto;padding:18px 20px 14px;border-radius:10px;background:rgba(0,0,0,.52);color:#fff}
 .short-publication-caption .publication-description{padding:0;color:#fff;font-size:14px;line-height:1.5;text-shadow:0 1px 3px #000}
 .short-publication-caption .description-toggle{color:#fff;text-decoration:underline}
 .short-publication-author{position:absolute;z-index:3;left:clamp(120px,13vw,220px);bottom:18px;display:flex;align-items:center;gap:10px;color:#fff;text-shadow:0 1px 4px #000}
