@@ -371,3 +371,5 @@ body.publication-viewer-open .site-header,body.publication-viewer-open .publicat
  .short-publication-author strong{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.publication-feed{scroll-behavior:auto}}
+
+.publication-viewer-create[hidden]{display:none!important}
