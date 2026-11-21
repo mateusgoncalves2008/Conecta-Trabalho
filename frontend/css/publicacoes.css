@@ -315,7 +315,11 @@ html[data-theme=dark] .upload-add-tile{background:#182638;border-color:#40536a;c
 body.publication-viewer-open{overflow:hidden;background:#050505}
 body.publication-viewer-open .site-header,body.publication-viewer-open .publication-viewer-footer{display:none!important}
 .publicacoes-main.publication-viewer-main{position:fixed;inset:0;z-index:50;width:100%;height:100vh;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;background:#050505;color:#fff}
-.publication-viewer-heading,.publication-viewer-feed-heading{display:none!important}
+.publication-viewer-heading{display:contents}
+.publication-viewer-heading .eyebrow,.publication-viewer-heading h1{display:none!important}
+.publication-viewer-heading #moderation-shortcut[hidden]{display:none!important}
+.publication-viewer-heading #moderation-shortcut:not([hidden]){position:fixed;top:24px;right:24px;z-index:12;display:inline-flex;padding:9px 12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:#171d25;color:#fff;font-size:12px}
+.publication-viewer-feed-heading{display:none!important}
 .publication-viewer-sidebar{position:fixed;z-index:5;top:50%;left:clamp(18px,3vw,48px);display:flex;flex-direction:column;align-items:center;gap:22px;transform:translateY(-50%)}
 .publication-following-button,.publication-viewer-create{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:78px;min-height:76px;padding:10px 6px;border:0;border-radius:12px;background:transparent;color:#f7f7f7;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .publication-following-button i,.publication-viewer-create i{font-size:24px}
@@ -333,7 +337,7 @@ body.publication-viewer-open .site-header,body.publication-viewer-open .publicat
 .short-publication-media .publication-media.single{grid-template-columns:minmax(0,1fr)}
 .short-publication-media .publication-media-item{display:flex;align-items:center;justify-content:center;width:100%;height:100%;max-height:none;background:#050505}
 .short-publication-media .publication-media-item img,.short-publication-media .publication-media-item video,.short-publication-media .publication-media.single img,.short-publication-media .publication-media.single video{display:block;width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:contain;background:#050505}
-.short-publication-caption{position:absolute;z-index:2;left:clamp(120px,13vw,220px);bottom:34px;width:min(620px,calc(100% - 290px));max-height:28vh;overflow:auto;padding:18px 20px 14px;border-radius:10px;background:rgba(0,0,0,.52);color:#fff}
+.short-publication-caption{position:absolute;z-index:2;left:clamp(120px,13vw,220px);bottom:62px;width:min(620px,calc(100% - 290px));max-height:28vh;overflow:auto;padding:18px 20px 14px;border-radius:10px;background:rgba(0,0,0,.52);color:#fff}
 .short-publication-caption .publication-description{padding:0;color:#fff;font-size:14px;line-height:1.5;text-shadow:0 1px 3px #000}
 .short-publication-caption .description-toggle{color:#fff;text-decoration:underline}
 .short-publication-author{position:absolute;z-index:3;left:clamp(120px,13vw,220px);bottom:18px;display:flex;align-items:center;gap:10px;color:#fff;text-shadow:0 1px 4px #000}
@@ -366,7 +370,7 @@ body.publication-viewer-open .site-header,body.publication-viewer-open .publicat
  .short-author-avatar{width:46px;height:46px}
  .short-action-button .like-icon{width:29px;height:29px}
  .short-action-button>i{font-size:24px}
- .short-publication-caption{left:82px;bottom:28px;width:calc(100% - 150px);max-height:25vh;padding:14px 10px 8px}
+ .short-publication-caption{left:82px;bottom:52px;width:calc(100% - 150px);max-height:25vh;padding:14px 10px 8px}
  .short-publication-author{left:82px;bottom:12px;max-width:calc(100% - 160px);flex-wrap:wrap;gap:5px 8px}
  .short-publication-author strong{font-size:12px}
 }
