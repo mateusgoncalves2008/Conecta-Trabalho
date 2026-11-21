@@ -374,7 +374,18 @@
   composer.addEventListener('click', event => {
     const button = event.target.closest('[data-open-picker]');
     if (!button) return;
-    composer.querySelectorAll('.composer-media-tab').forEach(tab => tab.classList.toggle('is-active', tab === button));
+
+    if (button.classList.contains('composer-media-tab')) {
+      const selectedType = button.dataset.openPicker;
+      composer.querySelectorAll('.composer-media-tab').forEach(tab => {
+        tab.classList.toggle('is-active', tab === button);
+      });
+      composer.querySelectorAll('.composer-dropzone-actions [data-open-picker]').forEach(option => {
+        option.hidden = option.dataset.openPicker !== selectedType;
+      });
+      return;
+    }
+
     if (button.dataset.openPicker === 'photos') photoPicker.click();
     if (button.dataset.openPicker === 'video') videoPicker.click();
   });
