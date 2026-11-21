@@ -59,7 +59,7 @@ const { rateLimit } = require('express-rate-limit');
 const MAX_PHOTO_BYTES = 20 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 const MAX_VIDEO_SECONDS = 60;
-const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_DESCRIPTION_LENGTH = 4000;
 const ALLOWED_REACTIONS = ['❤️'];
 const REPORT_REASONS = [
   'Conteúdo ofensivo ou discriminatório',
@@ -422,7 +422,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     await schemaReady;
     const description = typeof req.body.descricao === 'string' ? req.body.descricao.trim() : '';
     const mediaIds = Array.isArray(req.body.midias) ? [...new Set(req.body.midias.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
-    if (description.length > MAX_DESCRIPTION_LENGTH) return res.status(400).json({ erro: 'A descrição pode ter no máximo 2.000 caracteres.' });
+    if (description.length > MAX_DESCRIPTION_LENGTH) return res.status(400).json({ erro: 'O título e a descrição juntos podem ter no máximo 4.000 caracteres.' });
     if (!mediaIds.length || mediaIds.length > 10) return res.status(400).json({ erro: 'Adicione de 1 a 10 fotos ou um vídeo.' });
     const client = await pool.connect();
     let post;
