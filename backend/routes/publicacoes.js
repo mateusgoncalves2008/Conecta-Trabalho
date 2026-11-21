@@ -38,7 +38,7 @@ const runFfmpeg = (args, timeoutMs = 180000) => new Promise((resolve, reject) =>
 
 const probeVideoDuration = async inputPath => {
   const output = await runFfmpeg(['-hide_banner', '-protocol_whitelist', 'file,pipe,data', '-i', inputPath, '-t', '0', '-f', 'null', '-'], 30000);
-  const match = /Duration:\s*(\\d+):(\\d{2}):(\\d{2}(?:\\.\\d+)?)/.exec(output);
+  const match = /Duration:\s*(\d+):(\d{2}):(\d{2}(?:\.\d+)?)/.exec(output);
   if (!match) throw Object.assign(new Error('Não foi possível identificar a duração real do vídeo.'), { statusCode: 400 });
   const duration = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
   if (!Number.isFinite(duration) || duration <= 0) throw Object.assign(new Error('A duração do vídeo é inválida.'), { statusCode: 400 });
@@ -324,11 +324,12 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         return res.status(429).json({ erro: 'Já existe um vídeo sendo processado. Aguarde um instante e tente novamente.' });
       }
       activeVideoConversions += 1;
-      const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'conecta-video-'));
-      const inputPath = path.join(tempDir, 'original.' + media.extension);
-      const outputPath = path.join(tempDir, 'convertido.mp4');
+      let tempDir = null;
       let key = null;
       try {
+        tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'conecta-video-'));
+        const inputPath = path.join(tempDir, 'original.' + media.extension);
+        const outputPath = path.join(tempDir, 'convertido.mp4');
         await pipeline(req, createValidator(), fs.createWriteStream(inputPath, { flags: 'wx' }));
         const duration = await probeVideoDuration(inputPath);
         await convertVideoToMp4(inputPath, outputPath);
@@ -368,7 +369,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         throw error;
       } finally {
         activeVideoConversions = Math.max(0, activeVideoConversions - 1);
-        await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+        if (tempDir) await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
       }
       return;
     }
