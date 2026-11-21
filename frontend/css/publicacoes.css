@@ -226,3 +226,5 @@ html[data-theme=dark] .publication-composer-fullscreen #publication-description{
  .publication-composer-fullscreen .composer-footer{align-items:flex-end}
 }
 @media(prefers-reduced-motion:reduce){.create-publication-button,.composer-media-tab,.composer-dropzone-actions .button{transition:none!important}}
+
+.composer-dropzone-illustration{display:block;width:88px;height:88px;margin:16px 0 8px;object-fit:contain;flex:0 0 auto}
