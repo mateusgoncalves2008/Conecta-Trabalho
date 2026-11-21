@@ -1336,12 +1336,20 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
  .company-public-post-detail-media{grid-template-columns:1fr}
 }
 
-/* Avatar da empresa nos cartões do feed público */
+/* Feed do perfil público: mesma apresentação da página Publicações */
+.company-public-post-detail{
+  overflow:hidden;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 8px 28px rgba(20,43,73,.055);
+}
 .company-public-post-detail .publication-card-header{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:11px;
   min-width:0;
+  padding:18px 20px 12px;
 }
 .company-public-post-detail .publication-avatar{
   display:grid;
@@ -1352,11 +1360,10 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
   flex:0 0 44px;
   overflow:hidden;
   border-radius:50%;
-  background:var(--soft,#edf2f7);
-  color:var(--navy,#142b49);
-  font-size:13px;
+  background:var(--soft);
+  color:var(--navy);
+  font-size:14px;
   font-weight:750;
-  line-height:1;
 }
 .company-public-post-detail .publication-avatar img{
   display:block;
@@ -1374,4 +1381,169 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
 .company-public-post-detail .publication-author{
   min-width:0;
   flex:1 1 auto;
+}
+.company-public-post-detail .publication-author-name-link{
+  display:block;
+  overflow:hidden;
+  color:var(--navy);
+  font-size:13px;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.company-public-post-detail .publication-author small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:11px;
+}
+.company-public-post-detail .publication-description{
+  padding:0 20px 15px;
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+.company-public-post-detail .description-toggle{
+  display:inline-block;
+  margin:4px 20px 10px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--orange-dark);
+  font-size:13px;
+  font-weight:700;
+}
+.company-public-post-detail .company-public-post-detail-media{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3px;
+  max-height:620px;
+  overflow:hidden;
+  background:var(--page);
+}
+.company-public-post-detail .company-public-post-detail-media img,
+.company-public-post-detail .company-public-post-detail-media video{
+  display:block;
+  width:100%;
+  max-height:560px;
+  aspect-ratio:4/3;
+  object-fit:contain;
+  background:#111;
+}
+.company-public-post-detail .company-public-post-detail-media:has(> :only-child){
+  grid-template-columns:minmax(0,1fr);
+}
+.company-public-post-detail .company-public-post-detail-media:has(> :only-child) img,
+.company-public-post-detail .company-public-post-detail-media:has(> :only-child) video{
+  aspect-ratio:auto;
+  max-height:560px;
+}
+.company-public-post-detail .company-public-post-detail-stats{
+  padding:11px 20px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+}
+.company-public-post-detail .publication-card-footer{
+  padding:13px 18px 16px;
+}
+.company-public-post-detail .publication-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  padding-top:11px;
+}
+.company-public-post-detail .like-toggle-button{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-height:44px;
+  padding:7px 13px;
+  border:1px solid transparent;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:16px;
+  cursor:pointer;
+}
+.company-public-post-detail .like-toggle-button .like-icon{
+  display:block;
+  width:27px;
+  height:27px;
+  flex:0 0 27px;
+  fill:transparent;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.company-public-post-detail .like-toggle-button strong{
+  color:var(--ink);
+  font-size:18px;
+  font-weight:750;
+}
+.company-public-post-detail .like-toggle-button.liked{
+  color:#e53950;
+}
+.company-public-post-detail .like-toggle-button.liked .like-icon{
+  fill:#e53950;
+  stroke:#e53950;
+}
+.company-public-post-detail .report-button{
+  margin-left:auto;
+  min-height:38px;
+  padding:7px 12px;
+  border:1px solid rgba(189,74,66,.32);
+  border-radius:8px;
+  background:rgba(189,74,66,.09);
+  color:#bd4a42;
+  font-size:13px;
+  font-weight:700;
+}
+.company-public-post-detail .report-button:hover{
+  border-color:#bd4a42;
+  background:rgba(189,74,66,.17);
+  color:#a93630;
+}
+html[data-theme=dark] .company-public-post-detail{
+  background:#182638;
+  border-color:#34465c;
+  color:#e8eef5;
+}
+html[data-theme=dark] .company-public-post-detail .publication-author-name-link{
+  color:#edf2f7;
+}
+html[data-theme=dark] .company-public-post-detail .publication-description{
+  color:#e8eef5;
+}
+html[data-theme=dark] .company-public-post-detail .company-public-post-detail-stats{
+  border-color:#34465c;
+  color:#aab8c8;
+}
+@media(max-width:620px){
+  .company-public-post-detail{
+    border-radius:16px;
+    border:1px solid var(--line);
+    margin-bottom:0;
+  }
+  .company-public-post-detail .publication-card-header{
+    gap:9px;
+    padding:15px 14px 11px;
+  }
+  .company-public-post-detail .publication-description{
+    padding:0 14px 13px;
+  }
+  .company-public-post-detail .company-public-post-detail-media{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .company-public-post-detail .company-public-post-detail-media img,
+  .company-public-post-detail .company-public-post-detail-media video{
+    max-height:440px;
+  }
+  .company-public-post-detail .publication-card-footer{
+    padding:12px 12px 14px;
+  }
 }
