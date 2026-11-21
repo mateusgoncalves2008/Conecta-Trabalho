@@ -16,6 +16,7 @@
   const descriptionField = document.getElementById('composer-description-field');
   const fileInput = document.getElementById('publication-files');
   const preview = document.getElementById('upload-preview');
+  const dropzone = document.getElementById('composer-dropzone');
   const publishButton = document.getElementById('publish-button');
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
@@ -311,6 +312,7 @@
     discardStagedMedia();
     preview.innerHTML = '';
     preview.hidden = true;
+    dropzone.hidden = false;
     descriptionField.hidden = true;
     publishButton.disabled = true;
     fileInput.value = '';
@@ -328,6 +330,7 @@
         '<button type="button" data-remove-file="' + index + '" aria-label="Remover arquivo">×</button></div>';
     }).join('');
     preview.hidden = !selectedFiles.length;
+    dropzone.hidden = selectedFiles.length > 0;
     descriptionField.hidden = !selectedFiles.length;
     publishButton.disabled = !selectedFiles.length;
   }
@@ -371,6 +374,7 @@
   composer.addEventListener('click', event => {
     const button = event.target.closest('[data-open-picker]');
     if (!button) return;
+    composer.querySelectorAll('.composer-media-tab').forEach(tab => tab.classList.toggle('is-active', tab === button));
     if (button.dataset.openPicker === 'photos') photoPicker.click();
     if (button.dataset.openPicker === 'video') videoPicker.click();
   });
