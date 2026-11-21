@@ -178,35 +178,6 @@
     }
   }
 
-  function readVideoDuration(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement('video');
-      let settled = false;
-      const finish = (error, duration) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeout);
-        URL.revokeObjectURL(url);
-        video.removeAttribute('src');
-        video.load();
-        if (error) reject(error);
-        else resolve(duration);
-      };
-      const timeout = setTimeout(() => finish(new Error('O navegador demorou para ler este vídeo. Tente outro arquivo de vídeo compatível com seu navegador.')), 15000);
-      video.preload = 'metadata';
-      video.muted = true;
-      video.onloadedmetadata = () => {
-        const duration = video.duration;
-        if (!Number.isFinite(duration) || duration <= 0) finish(new Error('Não foi possível identificar a duração do vídeo.'));
-        else if (duration > 60) finish(new Error('O vídeo deve ter no máximo 60 segundos.'));
-        else finish(null, duration);
-      };
-      video.onerror = () => finish(new Error('Este vídeo não pôde ser lido pelo navegador. Tente um arquivo MP4 com codec H.264.'));
-      video.src = url;
-      video.load();
-    });
-  }
 
   async function compressImage(file) {
     if (!window.createImageBitmap) return file;
@@ -322,7 +293,7 @@
   }
 
   function clearPreview() {
-    selectedFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
+    selectedFiles.forEach(item => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
     selectedFiles = [];
     discardStagedMedia();
     preview.innerHTML = '';
@@ -338,7 +309,7 @@
   function renderPreview() {
     preview.innerHTML = selectedFiles.map((item, index) => {
       const media = item.kind === 'video'
-        ? '<video controls muted playsinline preload="metadata" src="' + item.previewUrl + '"></video>'
+        ? '<div class="upload-video-placeholder"><i class="fa-solid fa-film" aria-hidden="true"></i><small>Vídeo selecionado</small></div>'
         : '<img src="' + item.previewUrl + '" alt="">';
       return '<div class="upload-preview-item">' + media +
         '<span>' + escapeHTML(formatBytes(item.file.size)) + '</span>' +
@@ -389,7 +360,7 @@
       for (let index = 0; index < files.length; index++) {
         const source = files[index];
         const sourceExtension = String(source.name || '').split('.').pop().toLowerCase();
-        const kind = source.type.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v'].includes(sourceExtension) ? 'video' : 'image';
+        const kind = source.type.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v', 'mkv', 'avi', 'wmv', 'flv', 'mpeg', 'mpg', '3gp', 'ogv', 'ts'].includes(sourceExtension) ? 'video' : 'image';
         let file = source;
         let duration = null;
         if (kind === 'image') {
@@ -401,10 +372,10 @@
           file = getSupportedVideoFile(file);
           if (!file) throw new Error('Formato de vídeo não permitido. Confira a lista de formatos aceitos.');
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB.');
-          progressText.textContent = 'Verificando a duração do vídeo...';
-          duration = await readVideoDuration(file);
+          progressText.textContent = 'Vídeo pronto para conversão no servidor...';
+          duration = null;
         }
-        selectedFiles.push({ file, kind, duration, previewUrl: URL.createObjectURL(file) });
+        selectedFiles.push({ file, kind, duration, previewUrl: kind === 'image' ? URL.createObjectURL(file) : null });
       }
       renderPreview();
       mediaFeedback.hidden = true;
