@@ -445,6 +445,14 @@
         const reportReason = postViewer.querySelector('#company-post-report-reason');
         const reportDetail = postViewer.querySelector('#company-post-report-detail');
         const reportDetailLabel = postViewer.querySelector('[data-company-report-detail-label]');
+        postViewer._openReportFor = postId => {
+          reportTargetId = postId;
+          reportForm.reset();
+          reportDetail.hidden = true;
+          reportDetail.required = false;
+          reportDetailLabel.hidden = true;
+          reportDialog.showModal();
+        };
         const closeReportDialog = () => {
           reportDialog.close();
           reportTargetId = null;
@@ -688,13 +696,8 @@
           }
           if (action === 'report') {
             if (!currentUser) { window.location.href = '/pages/login.html'; return; }
-            ensurePostViewer();
-            reportTargetId = post.id;
-            reportForm.reset();
-            reportDetail.hidden = true;
-            reportDetail.required = false;
-            reportDetailLabel.hidden = true;
-            reportDialog.showModal();
+            const viewer = ensurePostViewer();
+            viewer._openReportFor(post.id);
             return;
           }
           if (action === 'delete') {
