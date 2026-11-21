@@ -302,3 +302,10 @@ html[data-theme=dark] .composer-description-tools button{color:#dce5ef}
 html[data-theme=dark] .upload-add-tile{background:#182638;border-color:#40536a;color:#aebdce}
 @media(max-width:900px){.composer-editor-layout{grid-template-columns:minmax(0,1fr) 250px;gap:16px}.publication-composer-fullscreen .upload-preview-item,.upload-add-tile{width:132px;height:132px;flex-basis:132px}.composer-phone{height:560px}}
 @media(max-width:680px){.publication-composer-fullscreen .composer-fullscreen-content{width:calc(100% - 22px);padding:18px 0 30px}.composer-editor-layout{grid-template-columns:1fr}.composer-preview-column{position:static;width:min(290px,100%);margin:0 auto}.composer-phone{height:570px}.publication-composer-fullscreen .upload-preview-item,.upload-add-tile{width:calc((100vw - 70px)/2);height:calc((100vw - 70px)/2);flex-basis:calc((100vw - 70px)/2)}}
+
+
+/* Respeita o atributo hidden nas áreas iniciais após a seleção da mídia. */
+.composer-dropzone[hidden],
+.composer-media-tabs[hidden] {
+  display: none !important;
+}
