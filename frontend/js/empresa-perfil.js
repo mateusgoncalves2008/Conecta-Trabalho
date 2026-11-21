@@ -323,11 +323,46 @@
             activeMediaFilter === 'video' ? 'Esta empresa ainda não publicou vídeos.' : 'Esta empresa ainda não publicou imagens.');
           return;
         }
-        grid.innerHTML = filteredPosts.map(({ post, index }) => `
-          <button class="company-public-post-tile" type="button" data-company-post-index="${index}" aria-label="Abrir publicação ${index + 1}, ${formatViews(post.visualizacoes)} visualizações">
-            <span class="company-public-post-preview">${postPreview(post)}</span>
-            <span class="company-public-post-views"><i class="fa-solid fa-eye" aria-hidden="true"></i><strong>${formatViews(post.visualizacoes)}</strong></span>
-          </button>`).join('');
+        grid.innerHTML = filteredPosts.map(({ post, index }) => {
+          const mediaMarkup = (post.midias || []).map(media => media.tipo === 'video'
+            ? '<video src="' + esc(media.url) + '" controls playsinline preload="metadata"></video>'
+            : '<img src="' + esc(media.url) + '" alt="Imagem da publicação" loading="lazy">').join('');
+          const likeTotal = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+          const avatarMarkup = company.foto_perfil
+            ? '<img src="' + esc(company.foto_perfil) + '" alt="">'
+            : esc(initials(name));
+          const longDescription = (post.descricao || '').length > 260;
+          return `<article class="publication-card company-public-post-detail" data-post-index="${index}" data-post-id="${esc(post.id)}">
+            <header class="publication-card-header">
+              <span class="publication-avatar publication-author-link">${avatarMarkup}</span>
+              <div class="publication-author">
+                <strong class="publication-author-name-link">${esc(name)}</strong>
+                <small><span data-followers-count>${Number(company.total_seguidores || 0).toLocaleString('pt-BR')}</span> seguidores · ${esc(dateLabel(post.criadaEm))}</small>
+              </div>
+            </header>
+            <div class="company-public-post-detail-media">${mediaMarkup}</div>
+            ${post.descricao ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + esc(post.descricao) + '</div>' + (longDescription ? '<button type="button" class="description-toggle" data-post-description-toggle>Ver mais...</button>' : '') : ''}
+            <div class="company-public-post-detail-stats"><span><i class="fa-solid fa-eye" aria-hidden="true"></i> <strong data-post-view-count>${formatViews(post.visualizacoes)}</strong> visualizações</span></div>
+            <footer class="publication-card-footer">
+              <div class="publication-actions">
+                <div class="reaction-control">
+                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
+                    <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <strong data-reaction-total>${formatViews(likeTotal)}</strong>
+                  </button>
+                </div>
+                ${post.minha
+                  ? '<button type="button" class="report-button" data-action="delete">Excluir</button>'
+                  : '<button type="button" class="report-button" data-action="report">Denunciar</button>'}
+              </div>
+            </footer>
+          </article>`;
+        }).join('');
+        grid.querySelectorAll('[data-post-index]').forEach(card => {
+          const post = companyPosts[Number(card.dataset.postIndex)];
+          if (!post || post._viewRegistered) return;
+          post._viewObserver?.disconnect?.();
+        });
       };
       const loadCompanyPosts = async () => {
         if (companyPostsLoaded || companyPostsLoading) return;
@@ -381,6 +416,8 @@
             </form>
           </dialog>`;
         document.body.appendChild(postViewer);
+        const detachedReportDialog = postViewer.querySelector('[data-company-post-report-dialog]');
+        document.body.appendChild(detachedReportDialog);
         const stream = postViewer.querySelector('[data-company-post-stream]');
         const observer = new IntersectionObserver(entries => {
           entries.forEach(async entry => {
@@ -418,8 +455,8 @@
           reportDetailLabel.hidden = !showDetail;
           reportDetail.required = showDetail;
         });
-        postViewer.addEventListener('click', async event => {
-          if (event.target.closest('[data-close-company-post-viewer]')) { closePostViewer(); return; }
+        reportDialog.addEventListener('click', async event => {
+          
           if (event.target.closest('[data-company-report-close],[data-company-report-cancel]')) { closeReportDialog(); return; }
           const descriptionToggle = event.target.closest('[data-post-description-toggle]');
           if (descriptionToggle) {
@@ -619,6 +656,61 @@
           });
           renderCompanyPosts();
           return;
+        }
+        const postAction = event.target.closest('[data-post-index] [data-action]');
+        if (postAction) {
+          const card = postAction.closest('[data-post-index]');
+          const post = card && companyPosts[Number(card.dataset.postIndex)];
+          if (!post || postAction.disabled) return;
+          const action = postAction.dataset.action;
+          if (action === 'like') {
+            if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+            const wasLiked = Boolean(post.minhaCurtida);
+            const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+            const nextLiked = !wasLiked;
+            postAction.disabled = true;
+            post.minhaCurtida = nextLiked;
+            const nextTotal = Math.max(0, total + (nextLiked ? 1 : -1));
+            post.reacoes = nextTotal ? [{ emoji: '❤️', total: nextTotal }] : [];
+            updatePostLikeButton(card, post, nextTotal);
+            try {
+              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
+                method: nextLiked ? 'PUT' : 'DELETE',
+                ...(nextLiked ? { body: JSON.stringify({ emoji: '❤️' }) } : {})
+              });
+            } catch (error) {
+              post.minhaCurtida = wasLiked;
+              post.reacoes = total ? [{ emoji: '❤️', total }] : [];
+              updatePostLikeButton(card, post, total);
+              Conecta.toast(error.message);
+            } finally { postAction.disabled = false; }
+            return;
+          }
+          if (action === 'report') {
+            if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+            ensurePostViewer();
+            reportTargetId = post.id;
+            reportForm.reset();
+            reportDetail.hidden = true;
+            reportDetail.required = false;
+            reportDetailLabel.hidden = true;
+            reportDialog.showModal();
+            return;
+          }
+          if (action === 'delete') {
+            if (!window.confirm('Deseja excluir esta publicação? As fotos ou o vídeo e todas as reações também serão excluídos.')) return;
+            postAction.disabled = true;
+            try {
+              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id), { method: 'DELETE' });
+              companyPosts = companyPosts.filter(item => String(item.id) !== String(post.id));
+              renderCompanyPosts();
+              Conecta.toast('Publicação excluída.');
+            } catch (error) {
+              Conecta.toast(error.message);
+              postAction.disabled = false;
+            }
+            return;
+          }
         }
         const postTile = event.target.closest('[data-company-post-index]');
         if (postTile) { openPostViewer(Number(postTile.dataset.companyPostIndex)); return; }
