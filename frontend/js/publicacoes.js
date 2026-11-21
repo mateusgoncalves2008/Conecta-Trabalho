@@ -7,8 +7,13 @@
   const toast = message => window.Conecta && window.Conecta.toast(message);
   const composer = document.getElementById('publication-composer');
   const followingButton = document.getElementById('publication-following');
+  const exploreButton = document.getElementById('publication-explore');
+  const searchInput = document.getElementById('publication-search');
+  const previousPostButton = document.getElementById('publication-prev');
+  const nextPostButton = document.getElementById('publication-next');
   const backButton = document.getElementById('publication-back');
   let followingOnly = false;
+  let searchTerm = '';
   const openComposerButton = document.getElementById('open-publication-composer');
   const closeComposerButton = document.getElementById('close-publication-composer');
   const profileAvatar = document.getElementById('composer-profile-avatar');
@@ -110,14 +115,11 @@
   function renderMedia(media) {
     if (!media.length) return '';
     const classes = media.length === 1 ? 'publication-media single' : 'publication-media';
-    return '<div class="' + classes + '">' + media.map((item, index) => {
-      const more = index === 3 && media.length > 4
-        ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
-        : '';
+    return '<div class="' + classes + '">' + media.map(item => {
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><video controls playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
+        return '<div class="publication-media-item"><div class="short-video-player"><video playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video><div class="short-video-controls"><button type="button" data-video-action="play" aria-label="Reproduzir vídeo"><i class="fa-solid fa-play"></i></button><span data-video-time>00:00 / 00:00</span><input data-video-action="seek" type="range" min="0" max="1000" value="0" aria-label="Progresso do vídeo"><button type="button" data-video-action="volume" aria-label="Ativar som"><i class="fa-solid fa-volume-xmark"></i></button><input data-video-action="volume-level" type="range" min="0" max="1" step="0.05" value="0" aria-label="Volume"><select data-video-action="speed" aria-label="Velocidade"><option value="0.5">0,5x</option><option value="0.75">0,75x</option><option value="1" selected>1x</option><option value="1.25">1,25x</option><option value="1.5">1,5x</option><option value="2">2x</option></select></div></div></div>';
       }
-      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
+      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação"></div>';
     }).join('') + '</div>';
   }
 
@@ -152,20 +154,21 @@
     const liked = Boolean(post.minhaCurtida);
     const saved = Boolean(post.minhaSalva);
     const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+    const followButton = post.autor.tipo === 'empresa' && currentUser && currentUser.tipo === 'candidato' && !post.minha
+      ? '<button type="button" class="short-follow-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" data-followers-count aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
+      : '';
     const moreAction = post.minha
       ? '<button type="button" data-action="delete" data-id="' + post.id + '">Excluir publicação</button>'
-      : '<button type="button" data-action="report" data-id="' + post.id + '">Denunciar publicação</button>';
-    return '<article class="publication-card short-publication-card" data-post-id="' + post.id + '">' +
+      : '<button type="button" data-action="report" data-id="' + post.id + '"><i class="fa-solid fa-flag" aria-hidden="true"></i> Denunciar</button>';
+    return '<article class="publication-card short-publication-card" data-post-id="' + post.id + '" data-search-text="' + escapeHTML((post.autor.nome + ' ' + (post.descricao || '')).toLowerCase()) + '">' +
       '<div class="short-publication-media">' + media + '</div>' +
-      '<div class="short-publication-caption">' + description + '</div>' +
+      '<div class="short-publication-caption"><div class="short-caption-author"><a href="' + escapeHTML(authorProfileUrl) + '">' + avatar + '<strong>' + escapeHTML(post.autor.nome) + '</strong></a>' + followButton + '</div>' + description + '</div>' +
       '<aside class="short-publication-actions">' +
-        '<a class="short-author-avatar" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Abrir perfil de ' + escapeHTML(post.autor.nome) + '">' + avatar + '</a>' +
         '<button type="button" class="short-action-button like-toggle-button' + (liked ? ' liked' : '') + '" data-action="like" data-id="' + post.id + '" data-efeito="icone-curtir" aria-pressed="' + liked + '" aria-label="' + (liked ? 'Remover curtida' : 'Curtir publicação') + '">' +
           '<svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong></button>' +
         '<button type="button" class="short-action-button save-toggle-button' + (saved ? ' is-saved' : '') + '" data-action="save" data-id="' + post.id + '" aria-pressed="' + saved + '" aria-label="' + (saved ? 'Remover dos salvos' : 'Salvar publicação') + '"><i class="fa-' + (saved ? 'solid' : 'regular') + ' fa-bookmark" aria-hidden="true"></i><span>Salvar</span></button>' +
         '<div class="short-more-wrap"><button type="button" class="short-action-button short-more-button" data-action="toggle-menu" aria-label="Mais opções" aria-expanded="false"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button><div class="short-more-menu" hidden>' + moreAction + '</div></div>' +
       '</aside>' +
-      '<header class="short-publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><span>' + escapeHTML(formatDate(post.criadaEm)) + '</span></header>' +
     '</article>';
   }
 
@@ -202,6 +205,7 @@
         });
       }
       cursor = result.proximoCursor;
+      applyPostSearch();
       loadMoreButton.hidden = cursor === null;
       document.getElementById('feed-count-label').textContent = followingOnly ? 'Publicações dos perfis que você segue' : 'Publicações da comunidade';
     } catch (error) {
@@ -585,10 +589,51 @@
     }
   });
 
+  function applyPostSearch() {
+    const term = searchTerm.trim().toLocaleLowerCase('pt-BR');
+    let visible = 0;
+    feed.querySelectorAll('.short-publication-card').forEach(card => {
+      const match = !term || (card.dataset.searchText || '').includes(term);
+      card.hidden = !match;
+      if (match) visible += 1;
+    });
+    let note = feed.querySelector('.search-empty');
+    if (term && !visible && !note) {
+      note = document.createElement('div');
+      note.className = 'feed-empty search-empty';
+      note.textContent = 'Nenhuma publicação encontrada entre as publicações carregadas.';
+      feed.appendChild(note);
+    } else if ((!term || visible) && note) note.remove();
+  }
+  searchInput.addEventListener('input', () => { searchTerm = searchInput.value; applyPostSearch(); });
+  exploreButton.addEventListener('click', () => {
+    followingOnly = false;
+    followingButton.classList.remove('is-active');
+    followingButton.setAttribute('aria-pressed', 'false');
+    exploreButton.classList.add('is-active');
+    exploreButton.setAttribute('aria-pressed', 'true');
+    document.getElementById('feed-title').textContent = 'Explorar';
+    loadPosts(true);
+  });
+  function movePublication(direction) {
+    const cards = [...feed.querySelectorAll('.short-publication-card:not([hidden])')];
+    if (!cards.length) return;
+    const current = cards.findIndex(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top >= -10 && rect.top < window.innerHeight * 0.55;
+    });
+    const index = Math.max(0, Math.min(cards.length - 1, (current < 0 ? 0 : current) + direction));
+    cards[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (index === cards.length - 1 && cursor !== null) loadPosts(false);
+  }
+  previousPostButton.addEventListener('click', () => movePublication(-1));
+  nextPostButton.addEventListener('click', () => movePublication(1));
   loadMoreButton.addEventListener('click', () => loadPosts(false));
   followingButton.addEventListener('click', () => {
     if (!currentUser) { window.location.href = '/pages/login.html'; return; }
     followingOnly = !followingOnly;
+    exploreButton.classList.toggle('is-active', !followingOnly);
+    exploreButton.setAttribute('aria-pressed', String(!followingOnly));
     followingButton.classList.toggle('is-active', followingOnly);
     followingButton.setAttribute('aria-pressed', String(followingOnly));
     document.getElementById('feed-title').textContent = followingOnly ? 'Seguindo' : 'Para você';
@@ -605,6 +650,28 @@
       const description = expandButton.parentElement.querySelector('[data-description]');
       const expanded = description.classList.toggle('is-collapsed') === false;
       expandButton.textContent = expanded ? 'Ver menos' : 'Ver mais...';
+      return;
+    }
+    const videoControl = event.target.closest('[data-video-action]');
+    if (videoControl) {
+      const player = videoControl.closest('.short-video-player');
+      const video = player && player.querySelector('video');
+      if (!video) return;
+      const action = videoControl.dataset.videoAction;
+      if (action === 'play') {
+        if (video.paused) video.play().catch(() => {}); else video.pause();
+      } else if (action === 'seek' && video.duration) {
+        video.currentTime = video.duration * Number(videoControl.value) / 1000;
+      } else if (action === 'volume') {
+        video.muted = !video.muted;
+        if (!video.muted && video.volume === 0) video.volume = 0.7;
+        player.querySelector('[data-video-action="volume-level"]').value = video.muted ? 0 : video.volume;
+        videoControl.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      } else if (action === 'volume-level') {
+        video.volume = Number(videoControl.value);
+        video.muted = video.volume === 0;
+        player.querySelector('[data-video-action="volume"]').innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      } else if (action === 'speed') video.playbackRate = Number(videoControl.value);
       return;
     }
     const button = event.target.closest('[data-action]');
@@ -787,6 +854,20 @@
       submit.disabled = false;
     }
   });
+
+  feed.addEventListener('timeupdate', event => {
+    const video = event.target.closest('video');
+    if (!video) return;
+    const player = video.closest('.short-video-player');
+    if (!player) return;
+    const seek = player.querySelector('[data-video-action="seek"]');
+    const time = player.querySelector('[data-video-time]');
+    const format = value => Number.isFinite(value) ? String(Math.floor(value / 60)).padStart(2, '0') + ':' + String(Math.floor(value % 60)).padStart(2, '0') : '00:00';
+    if (seek && video.duration) seek.value = String(Math.round(video.currentTime / video.duration * 1000));
+    if (time) time.textContent = format(video.currentTime) + ' / ' + format(video.duration);
+    const play = player.querySelector('[data-video-action="play"]');
+    if (play) play.innerHTML = video.paused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+  }, true);
 
   (async () => {
     if (!api) {
