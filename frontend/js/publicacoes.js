@@ -5,6 +5,17 @@
   const api = window.Conecta && window.Conecta.api;
   const toast = message => window.Conecta && window.Conecta.toast(message);
   const composer = document.getElementById('publication-composer');
+  const createEntry = document.getElementById('create-publication-entry');
+  const openComposerButton = document.getElementById('open-publication-composer');
+  const closeComposerButton = document.getElementById('close-publication-composer');
+  const profileAvatar = document.getElementById('composer-profile-avatar');
+  const photoPicker = document.getElementById('publication-photo-picker');
+  const cameraPicker = document.getElementById('publication-camera-picker');
+  const videoPicker = document.getElementById('publication-video-picker');
+  const startRecordingButton = document.getElementById('start-video-recording');
+  const stopRecordingButton = document.getElementById('stop-video-recording');
+  const recordingControls = document.getElementById('recording-controls');
+  const recordingTime = document.getElementById('recording-time');
   const visitorNote = document.getElementById('visitor-note');
   const form = document.getElementById('publication-form');
   const descriptionInput = document.getElementById('publication-description');
@@ -25,6 +36,11 @@
   let cursor = 0;
   let reportTarget = null;
   let loading = false;
+  let mediaRecorder = null;
+  let recordingStream = null;
+  let recordingChunks = [];
+  let recordingStartedAt = 0;
+  let recordingTimer = null;
 
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -47,9 +63,13 @@
       currentUser = null;
     }
     if (currentUser) {
-      composer.hidden = false;
+      createEntry.hidden = false;
+      composer.hidden = true;
       visitorNote.hidden = true;
-      document.getElementById('composer-account').textContent = currentUser.nomeEmpresa || currentUser.nome || '';
+      const accountName = currentUser.nomeEmpresa || currentUser.nome || currentUser.nome_empresa || 'Minha conta';
+      document.getElementById('composer-account').textContent = accountName;
+      const avatarUrl = currentUser.fotoPerfil || currentUser.foto_perfil || currentUser.foto || currentUser.avatar || '';
+      profileAvatar.innerHTML = avatarUrl ? '<img src="' + escapeHTML(avatarUrl) + '" alt="">' : '<span>' + escapeHTML(initials(accountName)) + '</span>';
       try {
         const moderation = await api('/api/publicacoes/moderacao/acesso');
         if (moderation.autorizado) {
@@ -61,6 +81,7 @@
         }
       } catch {}
     } else {
+      createEntry.hidden = true;
       composer.hidden = true;
       visitorNote.hidden = false;
     }
@@ -319,26 +340,20 @@
     publishButton.disabled = !selectedFiles.length;
   }
 
-  fileInput.addEventListener('change', async () => {
-    const files = [...(fileInput.files || [])];
+  async function processSelectedFiles(files) {
     clearPreview();
     if (!files.length) return;
     const isVideo = file => file.type.startsWith('video/');
     const hasVideo = files.some(isVideo);
-    if ((hasVideo && files.length !== 1) || (!hasVideo && files.length > 10)) {
-      toast('Escolha somente 1 vídeo ou até 10 fotos por publicação.');
-      return;
-    }
+    if ((hasVideo && files.length !== 1) || (!hasVideo && files.length > 10)) { toast('Escolha somente 1 vídeo ou até 10 fotos por publicação.'); return; }
     fileInput.disabled = true;
     progress.hidden = false;
     try {
-      for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
-        progressText.textContent = 'Preparando arquivo ' + (fileIndex + 1) + ' de ' + files.length + '...';
-        const original = files[fileIndex];
+      for (let index = 0; index < files.length; index++) {
+        progressText.textContent = 'Preparando arquivo ' + (index + 1) + ' de ' + files.length + '...';
+        const original = files[index];
         const kind = isVideo(original) ? 'video' : 'image';
-        const allowed = kind === 'video'
-          ? ['video/mp4', 'video/webm']
-          : ['image/jpeg', 'image/png', 'image/webp'];
+        const allowed = kind === 'video' ? ['video/mp4', 'video/webm'] : ['image/jpeg', 'image/png', 'image/webp'];
         if (!allowed.includes(original.type)) throw new Error('Formato não permitido. Use JPG, PNG, WebP, MP4 ou WebM.');
         let duration = null;
         let file = original;
@@ -351,22 +366,77 @@
           file = await compressVideo(file);
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB mesmo depois da compressão.');
         }
-        selectedFiles.push({
-          file,
-          kind,
-          duration,
-          previewUrl: URL.createObjectURL(file)
-        });
+        selectedFiles.push({ file, kind, duration, previewUrl: URL.createObjectURL(file) });
       }
       renderPreview();
+    } catch (error) { clearPreview(); toast(error.message); }
+    finally { fileInput.disabled = false; progress.hidden = true; }
+  }
+
+  fileInput.addEventListener('change', () => processSelectedFiles([...(fileInput.files || [])]));
+  photoPicker.addEventListener('change', () => processSelectedFiles([...(photoPicker.files || [])]));
+  cameraPicker.addEventListener('change', () => processSelectedFiles([...(cameraPicker.files || [])]));
+  videoPicker.addEventListener('change', () => processSelectedFiles([...(videoPicker.files || [])]));
+  composer.addEventListener('click', event => {
+    const button = event.target.closest('[data-open-picker]');
+    if (!button) return;
+    if (button.dataset.openPicker === 'photos') photoPicker.click();
+    if (button.dataset.openPicker === 'camera') cameraPicker.click();
+    if (button.dataset.openPicker === 'video') videoPicker.click();
+  });
+
+  function stopRecordingTracks() {
+    if (recordingTimer) clearInterval(recordingTimer);
+    recordingTimer = null;
+    if (recordingStream) recordingStream.getTracks().forEach(track => track.stop());
+    recordingStream = null;
+    mediaRecorder = null;
+    recordingControls.hidden = true;
+    startRecordingButton.disabled = false;
+  }
+  function finishVideoRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }
+  startRecordingButton.addEventListener('click', async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { toast('A gravação não é compatível com este navegador. Escolha um vídeo do dispositivo.'); return; }
+    try {
+      recordingStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+      recordingChunks = [];
+      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
+      mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+      mediaRecorder.ondataavailable = event => { if (event.data && event.data.size) recordingChunks.push(event.data); };
+      mediaRecorder.onerror = () => { stopRecordingTracks(); toast('Não foi possível gravar o vídeo neste dispositivo.'); };
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordingChunks, { type: mimeType || 'video/webm' });
+        stopRecordingTracks();
+        if (!blob.size) return;
+        const file = new File([blob], 'video-conectatrabalho.webm', { type: 'video/webm', lastModified: Date.now() });
+        await processSelectedFiles([file]);
+      };
+      recordingStartedAt = Date.now();
+      recordingControls.hidden = false;
+      startRecordingButton.disabled = true;
+      const updateTime = () => {
+        const elapsed = Math.min(60, Math.floor((Date.now() - recordingStartedAt) / 1000));
+        recordingTime.textContent = '00:' + String(elapsed).padStart(2, '0') + ' / 01:00';
+        if (elapsed >= 60) finishVideoRecording();
+      };
+      updateTime(); recordingTimer = setInterval(updateTime, 250); mediaRecorder.start(250);
     } catch (error) {
-      clearPreview();
-      toast(error.message);
-    } finally {
-      fileInput.disabled = false;
-      progress.hidden = true;
+      stopRecordingTracks();
+      toast(error.name === 'NotAllowedError' ? 'Permita o acesso à câmera e ao microfone para gravar.' : 'Não foi possível acessar a câmera. Verifique as permissões do dispositivo.');
     }
   });
+  stopRecordingButton.addEventListener('click', finishVideoRecording);
+
+  function openComposer() { composer.hidden = false; document.body.classList.add('publication-composer-open'); closeComposerButton.focus(); }
+  function closeComposer() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') finishVideoRecording();
+    composer.hidden = true; document.body.classList.remove('publication-composer-open');
+    if (!progress.hidden) return;
+    clearPreview(); descriptionInput.value = ''; openComposerButton.focus();
+  }
+  openComposerButton.addEventListener('click', openComposer);
+  closeComposerButton.addEventListener('click', closeComposer);
+  composer.addEventListener('keydown', event => { if (event.key === 'Escape' && progress.hidden) closeComposer(); });
 
   preview.addEventListener('click', event => {
     const button = event.target.closest('[data-remove-file]');
@@ -421,6 +491,7 @@
       uploadedMedia = [];
       clearPreview();
       toast('Publicação criada com sucesso.');
+      closeComposer();
       await loadPosts(true);
     } catch (error) {
       discardStagedMedia();
