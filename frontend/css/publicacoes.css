@@ -773,13 +773,22 @@ body.publication-viewer-open .short-publication-caption :is(a, strong, span, .pu
 }
 
 /* Descrição mais compacta e sem barras de rolagem visíveis no visualizador. */
+body.publication-viewer-open .short-publication-caption {
+  width: min(410px, calc(100% - 290px));
+}
 body.publication-viewer-open .short-publication-caption .publication-description.is-collapsed {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   overflow: hidden;
+  overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.3;
+}
+@media (max-width: 800px) {
+  body.publication-viewer-open .short-publication-caption {
+    width: calc(100% - 82px);
+  }
 }
 html:has(body.publication-viewer-open),
 body.publication-viewer-open,
