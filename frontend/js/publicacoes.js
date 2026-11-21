@@ -13,6 +13,17 @@
   const videoPicker = document.getElementById('publication-video-picker');
   const form = document.getElementById('publication-form');
   const descriptionInput = document.getElementById('publication-description');
+  const titleInput = document.getElementById('publication-title');
+  const editorLayout = document.getElementById('composer-editor-layout');
+  const phoneMedia = document.getElementById('composer-phone-media');
+  const phoneTitle = document.getElementById('composer-phone-title');
+  const phoneDescription = document.getElementById('composer-phone-description');
+  const mediaHeading = document.getElementById('composer-media-heading');
+  const mediaCount = document.getElementById('composer-media-count');
+  const mediaHelp = document.getElementById('composer-media-help');
+  const addMediaButton = document.getElementById('composer-add-media');
+  const titleCount = document.getElementById('publication-title-count');
+  const descriptionCount = document.getElementById('publication-description-count');
   const descriptionField = document.getElementById('composer-description-field');
   const fileInput = document.getElementById('publication-files');
   const preview = document.getElementById('upload-preview');
@@ -307,17 +318,29 @@
   }
 
   function renderPreview() {
+    const isVideo = selectedFiles[0]?.kind === 'video';
     preview.innerHTML = selectedFiles.map((item, index) => {
       const media = item.kind === 'video'
-        ? '<div class="upload-video-placeholder"><i class="fa-solid fa-film" aria-hidden="true"></i><small>Vídeo selecionado</small></div>'
+        ? '<div class="upload-video-placeholder"><i class="fa-solid fa-film" aria-hidden="true"></i></div>'
         : '<img src="' + item.previewUrl + '" alt="">';
-      return '<div class="upload-preview-item">' + media +
-        '<span>' + escapeHTML(formatBytes(item.file.size)) + '</span>' +
+      return '<div class="upload-preview-item' + (index === 0 ? ' is-cover' : '') + '">' + media +
+        (index === 0 ? '<strong class="upload-cover-label">Capa</strong>' : '') +
         '<button type="button" data-remove-file="' + index + '" aria-label="Remover arquivo">×</button></div>';
-    }).join('');
+    }).join('') + (!isVideo && selectedFiles.length < 10 ? '<button type="button" class="upload-add-tile" data-add-media aria-label="Adicionar fotos"><i class="fa-solid fa-plus"></i></button>' : '');
     preview.hidden = !selectedFiles.length;
     dropzone.hidden = selectedFiles.length > 0;
+    editorLayout.hidden = !selectedFiles.length;
+    composer.querySelector('.composer-media-tabs').hidden = selectedFiles.length > 0;
     descriptionField.hidden = !selectedFiles.length;
+    mediaHeading.textContent = isVideo ? 'Vídeo' : 'Fotos';
+    mediaCount.textContent = isVideo ? '1 vídeo carregado' : selectedFiles.length + (selectedFiles.length === 1 ? ' foto carregada' : ' fotos carregadas');
+    mediaHelp.textContent = isVideo ? 'Pré-visualização do vídeo selecionado.' : 'Arraste e solte para reordenar.';
+    addMediaButton.hidden = isVideo || selectedFiles.length >= 10;
+    phoneMedia.innerHTML = isVideo
+      ? '<div class="composer-phone-video"><i class="fa-solid fa-play"></i><span>Prévia do vídeo</span></div>'
+      : '<img src="' + selectedFiles[0].previewUrl + '" alt="Prévia da foto">';
+    phoneTitle.textContent = titleInput.value || 'Seu título aparecerá aqui';
+    phoneDescription.textContent = descriptionInput.value || 'Sua descrição aparecerá aqui.';
     publishButton.disabled = !selectedFiles.length;
   }
 
@@ -426,7 +449,7 @@
   function closeComposer() {
     composer.hidden = true; document.body.classList.remove('publication-composer-open');
     if (!progress.hidden) return;
-    clearPreview(); descriptionInput.value = ''; openComposerButton.focus();
+    clearPreview(); descriptionInput.value = ''; titleInput.value = ''; openComposerButton.focus();
   }
   openComposerButton.addEventListener('click', openComposer);
   closeComposerButton.addEventListener('click', closeComposer);
@@ -477,7 +500,7 @@
       await api('/api/publicacoes', {
         method: 'POST',
         body: JSON.stringify({
-          descricao: descriptionInput.value,
+          descricao: [titleInput.value.trim(), descriptionInput.value.trim()].filter(Boolean).join('\\n\\n'),
           midias: mediaIds
         })
       });
