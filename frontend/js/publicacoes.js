@@ -389,8 +389,8 @@
         dropzoneTitle.textContent = 'Selecione fotos para carregar';
         dropzoneDescription.textContent = 'Ou arraste e solte-as aqui. Carregue até 10 fotos por publicação.';
       } else {
-        dropzoneTitle.textContent = 'Selecione um vídeo para carregar';
-        dropzoneDescription.textContent = 'Ou arraste e solte-o aqui. Carregue um vídeo de até 60 segundos.';
+        dropzoneTitle.textContent = 'Selecione o vídeo a enviar';
+        dropzoneDescription.textContent = 'Ou arraste e solte aqui';
       }
       return;
     }
