@@ -855,6 +855,21 @@
     }
   });
 
+  feed.addEventListener('input', event => {
+    const control = event.target.closest('[data-video-action]');
+    if (!control) return;
+    const player = control.closest('.short-video-player');
+    const video = player && player.querySelector('video');
+    if (!video) return;
+    if (control.dataset.videoAction === 'seek' && video.duration) {
+      video.currentTime = video.duration * Number(control.value) / 1000;
+    } else if (control.dataset.videoAction === 'volume-level') {
+      video.volume = Number(control.value);
+      video.muted = video.volume === 0;
+      const muteButton = player.querySelector('[data-video-action="volume"]');
+      if (muteButton) muteButton.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+    }
+  });
   feed.addEventListener('timeupdate', event => {
     const video = event.target.closest('video');
     if (!video) return;
