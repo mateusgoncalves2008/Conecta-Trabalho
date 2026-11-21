@@ -136,7 +136,7 @@
   // A animação só é executada depois que essa lógica confirma visualmente a nova seleção.
   document.addEventListener('click', event => {
     const button = event.target.closest(SELECTOR);
-    if (!button || button.disabled) return;
+    if (!button) return;
     queueMicrotask(() => {
       prepare(button);
       const liked = button.getAttribute('aria-pressed') === 'true';
