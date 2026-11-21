@@ -58,12 +58,12 @@
           <input id="publication-video-picker" type="file" accept="video/mp4,video/webm,video/*" hidden>
           <div class="composer-dropzone" id="composer-dropzone">
             <img class="composer-dropzone-illustration" src="/img/icone-upload-publicacao.svg" alt="" width="72" height="72">
-            <span>Selecione arquivos do seu dispositivo para começar.</span>
+            <strong id="composer-dropzone-title">Selecione fotos para carregar</strong>
+            <span id="composer-dropzone-description">Ou arraste e solte-as aqui. Carregue até 10 fotos por publicação.</span>
             <div class="composer-dropzone-actions">
               <button class="button button-primary" type="button" data-open-picker="photos">Selecionar fotos</button>
               <button class="button button-outline" type="button" data-open-picker="video" hidden>Selecionar vídeo</button>
             </div>
-            <p class="composer-limits">Até 10 fotos (JPG, PNG ou WebP) ou 1 vídeo (MP4 ou WebM) de até 60 segundos.</p>
           </div>
           <div class="upload-preview" id="upload-preview" hidden></div>
           <div class="composer-description-field" id="composer-description-field" hidden>
