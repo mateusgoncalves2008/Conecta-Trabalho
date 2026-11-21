@@ -734,25 +734,69 @@
           const action = postAction.dataset.action;
           if (action === 'like') {
             if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+            const currentTotal = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
             const wasLiked = Boolean(post.minhaCurtida);
-            const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
-            const nextLiked = !wasLiked;
-            postAction.disabled = true;
-            post.minhaCurtida = nextLiked;
-            const nextTotal = Math.max(0, total + (nextLiked ? 1 : -1));
-            post.reacoes = nextTotal ? [{ emoji: '❤️', total: nextTotal }] : [];
-            updatePostLikeButton(card, post, nextTotal);
-            try {
-              await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
-                method: nextLiked ? 'PUT' : 'DELETE',
-                ...(nextLiked ? { body: JSON.stringify({ emoji: '❤️' }) } : {})
-              });
-            } catch (error) {
-              post.minhaCurtida = wasLiked;
-              post.reacoes = total ? [{ emoji: '❤️', total }] : [];
-              updatePostLikeButton(card, post, total);
-              Conecta.toast(error.message);
-            } finally { postAction.disabled = false; }
+
+            if (card.dataset.reacting === 'true') {
+              const confirmedLiked = card.dataset.likeConfirmed === 'true';
+              const desiredLiked = !(card.dataset.likeDesired === 'true');
+              card.dataset.likeDesired = String(desiredLiked);
+              const confirmedTotal = Number(card.dataset.likeConfirmedTotal || currentTotal);
+              post.minhaCurtida = desiredLiked;
+              const visibleTotal = Math.max(0, confirmedTotal + (desiredLiked === confirmedLiked ? 0 : desiredLiked ? 1 : -1));
+              post.reacoes = visibleTotal ? [{ emoji: '❤️', total: visibleTotal }] : [];
+              updatePostLikeButton(card, post, visibleTotal);
+              return;
+            }
+
+            card.dataset.reacting = 'true';
+            card.dataset.likeConfirmed = String(wasLiked);
+            card.dataset.likeDesired = String(!wasLiked);
+            card.dataset.likeConfirmedTotal = String(currentTotal);
+
+            const syncLike = async () => {
+              try {
+                while (card.dataset.likeDesired !== card.dataset.likeConfirmed) {
+                  const targetLiked = card.dataset.likeDesired === 'true';
+                  if (targetLiked) {
+                    await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', {
+                      method: 'PUT',
+                      body: JSON.stringify({ emoji: '❤️' })
+                    });
+                  } else {
+                    await Conecta.api('/api/publicacoes/' + encodeURIComponent(post.id) + '/reacao', { method: 'DELETE' });
+                  }
+                  const previousConfirmed = card.dataset.likeConfirmed === 'true';
+                  let confirmedTotal = Number(card.dataset.likeConfirmedTotal || 0);
+                  if (targetLiked !== previousConfirmed) confirmedTotal = Math.max(0, confirmedTotal + (targetLiked ? 1 : -1));
+                  card.dataset.likeConfirmed = String(targetLiked);
+                  card.dataset.likeConfirmedTotal = String(confirmedTotal);
+                  const desiredLiked = card.dataset.likeDesired === 'true';
+                  post.minhaCurtida = desiredLiked;
+                  const visibleTotal = Math.max(0, confirmedTotal + (desiredLiked === targetLiked ? 0 : desiredLiked ? 1 : -1));
+                  post.reacoes = visibleTotal ? [{ emoji: '❤️', total: visibleTotal }] : [];
+                  updatePostLikeButton(card, post, visibleTotal);
+                }
+              } catch (error) {
+                const confirmedLiked = card.dataset.likeConfirmed === 'true';
+                const confirmedTotal = Number(card.dataset.likeConfirmedTotal || 0);
+                post.minhaCurtida = confirmedLiked;
+                post.reacoes = confirmedTotal ? [{ emoji: '❤️', total: confirmedTotal }] : [];
+                updatePostLikeButton(card, post, confirmedTotal);
+                Conecta.toast(error.message);
+              } finally {
+                delete card.dataset.reacting;
+                delete card.dataset.likeConfirmed;
+                delete card.dataset.likeDesired;
+                delete card.dataset.likeConfirmedTotal;
+              }
+            };
+
+            const desiredTotal = Math.max(0, currentTotal + (wasLiked ? -1 : 1));
+            post.minhaCurtida = !wasLiked;
+            post.reacoes = desiredTotal ? [{ emoji: '❤️', total: desiredTotal }] : [];
+            updatePostLikeButton(card, post, desiredTotal);
+            void syncLike();
             return;
           }
           if (action === 'report') {
