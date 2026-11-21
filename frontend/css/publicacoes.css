@@ -747,3 +747,11 @@ body.publication-viewer-open .short-video-player > video {
     max-height: calc(100dvh - 100px) !important;
   }
 }
+
+
+/* Fundo mais escuro na área máxima reservada às fotos e aos vídeos. */
+body.publication-viewer-open .short-publication-media,
+body.publication-viewer-open .short-publication-media .publication-media,
+body.publication-viewer-open .short-publication-media .publication-media-item {
+  background-color: #080b10 !important;
+}
