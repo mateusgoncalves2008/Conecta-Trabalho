@@ -757,16 +757,17 @@ body.publication-viewer-open .short-publication-media .publication-media-item {
 }
 
 
-/* Destaque azul-claro somente no bloco de informações da publicação. */
+/* Mantém as informações da publicação sobre a mídia, sem fundo próprio. */
 body.publication-viewer-open .short-publication-caption {
-  background: rgba(173, 216, 244, .94) !important;
-  border-radius: 10px;
-  padding: 10px 14px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, .16) !important;
-  color: #183047 !important;
-  text-shadow: none !important;
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 0;
+  box-shadow: none !important;
+  color: #fff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .9);
 }
 body.publication-viewer-open .short-publication-caption :is(a, strong, span, .publication-description, .description-toggle) {
-  color: #183047 !important;
-  text-shadow: none !important;
+  color: #fff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .95);
 }
