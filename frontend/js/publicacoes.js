@@ -44,7 +44,6 @@
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
   const mediaFeedback = document.getElementById('composer-media-feedback');
-  const loadMoreButton = document.getElementById('load-more');
   const reportDialog = document.getElementById('report-dialog');
   const reportForm = document.getElementById('report-form');
   const reportReason = document.getElementById('report-reason');
@@ -185,7 +184,6 @@
   async function loadPosts(reset) {
     if (loading) return;
     loading = true;
-    loadMoreButton.disabled = true;
     if (reset) {
       cursor = 0;
       feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
@@ -206,14 +204,12 @@
       }
       cursor = result.proximoCursor;
       applyPostSearch();
-      loadMoreButton.hidden = cursor === null;
       document.getElementById('feed-count-label').textContent = followingOnly ? 'Publicações dos perfis que você segue' : 'Publicações da comunidade';
     } catch (error) {
       if (reset) feed.innerHTML = '<div class="feed-empty">Não foi possível carregar as publicações. Atualize a página para tentar novamente.</div>';
       toast(error.message);
     } finally {
       loading = false;
-      loadMoreButton.disabled = false;
     }
   }
 
@@ -633,7 +629,19 @@
   }
   previousPostButton.addEventListener('click', () => movePublication(-1));
   nextPostButton.addEventListener('click', () => movePublication(1));
-  loadMoreButton.addEventListener('click', () => loadPosts(false));
+  let paginationCheckPending = false;
+  const checkAutomaticPagination = () => {
+    if (paginationCheckPending || loading || cursor === null) return;
+    const lastCard = feed.querySelector('.short-publication-card:last-of-type');
+    if (!lastCard) return;
+    const rect = lastCard.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 900) {
+      paginationCheckPending = true;
+      loadPosts(false).finally(() => { paginationCheckPending = false; });
+    }
+  };
+  window.addEventListener('scroll', checkAutomaticPagination, { passive: true });
+  feed.addEventListener('scroll', checkAutomaticPagination, { passive: true });
   followingButton.addEventListener('click', () => {
     if (!currentUser) { window.location.href = '/pages/login.html'; return; }
     followingOnly = !followingOnly;
