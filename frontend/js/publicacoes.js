@@ -18,6 +18,7 @@
   const recordingTime = document.getElementById('recording-time');
   const form = document.getElementById('publication-form');
   const descriptionInput = document.getElementById('publication-description');
+  const descriptionField = document.getElementById('composer-description-field');
   const fileInput = document.getElementById('publication-files');
   const preview = document.getElementById('upload-preview');
   const publishButton = document.getElementById('publish-button');
@@ -320,6 +321,7 @@
     discardStagedMedia();
     preview.innerHTML = '';
     preview.hidden = true;
+    descriptionField.hidden = true;
     publishButton.disabled = true;
     fileInput.value = '';
     photoPicker.value = '';
@@ -337,6 +339,7 @@
         '<button type="button" data-remove-file="' + index + '" aria-label="Remover arquivo">×</button></div>';
     }).join('');
     preview.hidden = !selectedFiles.length;
+    descriptionField.hidden = !selectedFiles.length;
     publishButton.disabled = !selectedFiles.length;
   }
 
