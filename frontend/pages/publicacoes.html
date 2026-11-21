@@ -49,18 +49,23 @@
       <div class="composer-fullscreen-content">
         <div class="composer-fullscreen-intro"><span class="eyebrow">COMPARTILHE COM A COMUNIDADE</span><h2 id="composer-title">O que você gostaria de compartilhar?</h2><span class="composer-account" id="composer-account"></span></div>
         <form id="publication-form">
-          <div class="composer-media-actions" role="group" aria-label="Adicionar mídia">
-            <button class="composer-media-option" type="button" data-open-picker="photos"><i class="fa-regular fa-images" aria-hidden="true"></i><span>Escolher fotos</span></button>
-            <button class="composer-media-option" type="button" data-open-picker="camera"><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Tirar foto</span></button>
-            <button class="composer-media-option" type="button" data-open-picker="video"><i class="fa-solid fa-video" aria-hidden="true"></i><span>Escolher vídeo</span></button>
-            <button class="composer-media-option" type="button" id="start-video-recording"><i class="fa-solid fa-circle-dot" aria-hidden="true"></i><span>Gravar vídeo</span></button>
+          <div class="composer-media-tabs" role="group" aria-label="Tipo de mídia">
+            <button class="composer-media-tab is-active" type="button" data-open-picker="photos"><i class="fa-regular fa-images" aria-hidden="true"></i> Fotos</button>
+            <button class="composer-media-tab" type="button" data-open-picker="video"><i class="fa-solid fa-video" aria-hidden="true"></i> Vídeos</button>
           </div>
           <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple hidden>
           <input id="publication-photo-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
-          <input id="publication-camera-picker" type="file" accept="image/*" capture="environment" hidden>
           <input id="publication-video-picker" type="file" accept="video/mp4,video/webm,video/*" hidden>
-          <div class="recording-controls" id="recording-controls" hidden><span id="recording-time">00:00 / 01:00</span><button type="button" id="stop-video-recording"><i class="fa-solid fa-stop" aria-hidden="true"></i> Finalizar gravação</button></div>
-          <p class="composer-limits">Até 10 fotos por publicação ou 1 vídeo com duração máxima de 60 segundos.</p>
+          <div class="composer-dropzone" id="composer-dropzone">
+            <div class="composer-dropzone-icon"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i></div>
+            <strong>Adicione fotos ou vídeos à sua publicação</strong>
+            <span>Selecione arquivos do seu dispositivo para começar.</span>
+            <div class="composer-dropzone-actions">
+              <button class="button button-primary" type="button" data-open-picker="photos">Selecionar fotos</button>
+              <button class="button button-outline" type="button" data-open-picker="video">Selecionar vídeo</button>
+            </div>
+            <p class="composer-limits">Até 10 fotos (JPG, PNG ou WebP) ou 1 vídeo (MP4 ou WebM) de até 60 segundos.</p>
+          </div>
           <div class="upload-preview" id="upload-preview" hidden></div>
           <div class="composer-description-field" id="composer-description-field" hidden>
           <label class="publication-description-label" for="publication-description">Descrição <span>(opcional)</span></label>
