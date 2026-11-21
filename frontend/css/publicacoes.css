@@ -771,3 +771,26 @@ body.publication-viewer-open .short-publication-caption :is(a, strong, span, .pu
   color: #fff !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, .95);
 }
+
+/* Descrição mais compacta e sem barras de rolagem visíveis no visualizador. */
+body.publication-viewer-open .short-publication-caption .publication-description.is-collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.35;
+}
+html:has(body.publication-viewer-open),
+body.publication-viewer-open,
+body.publication-viewer-open .publication-viewer-main,
+body.publication-viewer-open .publication-feed {
+  scrollbar-width: none !important;
+}
+html:has(body.publication-viewer-open)::-webkit-scrollbar,
+body.publication-viewer-open::-webkit-scrollbar,
+body.publication-viewer-open *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
