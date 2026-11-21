@@ -49,9 +49,10 @@
       <div class="composer-fullscreen-content">
         <div class="composer-fullscreen-intro"><span class="eyebrow">COMPARTILHE COM A COMUNIDADE</span><h2 id="composer-title">O que você gostaria de compartilhar?</h2><span class="composer-account" id="composer-account"></span></div>
         <form id="publication-form">
+
           <div class="composer-media-tabs" role="group" aria-label="Tipo de mídia">
-            <button class="composer-media-tab is-active" type="button" data-open-picker="photos"><i class="fa-regular fa-images" aria-hidden="true"></i> Fotos</button>
-            <button class="composer-media-tab" type="button" data-open-picker="video"><i class="fa-solid fa-video" aria-hidden="true"></i> Vídeos</button>
+            <button class="composer-media-tab is-active" type="button" data-open-picker="photos">Fotos</button>
+            <button class="composer-media-tab" type="button" data-open-picker="video">Vídeos</button>
           </div>
           <input id="publication-files" type="file" accept="image/jpeg,image/png,image/webp,video/*,.mp4,.mov,.webm,.mkv,.avi,.wmv,.flv,.mpeg,.mpg,.m4v,.3gp,.ogv,.ts" multiple hidden>
           <input id="publication-photo-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
@@ -65,43 +66,25 @@
               <button class="button button-primary" type="button" data-open-picker="video" hidden>Selecionar vídeo</button>
             </div>
           </div>
-          <section class="composer-media-guidelines" id="composer-photo-guidelines" aria-label="Regras para fotos">
-            <div class="composer-guideline">
-              <h3>Tamanho e quantidade</h3>
-              <p>Até 10 fotos por publicação, com no máximo 20 MB por foto.</p>
+          <section class="composer-media-guidelines" id="composer-photo-guidelines"><div class="composer-guideline"><h3>Tamanho e quantidade</h3><p>Até 10 fotos por publicação, com no máximo 20 MB por foto.</p></div><div class="composer-guideline"><h3>Formatos de arquivo</h3><p>JPG, JPEG, PNG e WebP.</p></div><div class="composer-guideline"><h3>Proporções recomendadas</h3><p>16:9, 4:3 e 3:4.</p></div></section>
+          <section class="composer-media-guidelines" id="composer-video-guidelines" hidden><div class="composer-guideline"><h3>Tamanho e duração</h3><p>Até 150 MB por vídeo, com duração máxima de 60 segundos.</p></div><div class="composer-guideline"><h3>Formatos de arquivo</h3><p>MP4, MOV, WebM, MKV, AVI, WMV, FLV, MPEG, M4V, 3GP, OGV e TS. O sistema converte os vídeos automaticamente para MP4 compatível.</p></div><div class="composer-guideline"><h3>Resoluções recomendadas</h3><p>1080p, 1440p e 4K.</p></div><div class="composer-guideline"><h3>Proporções recomendadas</h3><p>16:9 na horizontal e 9:16 na vertical.</p></div></section>
+          <section class="composer-editor-layout" id="composer-editor-layout" hidden>
+            <div class="composer-editor-details">
+              <h3>Detalhes</h3>
+              <label class="composer-editor-label" for="publication-title">Título</label>
+              <div class="composer-title-input-wrap"><input id="publication-title" type="text" maxlength="90" placeholder="Adicione um título chamativo"><span id="publication-title-count">0/90</span></div>
+              <div class="composer-description-field" id="composer-description-field">
+                <label class="composer-editor-label" for="publication-description">Descrição</label>
+                <textarea id="publication-description" maxlength="4000" rows="6" placeholder="Escrever uma descrição longa pode ajudar a obter, em média, 3x mais visualizações"></textarea>
+                <div class="composer-description-tools"><button type="button" data-insert-token="#"># Hashtags</button><button type="button" data-insert-token="@">@ Mencionar</button><span id="publication-description-count">0/4000</span></div>
+              </div>
+              <div class="composer-photo-section"><div class="composer-photo-heading"><strong id="composer-media-heading">Fotos</strong><span id="composer-media-count"></span></div><p id="composer-media-help">Arraste e solte para reordenar.</p><div class="upload-preview" id="upload-preview" hidden></div><button class="composer-add-media" id="composer-add-media" type="button">Adicionar fotos</button></div>
             </div>
-            <div class="composer-guideline">
-              <h3>Formatos de arquivo</h3>
-              <p>JPG, JPEG, PNG e WebP.</p>
-            </div>
-            <div class="composer-guideline">
-              <h3>Proporções recomendadas</h3>
-              <p>16:9, 4:3 e 3:4. Outras proporções também podem ser usadas.</p>
-            </div>
+            <aside class="composer-preview-column" aria-label="Pré-visualização da publicação">
+              <div class="composer-preview-tabs" role="tablist" aria-label="Visualização"><button type="button" class="is-active" data-preview-mode="feed">Feed</button><button type="button" data-preview-mode="profile">Perfil</button><button type="button" data-preview-mode="web">Web</button></div>
+              <div class="composer-phone"><div class="composer-phone-status"><span>8:00</span><span>••• ▰</span></div><div class="composer-phone-nav"><span>ConectaTrabalho</span><span>Publicações</span></div><div class="composer-phone-media" id="composer-phone-media"><i class="fa-regular fa-image"></i></div><div class="composer-phone-actions">♡　◯　▣</div><div class="composer-phone-caption"><strong id="composer-phone-title">Seu título aparecerá aqui</strong><p id="composer-phone-description">Sua descrição aparecerá aqui.</p></div><div class="composer-phone-bottom">⌂　♙　＋　♧</div></div>
+            </aside>
           </section>
-          <section class="composer-media-guidelines" id="composer-video-guidelines" aria-label="Regras para vídeos" hidden>
-            <div class="composer-guideline">
-              <h3>Tamanho e duração</h3>
-              <p>Até 150 MB por vídeo, com duração máxima de 60 segundos.</p>
-            </div>
-            <div class="composer-guideline">
-              <h3>Formatos de arquivo</h3>
-              <p>MP4, MOV, WebM, MKV, AVI, WMV, FLV, MPEG, M4V, 3GP, OGV e TS. O sistema converte os vídeos automaticamente para MP4 compatível.</p>
-            </div>
-            <div class="composer-guideline">
-              <h3>Resoluções recomendadas</h3>
-              <p>1080p, 1440p e 4K.</p>
-            </div>
-            <div class="composer-guideline">
-              <h3>Proporções recomendadas</h3>
-              <p>16:9 para vídeos na horizontal e 9:16 para vídeos na vertical.</p>
-            </div>
-          </section>
-          <div class="upload-preview" id="upload-preview" hidden></div>
-          <div class="composer-description-field" id="composer-description-field" hidden>
-          <label class="publication-description-label" for="publication-description">Descrição <span>(opcional)</span></label>
-          <textarea id="publication-description" maxlength="2000" rows="4" placeholder="Escreva uma descrição para sua publicação..."></textarea>
-          </div>
           <div class="upload-progress" id="upload-progress" hidden><span></span><small id="upload-progress-text">Preparando arquivos...</small></div>
           <p class="composer-media-feedback" id="composer-media-feedback" role="status" aria-live="polite" hidden></p>
           <div class="composer-footer"><small>Os limites e formatos informados são verificados durante o envio.</small><button class="button button-primary" id="publish-button" type="submit" disabled>Publicar</button></div>
