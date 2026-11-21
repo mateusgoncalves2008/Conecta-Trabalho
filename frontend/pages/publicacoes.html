@@ -14,32 +14,17 @@
   <script src="/js/efeitos/icone-curtir.js" defer></script>
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="/" aria-label="ConectaTrabalho - início">
-      <img class="brand-mark-image" src="/img/logo-conectatrabalho.svg" alt="" width="38" height="38">
-      <span>Conecta<span class="brand-light">Trabalho</span></span>
-    </a>
-    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
-      <a href="/">Início</a><a href="/pages/vagas.html">Vagas</a><a class="active" href="/pages/publicacoes.html" aria-current="page">Publicações</a>
-      <a href="/pages/como-funciona.html">Como funciona</a><a href="/pages/sobre.html">Sobre</a>
-      <a class="mobile-login-link" href="/pages/login.html">Entrar</a><a class="mobile-register-link" href="/pages/cadastro.html">Cadastrar</a>
-    </nav>
-    <div class="header-actions"><a class="button button-outline button-small" href="/pages/login.html">Entrar</a><a class="button button-primary button-small" href="/pages/cadastro.html">Cadastrar</a></div>
-  </header>
-
-  <main class="publicacoes-main">
-    <section class="publicacoes-heading">
-      <div>
-        <span class="eyebrow">COMUNIDADE CONECTATRABALHO</span>
-        <h1>Publicações</h1>
-        <p>Acompanhe novidades, projetos e momentos compartilhados por candidatos e empresas.</p>
-      </div>
+  <main class="publicacoes-main publication-viewer-main">
+    <button class="publication-back-button" id="publication-back" type="button" aria-label="Voltar"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+    <aside class="publication-viewer-sidebar" aria-label="Filtros do feed">
+      <button class="publication-following-button" id="publication-following" type="button" aria-pressed="false"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Seguindo</span></button>
+      <button class="publication-viewer-create" id="open-publication-composer" type="button" hidden><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Criar</span></button>
+    </aside>
+    <section class="publicacoes-heading publication-viewer-heading">
+      <span class="eyebrow">CONECTATRABALHO</span>
+      <h1 class="visually-hidden">Publicações</h1>
+      <a class="moderation-shortcut" id="moderation-shortcut" href="/pages/moderacao-publicacoes.html" hidden>Analisar denúncias</a>
     </section>
-
-    <div class="create-publication-entry" id="create-publication-entry" hidden>
-      <button class="create-publication-button" id="open-publication-composer" type="button"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Criar</span></button>
-    </div>
     <section class="publication-composer publication-composer-fullscreen" id="publication-composer" hidden aria-labelledby="composer-title" aria-modal="true" role="dialog">
       <header class="composer-fullscreen-header">
         <button class="composer-close-button" id="close-publication-composer" type="button" aria-label="Fechar criação de publicação"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
@@ -93,7 +78,7 @@
     </section>
 
     <section class="feed-section" aria-label="Feed de publicações">
-      <div class="feed-heading"><h2>Mais recentes</h2><span id="feed-count-label">Publicações da comunidade</span></div>
+      <div class="feed-heading publication-viewer-feed-heading"><h2 id="feed-title">Para você</h2><span id="feed-count-label">Publicações da comunidade</span></div>
       <div class="publication-feed" id="publication-feed" aria-live="polite">
         <div class="feed-loading">Carregando publicações...</div>
       </div>
@@ -121,7 +106,7 @@
     </form>
   </dialog>
 
-  <footer class="site-footer site-footer-simple">
+  <footer class="site-footer site-footer-simple publication-viewer-footer">
     <nav class="footer-simple-links" aria-label="Links institucionais">
       <a href="/pages/sobre.html" class="footer-simple-link">Sobre</a>
       <a href="/pages/acessibilidade.html" class="footer-simple-link">Acessibilidade</a>

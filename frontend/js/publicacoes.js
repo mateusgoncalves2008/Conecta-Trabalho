@@ -1,11 +1,14 @@
 (() => {
   const feed = document.getElementById('publication-feed');
   if (!feed) return;
+  document.body.classList.add('publication-viewer-open');
 
   const api = window.Conecta && window.Conecta.api;
   const toast = message => window.Conecta && window.Conecta.toast(message);
   const composer = document.getElementById('publication-composer');
-  const createEntry = document.getElementById('create-publication-entry');
+  const followingButton = document.getElementById('publication-following');
+  const backButton = document.getElementById('publication-back');
+  let followingOnly = false;
   const openComposerButton = document.getElementById('open-publication-composer');
   const closeComposerButton = document.getElementById('close-publication-composer');
   const profileAvatar = document.getElementById('composer-profile-avatar');
@@ -48,6 +51,21 @@
   let cursor = 0;
   let reportTarget = null;
   let loading = false;
+  const postObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const card = entry.target;
+      const video = card.querySelector('video');
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+        if (video) video.play().catch(() => {});
+        if (currentUser && card.dataset.viewRegistered !== 'true') {
+          card.dataset.viewRegistered = 'true';
+          api('/api/publicacoes/' + encodeURIComponent(card.dataset.postId) + '/visualizacao', { method: 'POST' }).catch(() => {});
+        }
+      } else if (video) {
+        video.pause();
+      }
+    });
+  }, { threshold: [0, 0.65, 1] }) : null;
 
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -70,7 +88,7 @@
       currentUser = null;
     }
     if (currentUser) {
-      createEntry.hidden = false;
+      openComposerButton.hidden = false;
       composer.hidden = true;
       const accountName = currentUser.nomeEmpresa || currentUser.nome || currentUser.nome_empresa || 'Minha conta';
       document.getElementById('composer-account').textContent = accountName;
@@ -79,15 +97,12 @@
       try {
         const moderation = await api('/api/publicacoes/moderacao/acesso');
         if (moderation.autorizado) {
-          const shortcut = document.createElement('a');
-          shortcut.className = 'moderation-shortcut';
-          shortcut.href = '/pages/moderacao-publicacoes.html';
-          shortcut.textContent = 'Analisar denúncias';
-          document.querySelector('.publicacoes-heading').appendChild(shortcut);
+          const shortcut = document.getElementById('moderation-shortcut');
+          if (shortcut) shortcut.hidden = false;
         }
       } catch {}
     } else {
-      createEntry.hidden = true;
+      openComposerButton.hidden = true;
       composer.hidden = true;
     }
   }
@@ -100,7 +115,7 @@
         ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
         : '';
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><video controls playsinline preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
+        return '<div class="publication-media-item"><video controls playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
       return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
@@ -129,22 +144,29 @@
       : '';
     const avatar = post.autor.foto
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
-      : escapeHTML(initials(post.autor.nome));
-    const authorDetail = post.autor.tipo === 'empresa'
-      ? '<span data-followers-count>' + Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + '</span> seguidores'
-      : escapeHTML(post.autor.tituloProfissional || 'Título profissional não informado');
+      : '<span>' + escapeHTML(initials(post.autor.nome)) + '</span>';
     const authorProfileUrl = post.autor.tipo === 'empresa'
       ? '/pages/empresa-perfil.html?id=' + encodeURIComponent(post.autor.id)
       : '/pages/candidato-perfil.html?id=' + encodeURIComponent(post.autor.id);
-    const authorName = escapeHTML(post.autor.nome);
-    return '<article class="publication-card" data-post-id="' + post.id + '">' +
-      '<header class="publication-card-header"><a class="publication-avatar publication-author-link" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Ver perfil de ' + authorName + '">' + avatar + '</a>' +
-      '<div class="publication-author"><a class="publication-author-name-link" href="' + escapeHTML(authorProfileUrl) + '">' + authorName + '</a><small>' + authorDetail + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
-      (currentUser && currentUser.tipo === 'candidato' && post.autor.tipo === 'empresa' && !post.minha
-        ? '<button type="button" class="follow-company-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
-        : '') +
-      '</header>' + description + renderMedia(post.midias || []) +
-      '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
+    const media = renderMedia(post.midias || []);
+    const liked = Boolean(post.minhaCurtida);
+    const saved = Boolean(post.minhaSalva);
+    const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
+    const moreAction = post.minha
+      ? '<button type="button" data-action="delete" data-id="' + post.id + '">Excluir publicação</button>'
+      : '<button type="button" data-action="report" data-id="' + post.id + '">Denunciar publicação</button>';
+    return '<article class="publication-card short-publication-card" data-post-id="' + post.id + '">' +
+      '<div class="short-publication-media">' + media + '</div>' +
+      '<div class="short-publication-caption">' + description + '</div>' +
+      '<aside class="short-publication-actions">' +
+        '<a class="short-author-avatar" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Abrir perfil de ' + escapeHTML(post.autor.nome) + '">' + avatar + '</a>' +
+        '<button type="button" class="short-action-button like-toggle-button' + (liked ? ' liked' : '') + '" data-action="like" data-id="' + post.id + '" data-efeito="icone-curtir" aria-pressed="' + liked + '" aria-label="' + (liked ? 'Remover curtida' : 'Curtir publicação') + '">' +
+          '<svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong></button>' +
+        '<button type="button" class="short-action-button save-toggle-button' + (saved ? ' is-saved' : '') + '" data-action="save" data-id="' + post.id + '" aria-pressed="' + saved + '" aria-label="' + (saved ? 'Remover dos salvos' : 'Salvar publicação') + '"><i class="fa-' + (saved ? 'solid' : 'regular') + ' fa-bookmark" aria-hidden="true"></i><span>Salvar</span></button>' +
+        '<div class="short-more-wrap"><button type="button" class="short-action-button short-more-button" data-action="toggle-menu" aria-label="Mais opções" aria-expanded="false"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button><div class="short-more-menu" hidden>' + moreAction + '</div></div>' +
+      '</aside>' +
+      '<header class="short-publication-author"><strong>' + escapeHTML(post.autor.nome) + '</strong><span>' + escapeHTML(formatDate(post.criadaEm)) + '</span></header>' +
+    '</article>';
   }
 
   function updateLikeUI(card, liked, total) {
@@ -166,20 +188,22 @@
       feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
     }
     try {
-      const query = '?limit=15&cursor=' + cursor;
+      const query = '?limit=15&cursor=' + cursor + (followingOnly ? '&seguindo=1' : '');
       const result = await api('/api/publicacoes' + query);
       const posts = result.publicacoes || [];
       if (reset) feed.innerHTML = '';
       if (!posts.length && reset) {
-        feed.innerHTML = '<div class="feed-empty">Ainda não há publicações. Volte em breve para conferir as novidades.</div>';
+        feed.innerHTML = '<div class="feed-empty">' + (followingOnly ? 'Ainda não há publicações de perfis que você segue.' : 'Ainda não há publicações. Volte em breve para conferir as novidades.') + '</div>';
       } else {
         feed.insertAdjacentHTML('beforeend', posts.map(renderPost).join(''));
+        if (postObserver) feed.querySelectorAll('.short-publication-card:not([data-observed])').forEach(card => {
+          card.dataset.observed = 'true';
+          postObserver.observe(card);
+        });
       }
       cursor = result.proximoCursor;
       loadMoreButton.hidden = cursor === null;
-      document.getElementById('feed-count-label').textContent = posts.length
-        ? 'Novidades de candidatos e empresas'
-        : 'Publicações da comunidade';
+      document.getElementById('feed-count-label').textContent = followingOnly ? 'Publicações dos perfis que você segue' : 'Publicações da comunidade';
     } catch (error) {
       if (reset) feed.innerHTML = '<div class="feed-empty">Não foi possível carregar as publicações. Atualize a página para tentar novamente.</div>';
       toast(error.message);
@@ -562,6 +586,18 @@
   });
 
   loadMoreButton.addEventListener('click', () => loadPosts(false));
+  followingButton.addEventListener('click', () => {
+    if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+    followingOnly = !followingOnly;
+    followingButton.classList.toggle('is-active', followingOnly);
+    followingButton.setAttribute('aria-pressed', String(followingOnly));
+    document.getElementById('feed-title').textContent = followingOnly ? 'Seguindo' : 'Para você';
+    loadPosts(true);
+  });
+  backButton.addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else window.location.href = '/';
+  });
 
   feed.addEventListener('click', async event => {
     const expandButton = event.target.closest('[data-action="expand"]');
@@ -602,6 +638,32 @@
       } finally {
         button.disabled = false;
       }
+      return;
+    }
+    if (action === 'toggle-menu') {
+      const menu = button.parentElement.querySelector('.short-more-menu');
+      const opening = menu.hidden;
+      feed.querySelectorAll('.short-more-menu').forEach(item => { item.hidden = true; });
+      feed.querySelectorAll('[data-action="toggle-menu"]').forEach(item => item.setAttribute('aria-expanded', 'false'));
+      menu.hidden = !opening;
+      button.setAttribute('aria-expanded', String(opening));
+      return;
+    }
+    if (action === 'save') {
+      if (!currentUser) { window.location.href = '/pages/login.html'; return; }
+      if (button.disabled) return;
+      const wasSaved = button.getAttribute('aria-pressed') === 'true';
+      button.disabled = true;
+      try {
+        const result = await api('/api/publicacoes/' + encodeURIComponent(id) + '/salvar', { method: wasSaved ? 'DELETE' : 'POST' });
+        const saved = Boolean(result.salva);
+        button.classList.toggle('is-saved', saved);
+        button.setAttribute('aria-pressed', String(saved));
+        button.setAttribute('aria-label', saved ? 'Remover dos salvos' : 'Salvar publicação');
+        button.querySelector('i').className = 'fa-' + (saved ? 'solid' : 'regular') + ' fa-bookmark';
+        toast(saved ? 'Publicação salva.' : 'Publicação removida dos salvos.');
+      } catch (error) { toast(error.message); }
+      finally { button.disabled = false; }
       return;
     }
     if (action === 'like') {
