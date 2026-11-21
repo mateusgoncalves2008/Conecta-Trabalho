@@ -193,7 +193,7 @@
         if (error) reject(error);
         else resolve(duration);
       };
-      const timeout = setTimeout(() => finish(new Error('O navegador demorou para ler este vídeo. Tente outro arquivo MP4 ou WebM.')), 15000);
+      const timeout = setTimeout(() => finish(new Error('O navegador demorou para ler este vídeo. Tente outro arquivo de vídeo compatível com seu navegador.')), 15000);
       video.preload = 'metadata';
       video.muted = true;
       video.onloadedmetadata = () => {
@@ -202,7 +202,7 @@
         else if (duration > 60) finish(new Error('O vídeo deve ter no máximo 60 segundos.'));
         else finish(null, duration);
       };
-      video.onerror = () => finish(new Error('Este vídeo não pôde ser lido. Use um arquivo MP4 ou WebM.'));
+      video.onerror = () => finish(new Error('Este vídeo não pôde ser lido pelo navegador. Tente um arquivo MP4 com codec H.264.'));
       video.src = url;
       video.load();
     });
@@ -352,8 +352,14 @@
 
   function getSupportedVideoFile(file) {
     const extension = String(file.name || '').split('.').pop().toLowerCase();
-    const mime = file.type || (extension === 'mp4' ? 'video/mp4' : extension === 'webm' ? 'video/webm' : '');
-    if (!['video/mp4', 'video/webm'].includes(mime)) return null;
+    const mimeByExtension = {
+      mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm',
+      mkv: 'video/x-matroska', avi: 'video/x-msvideo', wmv: 'video/x-ms-wmv',
+      flv: 'video/x-flv', mpeg: 'video/mpeg', mpg: 'video/mpeg',
+      m4v: 'video/x-m4v', '3gp': 'video/3gpp', ogv: 'video/ogg', ts: 'video/mp2t'
+    };
+    const mime = mimeByExtension[extension];
+    if (!mime) return null;
     if (file.type === mime) return file;
     return new File([file], file.name, { type: mime, lastModified: file.lastModified || Date.now() });
   }
@@ -365,7 +371,7 @@
     if (!files.length) return;
     const original = files[0];
     const extension = String(original.name || '').split('.').pop().toLowerCase();
-    const isVideo = original.type.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v'].includes(extension);
+    const isVideo = original.type.startsWith('video/') || ['mp4', 'mov', 'webm', 'mkv', 'avi', 'wmv', 'flv', 'mpeg', 'mpg', 'm4v', '3gp', 'ogv', 'ts'].includes(extension);
     if (isVideo && files.length !== 1) {
       mediaFeedback.textContent = 'Escolha somente um vídeo por publicação.';
       mediaFeedback.hidden = false;
@@ -393,7 +399,7 @@
           file = await compressImage(file);
         } else {
           file = getSupportedVideoFile(file);
-          if (!file) throw new Error('Formato de vídeo não permitido. Use MP4 ou WebM.');
+          if (!file) throw new Error('Formato de vídeo não permitido. Confira a lista de formatos aceitos.');
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB.');
           progressText.textContent = 'Verificando a duração do vídeo...';
           duration = await readVideoDuration(file);
