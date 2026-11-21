@@ -138,7 +138,7 @@
   }
 
   function renderPost(post) {
-    const longDescription = (post.descricao || '').length > 30;
+    const longDescription = (post.descricao || '').length > 100;
     const description = post.descricao
       ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
         (longDescription ? '<button type="button" class="description-toggle" data-action="expand">Ler mais</button>' : '')
