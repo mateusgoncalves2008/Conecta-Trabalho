@@ -533,7 +533,7 @@
           delete card.dataset.likeConfirmedTotal;
         }
       };
-      updateLikeUI(card, true, Math.max(0, currentTotal + (wasLiked ? -1 : 1)));
+      updateLikeUI(card, !wasLiked, Math.max(0, currentTotal + (wasLiked ? -1 : 1)));
       void syncLike();
       return;
     }
