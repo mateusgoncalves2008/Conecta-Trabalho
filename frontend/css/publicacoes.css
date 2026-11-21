@@ -37,16 +37,16 @@
 .publication-feed{display:grid;gap:18px}
 .feed-loading,.feed-empty{padding:42px 20px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center;font-size:14px}
 .publication-card{overflow:hidden}
-.publication-card-header{display:flex;align-items:center;gap:11px;padding:18px 20px 12px}
-.publication-avatar{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;overflow:hidden;border-radius:50%;background:var(--soft);color:var(--navy);font-size:14px;font-weight:750}
+.publication-card-header{display:flex;align-items:center;gap:13px;padding:18px 20px 12px}
+.publication-avatar{display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;overflow:hidden;border-radius:50%;background:var(--soft);color:var(--navy);font-size:16px;font-weight:750}
 .publication-avatar img{width:100%;height:100%;object-fit:cover}
-.publication-author-link{display:grid;flex:0 0 44px;text-decoration:none;cursor:pointer}
+.publication-author-link{display:grid;flex:0 0 54px;text-decoration:none;cursor:pointer}
 .publication-author-link:focus-visible,.publication-author-name-link:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
 .publication-author{min-width:0;flex:1}
-.publication-author-name-link{display:block;overflow:hidden;color:var(--navy);font-size:13px;font-weight:750;text-decoration:none;text-overflow:ellipsis;white-space:nowrap}
+.publication-author-name-link{display:block;overflow:hidden;color:var(--navy);font-size:16px;font-weight:750;text-decoration:none;text-overflow:ellipsis;white-space:nowrap}
 .publication-author-name-link:hover{text-decoration:underline}
 .publication-author-name-link:focus-visible{border-radius:3px}
-.publication-author small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.publication-author small{display:block;margin-top:3px;color:var(--muted);font-size:13px}
 .follow-company-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:82px;min-height:34px;padding:7px 13px;border:1px solid var(--orange);border-radius:8px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s ease,border-color .15s ease}
 .follow-company-button:hover{border-color:var(--orange-dark);background:var(--orange-dark)}
 .follow-company-button.is-following{border-color:var(--line);background:var(--page);color:var(--ink)}
@@ -92,7 +92,11 @@
 .report-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
 .report-dialog-actions .button{padding:10px 14px}
 @media(max-width:600px){
- .publication-card-header{gap:9px;padding:15px 14px 11px}
+ .publication-card-header{gap:10px;padding:15px 14px 11px}
+ .publication-avatar{width:48px;height:48px;flex-basis:48px;font-size:15px}
+ .publication-author-link{flex-basis:48px}
+ .publication-author-name-link{font-size:15px}
+ .publication-author small{font-size:12px}
  .follow-company-button{min-width:72px;min-height:32px;padding:6px 10px;font-size:11px}
 
  .publicacoes-main{width:calc(100% - 24px);padding:38px 0 58px}
