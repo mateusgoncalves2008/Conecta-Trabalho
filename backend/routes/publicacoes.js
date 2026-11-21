@@ -1,6 +1,58 @@
 const express = require('express');
 const crypto = require('crypto');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { spawn } = require('child_process');
 const { Transform } = require('stream');
+const { pipeline } = require('stream/promises');
+const ffmpegStatic = require('ffmpeg-static');
+
+const FFMPEG_PATH = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
+let activeVideoConversions = 0;
+const MAX_ACTIVE_VIDEO_CONVERSIONS = 1;
+
+const runFfmpeg = (args, timeoutMs = 180000) => new Promise((resolve, reject) => {
+  const child = spawn(FFMPEG_PATH, args, { stdio: ['ignore', 'ignore', 'pipe'] });
+  let stderr = '';
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    child.kill('SIGKILL');
+  }, timeoutMs);
+  child.stderr.on('data', chunk => {
+    stderr += chunk.toString();
+    if (stderr.length > 30000) stderr = stderr.slice(-30000);
+  });
+  child.once('error', error => {
+    clearTimeout(timer);
+    reject(error);
+  });
+  child.once('close', code => {
+    clearTimeout(timer);
+    if (timedOut) return reject(Object.assign(new Error('A conversão do vídeo excedeu o tempo permitido.'), { statusCode: 408 }));
+    if (code !== 0) return reject(Object.assign(new Error('O FFmpeg não conseguiu processar o vídeo.'), { statusCode: 400, ffmpegDetails: stderr.slice(-4000) }));
+    resolve(stderr);
+  });
+});
+
+const probeVideoDuration = async inputPath => {
+  const output = await runFfmpeg(['-hide_banner', '-protocol_whitelist', 'file,pipe,data', '-i', inputPath, '-t', '0', '-f', 'null', '-'], 30000);
+  const match = /Duration:\s*(\d+):(\d{2}):(\d{2}(?:\.\d+)?)/.exec(output);
+  if (!match) throw Object.assign(new Error('Não foi possível identificar a duração real do vídeo.'), { statusCode: 400 });
+  const duration = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+  if (!Number.isFinite(duration) || duration <= 0) throw Object.assign(new Error('A duração do vídeo é inválida.'), { statusCode: 400 });
+  if (duration > MAX_VIDEO_SECONDS) throw Object.assign(new Error('O vídeo deve ter no máximo 60 segundos.'), { statusCode: 400 });
+  return Number(duration.toFixed(2));
+};
+
+const convertVideoToMp4 = (inputPath, outputPath) => runFfmpeg([
+  '-hide_banner', '-loglevel', 'error', '-y', '-protocol_whitelist', 'file,pipe,data',
+  '-i', inputPath, '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn',
+  '-map_metadata', '-1', '-map_chapters', '-1', '-vf', 'scale=1920:1920:force_original_aspect_ratio=decrease:force_divisible_by=2', '-c:v', 'libx264', '-preset', 'veryfast',
+  '-crf', '23', '-pix_fmt', 'yuv420p', '-threads', '2', '-c:a', 'aac', '-b:a', '128k',
+  '-movflags', '+faststart', '-f', 'mp4', outputPath
+]);
 const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { rateLimit } = require('express-rate-limit');
 
@@ -227,48 +279,104 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     if (!Number.isSafeInteger(length) || length < 12) return res.status(400).json({ erro: 'Não foi possível identificar o tamanho do arquivo.' });
     const maxBytes = kind === 'image' ? MAX_PHOTO_BYTES : MAX_VIDEO_BYTES;
     if (length > maxBytes) return res.status(413).json({ erro: kind === 'image' ? 'Cada foto pode ter no máximo 20 MB.' : 'Cada vídeo pode ter no máximo 150 MB.' });
-    const duration = kind === 'video' ? Number(req.headers['x-media-duration']) : null;
-    if (kind === 'video' && (!Number.isFinite(duration) || duration <= 0 || duration > MAX_VIDEO_SECONDS)) {
-      return res.status(400).json({ erro: 'O vídeo deve ter duração máxima de 60 segundos.' });
-    }
-    let inspected = false;
-    let prefix = Buffer.alloc(0);
-    let received = 0;
-    const validator = new Transform({
-      transform(chunk, _encoding, callback) {
-        received += chunk.length;
-        if (received > length || received > maxBytes) {
-          const error = new Error('O arquivo ultrapassou o tamanho permitido.');
-          error.statusCode = 413;
-          return callback(error);
-        }
-        if (!inspected) {
-          prefix = Buffer.concat([prefix, chunk]);
-          if (prefix.length < 12) return callback();
-          if (!isValidSignature(prefix, mime)) {
-            const error = new Error('O conteúdo enviado não corresponde ao formato informado.');
+
+    const createValidator = () => {
+      let inspected = false;
+      let prefix = Buffer.alloc(0);
+      let received = 0;
+      return new Transform({
+        transform(chunk, _encoding, callback) {
+          received += chunk.length;
+          if (received > length || received > maxBytes) {
+            const error = new Error('O arquivo ultrapassou o tamanho permitido.');
+            error.statusCode = 413;
+            return callback(error);
+          }
+          if (!inspected) {
+            prefix = Buffer.concat([prefix, chunk]);
+            if (prefix.length < 12) return callback();
+            if (!isValidSignature(prefix, mime)) {
+              const error = new Error('O conteúdo enviado não corresponde ao formato informado.');
+              error.statusCode = 400;
+              return callback(error);
+            }
+            inspected = true;
+            this.push(prefix);
+            prefix = Buffer.alloc(0);
+          } else {
+            this.push(chunk);
+          }
+          callback();
+        },
+        flush(callback) {
+          if (!inspected || received !== length) {
+            const error = new Error('O arquivo enviado está incompleto ou inválido.');
             error.statusCode = 400;
             return callback(error);
           }
-          inspected = true;
-          this.push(prefix);
-          prefix = Buffer.alloc(0);
-        } else {
-          this.push(chunk);
+          callback();
         }
-        callback();
-      },
-      flush(callback) {
-        if (!inspected || received !== length) {
-          const error = new Error('O arquivo enviado está incompleto ou inválido.');
-          error.statusCode = 400;
-          return callback(error);
-        }
-        callback();
+      });
+    };
+
+    if (kind === 'video') {
+      if (activeVideoConversions >= MAX_ACTIVE_VIDEO_CONVERSIONS) {
+        return res.status(429).json({ erro: 'Já existe um vídeo sendo processado. Aguarde um instante e tente novamente.' });
       }
-    });
+      activeVideoConversions += 1;
+      let tempDir = null;
+      let key = null;
+      try {
+        tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'conecta-video-'));
+        const inputPath = path.join(tempDir, 'original.' + media.extension);
+        const outputPath = path.join(tempDir, 'convertido.mp4');
+        await pipeline(req, createValidator(), fs.createWriteStream(inputPath, { flags: 'wx' }));
+        const duration = await probeVideoDuration(inputPath);
+        await convertVideoToMp4(inputPath, outputPath);
+        const outputStats = await fs.promises.stat(outputPath);
+        if (!outputStats.size || outputStats.size > MAX_VIDEO_BYTES) {
+          return res.status(413).json({ erro: 'O vídeo convertido ultrapassou o limite de 150 MB.' });
+        }
+        key = 'publicacoes/temporarios/' + req.session.user.id + '/' + crypto.randomUUID() + '.mp4';
+        await s3.send(new PutObjectCommand({
+          Bucket: storageBucket, Key: key, Body: fs.createReadStream(outputPath),
+          ContentLength: outputStats.size, ContentType: 'video/mp4', CacheControl: 'public, max-age=86400'
+        }));
+        const saved = await pool.query(
+          'INSERT INTO publicacao_midias (autor_id,storage_key,tipo,mime_type,tamanho_bytes,duracao_segundos) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,tipo,mime_type,tamanho_bytes,duracao_segundos',
+          [req.session.user.id, key, 'video', 'video/mp4', outputStats.size, duration]
+        );
+        const item = saved.rows[0];
+        res.status(201).json({
+          sucesso: true,
+          midia: {
+            id: item.id, tipo: item.tipo, mimeType: item.mime_type,
+            tamanhoBytes: Number(item.tamanho_bytes),
+            duracaoSegundos: item.duracao_segundos ? Number(item.duracao_segundos) : null,
+            url: mediaUrl(item.id)
+          }
+        });
+      } catch (error) {
+        if (key) {
+          try { await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: key })); } catch {}
+        }
+        if (error.statusCode) return res.status(error.statusCode).json({
+          erro: error.statusCode === 400 && error.ffmpegDetails
+            ? 'Não foi possível converter este vídeo. Verifique se o arquivo está íntegro e tente outro.'
+            : error.message
+        });
+        if (error.code === 'ENOENT') return res.status(503).json({ erro: 'O conversor de vídeos não está disponível no servidor.' });
+        throw error;
+      } finally {
+        activeVideoConversions = Math.max(0, activeVideoConversions - 1);
+        if (tempDir) await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+      }
+      return;
+    }
+
     const key = 'publicacoes/temporarios/' + req.session.user.id + '/' + crypto.randomUUID() + '.' + media.extension;
     try {
+      const validator = createValidator();
       const upload = s3.send(new PutObjectCommand({
         Bucket: storageBucket, Key: key, Body: validator,
         ContentLength: length, ContentType: mime, CacheControl: 'public, max-age=86400'
@@ -277,7 +385,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
       await upload;
       const saved = await pool.query(
         'INSERT INTO publicacao_midias (autor_id,storage_key,tipo,mime_type,tamanho_bytes,duracao_segundos) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,tipo,mime_type,tamanho_bytes,duracao_segundos',
-        [req.session.user.id, key, kind, mime, length, duration]
+        [req.session.user.id, key, kind, mime, length, null]
       );
       const item = saved.rows[0];
       res.status(201).json({
@@ -285,7 +393,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
         midia: {
           id: item.id, tipo: item.tipo, mimeType: item.mime_type,
           tamanhoBytes: Number(item.tamanho_bytes),
-          duracaoSegundos: item.duracao_segundos ? Number(item.duracao_segundos) : null,
+          duracaoSegundos: null,
           url: mediaUrl(item.id)
         }
       });
@@ -295,7 +403,6 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
       throw error;
     }
   }));
-
   router.delete('/upload/:id', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
