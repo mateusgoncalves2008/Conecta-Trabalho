@@ -422,7 +422,7 @@
   }
 
   fileInput.addEventListener('change', () => processSelectedFiles([...(fileInput.files || [])]));
-  photoPicker.addEventListener('change', () => processSelectedFiles([...(photoPicker.files || [])]));
+  photoPicker.addEventListener('change', () => {\n    const addedFiles = [...(photoPicker.files || [])];\n    const existingFiles = selectedFiles.filter(item => item.kind === 'image').map(item => item.file);\n    processSelectedFiles([...existingFiles, ...addedFiles]);\n  });
   videoPicker.addEventListener('change', () => processSelectedFiles([...(videoPicker.files || [])]));
   composer.addEventListener('click', event => {
     const button = event.target.closest('[data-open-picker]');
