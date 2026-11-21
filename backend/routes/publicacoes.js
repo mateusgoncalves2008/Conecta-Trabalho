@@ -38,7 +38,7 @@ const runFfmpeg = (args, timeoutMs = 180000) => new Promise((resolve, reject) =>
 
 const probeVideoDuration = async inputPath => {
   const output = await runFfmpeg(['-hide_banner', '-protocol_whitelist', 'file,pipe,data', '-i', inputPath, '-t', '0', '-f', 'null', '-'], 30000);
-  const match = /Duration:\\s*(\\d+):(\\d{2}):(\\d{2}(?:\\.\\d+)?)/.exec(output);
+  const match = /Duration:\s*(\\d+):(\\d{2}):(\\d{2}(?:\\.\\d+)?)/.exec(output);
   if (!match) throw Object.assign(new Error('Não foi possível identificar a duração real do vídeo.'), { statusCode: 400 });
   const duration = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
   if (!Number.isFinite(duration) || duration <= 0) throw Object.assign(new Error('A duração do vídeo é inválida.'), { statusCode: 400 });
