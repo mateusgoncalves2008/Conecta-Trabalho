@@ -10,12 +10,7 @@
   const closeComposerButton = document.getElementById('close-publication-composer');
   const profileAvatar = document.getElementById('composer-profile-avatar');
   const photoPicker = document.getElementById('publication-photo-picker');
-  const cameraPicker = document.getElementById('publication-camera-picker');
   const videoPicker = document.getElementById('publication-video-picker');
-  const startRecordingButton = document.getElementById('start-video-recording');
-  const stopRecordingButton = document.getElementById('stop-video-recording');
-  const recordingControls = document.getElementById('recording-controls');
-  const recordingTime = document.getElementById('recording-time');
   const form = document.getElementById('publication-form');
   const descriptionInput = document.getElementById('publication-description');
   const descriptionField = document.getElementById('composer-description-field');
@@ -36,11 +31,6 @@
   let cursor = 0;
   let reportTarget = null;
   let loading = false;
-  let mediaRecorder = null;
-  let recordingStream = null;
-  let recordingChunks = [];
-  let recordingStartedAt = 0;
-  let recordingTimer = null;
 
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -325,7 +315,6 @@
     publishButton.disabled = true;
     fileInput.value = '';
     photoPicker.value = '';
-    cameraPicker.value = '';
     videoPicker.value = '';
   }
 
@@ -378,63 +367,16 @@
 
   fileInput.addEventListener('change', () => processSelectedFiles([...(fileInput.files || [])]));
   photoPicker.addEventListener('change', () => processSelectedFiles([...(photoPicker.files || [])]));
-  cameraPicker.addEventListener('change', () => processSelectedFiles([...(cameraPicker.files || [])]));
   videoPicker.addEventListener('change', () => processSelectedFiles([...(videoPicker.files || [])]));
   composer.addEventListener('click', event => {
     const button = event.target.closest('[data-open-picker]');
     if (!button) return;
     if (button.dataset.openPicker === 'photos') photoPicker.click();
-    if (button.dataset.openPicker === 'camera') cameraPicker.click();
     if (button.dataset.openPicker === 'video') videoPicker.click();
   });
 
-  function stopRecordingTracks() {
-    if (recordingTimer) clearInterval(recordingTimer);
-    recordingTimer = null;
-    if (recordingStream) recordingStream.getTracks().forEach(track => track.stop());
-    recordingStream = null;
-    mediaRecorder = null;
-    recordingControls.hidden = true;
-    startRecordingButton.disabled = false;
-  }
-  function finishVideoRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }
-  startRecordingButton.addEventListener('click', async () => {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { toast('A gravação não é compatível com este navegador. Escolha um vídeo do dispositivo.'); return; }
-    try {
-      recordingStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
-      recordingChunks = [];
-      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
-      mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
-      mediaRecorder.ondataavailable = event => { if (event.data && event.data.size) recordingChunks.push(event.data); };
-      mediaRecorder.onerror = () => { stopRecordingTracks(); toast('Não foi possível gravar o vídeo neste dispositivo.'); };
-      mediaRecorder.onstop = async () => {
-        const recordedType = mediaRecorder?.mimeType || mimeType || 'video/webm';
-        const blob = new Blob(recordingChunks, { type: recordedType });
-        stopRecordingTracks();
-        if (!blob.size) return;
-        const isMp4 = recordedType.includes('mp4');
-        const file = new File([blob], 'video-conectatrabalho.' + (isMp4 ? 'mp4' : 'webm'), { type: isMp4 ? 'video/mp4' : 'video/webm', lastModified: Date.now() });
-        await processSelectedFiles([file]);
-      };
-      recordingStartedAt = Date.now();
-      recordingControls.hidden = false;
-      startRecordingButton.disabled = true;
-      const updateTime = () => {
-        const elapsed = Math.min(60, Math.floor((Date.now() - recordingStartedAt) / 1000));
-        recordingTime.textContent = '00:' + String(elapsed).padStart(2, '0') + ' / 01:00';
-        if (elapsed >= 60) finishVideoRecording();
-      };
-      updateTime(); recordingTimer = setInterval(updateTime, 250); mediaRecorder.start(250);
-    } catch (error) {
-      stopRecordingTracks();
-      toast(error.name === 'NotAllowedError' ? 'Permita o acesso à câmera e ao microfone para gravar.' : 'Não foi possível acessar a câmera. Verifique as permissões do dispositivo.');
-    }
-  });
-  stopRecordingButton.addEventListener('click', finishVideoRecording);
-
   function openComposer() { composer.hidden = false; document.body.classList.add('publication-composer-open'); closeComposerButton.focus(); }
   function closeComposer() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') finishVideoRecording();
     composer.hidden = true; document.body.classList.remove('publication-composer-open');
     if (!progress.hidden) return;
     clearPreview(); descriptionInput.value = ''; openComposerButton.focus();
