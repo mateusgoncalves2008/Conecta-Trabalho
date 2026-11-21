@@ -16,10 +16,16 @@
 <body>
   <main class="publicacoes-main publication-viewer-main">
     <button class="publication-back-button" id="publication-back" type="button" aria-label="Voltar"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
-    <aside class="publication-viewer-sidebar" aria-label="Filtros do feed">
+    <aside class="publication-viewer-sidebar" aria-label="Navegação das publicações">
+      <label class="publication-search" aria-label="Pesquisar publicações"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="publication-search" type="search" placeholder="Pesquisar" autocomplete="off"></label>
+      <button class="publication-explore-button is-active" id="publication-explore" type="button" aria-pressed="true"><i class="fa-regular fa-compass" aria-hidden="true"></i><span>Explorar</span></button>
       <button class="publication-following-button" id="publication-following" type="button" aria-pressed="false"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Seguindo</span></button>
       <button class="publication-viewer-create" id="open-publication-composer" type="button" hidden><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Criar</span></button>
     </aside>
+    <div class="publication-feed-navigation" aria-label="Navegar entre publicações">
+      <button id="publication-prev" type="button" aria-label="Publicação anterior"><i class="fa-solid fa-chevron-up" aria-hidden="true"></i></button>
+      <button id="publication-next" type="button" aria-label="Próxima publicação"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+    </div>
     <section class="publicacoes-heading publication-viewer-heading">
       <span class="eyebrow">CONECTATRABALHO</span>
       <h1 class="visually-hidden">Publicações</h1>
