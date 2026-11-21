@@ -24,6 +24,7 @@
   const publishButton = document.getElementById('publish-button');
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
+  const mediaFeedback = document.getElementById('composer-media-feedback');
   const loadMoreButton = document.getElementById('load-more');
   const reportDialog = document.getElementById('report-dialog');
   const reportForm = document.getElementById('report-form');
@@ -181,19 +182,29 @@
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.onloadedmetadata = () => {
-        const duration = video.duration;
+      let settled = false;
+      const finish = (error, duration) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
         URL.revokeObjectURL(url);
-        if (!Number.isFinite(duration) || duration <= 0) reject(new Error('Não foi possível identificar a duração do vídeo.'));
-        else if (duration > 60) reject(new Error('O vídeo deve ter no máximo 60 segundos.'));
+        video.removeAttribute('src');
+        video.load();
+        if (error) reject(error);
         else resolve(duration);
       };
-      video.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error('Não foi possível abrir este vídeo.'));
+      const timeout = setTimeout(() => finish(new Error('O navegador demorou para ler este vídeo. Tente outro arquivo MP4 ou WebM.')), 15000);
+      video.preload = 'metadata';
+      video.muted = true;
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        if (!Number.isFinite(duration) || duration <= 0) finish(new Error('Não foi possível identificar a duração do vídeo.'));
+        else if (duration > 60) finish(new Error('O vídeo deve ter no máximo 60 segundos.'));
+        else finish(null, duration);
       };
+      video.onerror = () => finish(new Error('Este vídeo não pôde ser lido. Use um arquivo MP4 ou WebM.'));
       video.src = url;
+      video.load();
     });
   }
 
@@ -339,36 +350,67 @@
     publishButton.disabled = !selectedFiles.length;
   }
 
+  function getSupportedVideoFile(file) {
+    const extension = String(file.name || '').split('.').pop().toLowerCase();
+    const mime = file.type || (extension === 'mp4' ? 'video/mp4' : extension === 'webm' ? 'video/webm' : '');
+    if (!['video/mp4', 'video/webm'].includes(mime)) return null;
+    if (file.type === mime) return file;
+    return new File([file], file.name, { type: mime, lastModified: file.lastModified || Date.now() });
+  }
+
   async function processSelectedFiles(files) {
     clearPreview();
+    mediaFeedback.hidden = true;
+    mediaFeedback.textContent = '';
     if (!files.length) return;
-    const isVideo = file => file.type.startsWith('video/');
-    const hasVideo = files.some(isVideo);
-    if ((hasVideo && files.length !== 1) || (!hasVideo && files.length > 10)) { toast('Escolha somente 1 vídeo ou até 10 fotos por publicação.'); return; }
+    const original = files[0];
+    const extension = String(original.name || '').split('.').pop().toLowerCase();
+    const isVideo = original.type.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v'].includes(extension);
+    if (isVideo && files.length !== 1) {
+      mediaFeedback.textContent = 'Escolha somente um vídeo por publicação.';
+      mediaFeedback.hidden = false;
+      return;
+    }
+    if (!isVideo && files.length > 10) {
+      mediaFeedback.textContent = 'Você pode selecionar até 10 fotos por publicação.';
+      mediaFeedback.hidden = false;
+      return;
+    }
     fileInput.disabled = true;
     progress.hidden = false;
+    progressText.textContent = 'Preparando vídeo...';
     try {
       for (let index = 0; index < files.length; index++) {
-        progressText.textContent = 'Preparando arquivo ' + (index + 1) + ' de ' + files.length + '...';
-        const original = files[index];
-        const kind = isVideo(original) ? 'video' : 'image';
-        const allowed = kind === 'video' ? ['video/mp4', 'video/webm'] : ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(original.type)) throw new Error('Formato não permitido. Use JPG, PNG, WebP, MP4 ou WebM.');
+        const source = files[index];
+        const sourceExtension = String(source.name || '').split('.').pop().toLowerCase();
+        const kind = source.type.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v'].includes(sourceExtension) ? 'video' : 'image';
+        let file = source;
         let duration = null;
-        let file = original;
         if (kind === 'image') {
+          const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+          if (!allowed.includes(file.type)) throw new Error('Formato de foto não permitido. Use JPG, PNG ou WebP.');
           if (file.size > 20 * 1024 * 1024) throw new Error('Cada foto deve ter no máximo 20 MB.');
           file = await compressImage(file);
         } else {
+          file = getSupportedVideoFile(file);
+          if (!file) throw new Error('Formato de vídeo não permitido. Use MP4 ou WebM.');
           if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB.');
+          progressText.textContent = 'Verificando a duração do vídeo...';
           duration = await readVideoDuration(file);
-          if (file.size > 150 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 150 MB mesmo depois da compressão.');
         }
         selectedFiles.push({ file, kind, duration, previewUrl: URL.createObjectURL(file) });
       }
       renderPreview();
-    } catch (error) { clearPreview(); toast(error.message); }
-    finally { fileInput.disabled = false; progress.hidden = true; }
+      mediaFeedback.hidden = true;
+      mediaFeedback.textContent = '';
+    } catch (error) {
+      clearPreview();
+      mediaFeedback.textContent = error && error.message ? error.message : 'Não foi possível carregar este arquivo.';
+      mediaFeedback.hidden = false;
+    } finally {
+      fileInput.disabled = false;
+      progress.hidden = true;
+    }
   }
 
   fileInput.addEventListener('change', () => processSelectedFiles([...(fileInput.files || [])]));
