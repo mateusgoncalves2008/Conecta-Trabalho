@@ -1398,7 +1398,7 @@ html[data-theme="dark"] .company-post-report-dialog .dialog-close{background:#26
   font-size:11px;
 }
 .company-public-post-detail .publication-description{
-  padding:0 20px 15px;
+  padding:15px 20px 15px;
   color:var(--ink);
   font-size:14px;
   line-height:1.65;
@@ -1534,7 +1534,7 @@ html[data-theme=dark] .company-public-post-detail .company-public-post-detail-st
     padding:15px 14px 11px;
   }
   .company-public-post-detail .publication-description{
-    padding:0 14px 13px;
+    padding:13px 14px 13px;
   }
   .company-public-post-detail .company-public-post-detail-media{
     grid-template-columns:repeat(2,minmax(0,1fr));
