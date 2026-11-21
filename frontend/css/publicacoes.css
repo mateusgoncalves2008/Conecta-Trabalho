@@ -246,3 +246,59 @@ html[data-theme=dark] .composer-guideline p{color:#b9c5d2}
 .composer-media-feedback{margin:12px 0 0;padding:11px 14px;border:1px solid #e6b9b2;border-radius:8px;background:#fff4f2;color:#9b3328;font-size:13px;line-height:1.5}
 .composer-media-feedback[hidden]{display:none!important}
 html[data-theme=dark] .composer-media-feedback{border-color:#75443e;background:#352321;color:#ffc3b9}
+
+/* Editor de publicação inspirado na referência enviada. */
+.publication-composer-fullscreen .composer-fullscreen-content{width:min(1544px,calc(100% - 40px));padding:28px 0 34px}
+.publication-composer-fullscreen .composer-fullscreen-intro{display:none}
+.composer-editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:24px;align-items:start}
+.composer-editor-layout[hidden]{display:none!important}
+.composer-editor-details{min-width:0;padding:0 20px 22px;border:1px solid #e2e5e9;border-radius:9px;background:#fff}
+.composer-editor-details>h3{margin:0 -20px 24px;padding:0 20px 14px;border-bottom:1px solid #e8eaed;color:#171717;font-size:16px}
+.composer-editor-label{display:block;margin:0 0 10px;color:#151515;font-size:13px;font-weight:700}
+.composer-title-input-wrap{position:relative}
+.composer-title-input-wrap input{width:100%;height:45px;padding:10px 55px 10px 12px;border:1px solid #dedede;border-radius:7px 7px 0 0;background:#f2f2f2;color:#222;font:inherit;font-size:14px}
+.composer-title-input-wrap>span{position:absolute;right:12px;top:14px;color:#8b929b;font-size:12px}
+.composer-description-field{margin:0}
+.composer-description-field .composer-editor-label{margin-top:20px}
+.composer-description-field textarea{width:100%;min-height:155px;padding:12px;border:1px solid #dedede;border-radius:0 0 7px 7px;background:#f2f2f2;color:#222;font:inherit;font-size:14px;resize:vertical}
+.composer-description-tools{display:flex;align-items:center;gap:14px;margin-top:-42px;padding:0 12px 10px;position:relative}
+.composer-description-tools button{padding:0;border:0;background:transparent;color:#3d4b5c;font-size:12px;cursor:pointer}
+.composer-description-tools span{margin-left:auto;color:#8b929b;font-size:12px}
+.composer-photo-section{margin-top:58px}
+.composer-photo-heading{display:flex;align-items:center;gap:12px}
+.composer-photo-heading strong{color:#151515;font-size:13px}
+.composer-photo-heading span,.composer-photo-section>p{color:#8290a0;font-size:11px}
+.composer-photo-section>p{margin:4px 0 12px}
+.publication-composer-fullscreen .upload-preview{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+.publication-composer-fullscreen .upload-preview-item{width:164px;height:164px;flex:0 0 164px;aspect-ratio:1;overflow:hidden;border:0;border-radius:10px;background:#eee}
+.publication-composer-fullscreen .upload-preview-item img{width:100%;height:100%;object-fit:cover}
+.publication-composer-fullscreen .upload-preview-item .upload-video-placeholder{width:100%;height:100%}
+.upload-preview-item.is-cover .upload-cover-label{position:absolute;top:0;left:0;padding:4px 8px;border-radius:0 0 7px 0;background:#111;color:#fff;font-size:12px}
+.upload-preview-item button{top:4px;right:4px;width:21px;height:21px;background:rgba(30,30,30,.65);color:#fff}
+.upload-add-tile{display:grid;place-items:center;width:164px;height:164px;border:2px dashed #d5d5d5;border-radius:8px;background:#fff;color:#aaa;font-size:32px;cursor:pointer}
+.composer-add-media{display:none}
+.composer-preview-column{position:sticky;top:94px;min-width:0}
+.composer-preview-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:16px;padding:4px;border-radius:7px;background:#ececee}
+.composer-preview-tabs button{min-height:30px;border:0;border-radius:5px;background:transparent;color:#344052;font-size:12px;cursor:pointer}
+.composer-preview-tabs button.is-active{background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px #00000012}
+.composer-phone{position:relative;display:flex;flex-direction:column;width:100%;height:622px;overflow:hidden;border:7px solid #101010;border-radius:24px;background:#050505;color:#fff}
+.composer-phone-status{display:flex;justify-content:space-between;padding:9px 12px;font-size:10px}
+.composer-phone-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;font-size:10px}
+.composer-phone-media{display:grid;place-items:center;flex:1;min-height:0;overflow:hidden;background:#111}
+.composer-phone-media>img{width:100%;height:100%;object-fit:contain}
+.composer-phone-media>i{color:#888;font-size:40px}
+.composer-phone-video{display:flex;flex-direction:column;align-items:center;gap:12px;color:#ddd;font-size:12px}
+.composer-phone-video i{display:grid;place-items:center;width:54px;height:54px;border:1px solid #fff;border-radius:50%;font-size:19px}
+.composer-phone-actions{display:flex;gap:19px;padding:10px 12px;font-size:18px}
+.composer-phone-caption{min-height:54px;padding:0 12px 8px;font-size:10px}
+.composer-phone-caption strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.composer-phone-caption p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:4px 0;color:#ddd;line-height:1.35}
+.composer-phone-bottom{display:flex;justify-content:space-around;padding:11px 5px;border-top:1px solid #292929;font-size:14px}
+.composer-phone[data-preview-mode="web"]{border-radius:12px}
+html[data-theme=dark] .composer-editor-details{background:#182638;border-color:#40536a}
+html[data-theme=dark] .composer-editor-details>h3,html[data-theme=dark] .composer-editor-label,html[data-theme=dark] .composer-photo-heading strong{color:#edf2f7}
+html[data-theme=dark] .composer-title-input-wrap input,html[data-theme=dark] .composer-description-field textarea{background:#111e2e;border-color:#40536a;color:#edf2f7}
+html[data-theme=dark] .composer-description-tools button{color:#dce5ef}
+html[data-theme=dark] .upload-add-tile{background:#182638;border-color:#40536a;color:#aebdce}
+@media(max-width:900px){.composer-editor-layout{grid-template-columns:minmax(0,1fr) 250px;gap:16px}.publication-composer-fullscreen .upload-preview-item,.upload-add-tile{width:132px;height:132px;flex-basis:132px}.composer-phone{height:560px}}
+@media(max-width:680px){.publication-composer-fullscreen .composer-fullscreen-content{width:calc(100% - 22px);padding:18px 0 30px}.composer-editor-layout{grid-template-columns:1fr}.composer-preview-column{position:static;width:min(290px,100%);margin:0 auto}.composer-phone{height:570px}.publication-composer-fullscreen .upload-preview-item,.upload-add-tile{width:calc((100vw - 70px)/2);height:calc((100vw - 70px)/2);flex-basis:calc((100vw - 70px)/2)}}
