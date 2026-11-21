@@ -16,7 +16,6 @@
   const stopRecordingButton = document.getElementById('stop-video-recording');
   const recordingControls = document.getElementById('recording-controls');
   const recordingTime = document.getElementById('recording-time');
-  const visitorNote = document.getElementById('visitor-note');
   const form = document.getElementById('publication-form');
   const descriptionInput = document.getElementById('publication-description');
   const fileInput = document.getElementById('publication-files');
@@ -65,7 +64,6 @@
     if (currentUser) {
       createEntry.hidden = false;
       composer.hidden = true;
-      visitorNote.hidden = true;
       const accountName = currentUser.nomeEmpresa || currentUser.nome || currentUser.nome_empresa || 'Minha conta';
       document.getElementById('composer-account').textContent = accountName;
       const avatarUrl = currentUser.fotoPerfil || currentUser.foto_perfil || currentUser.foto || currentUser.avatar || '';
@@ -83,7 +81,6 @@
     } else {
       createEntry.hidden = true;
       composer.hidden = true;
-      visitorNote.hidden = false;
     }
   }
 
