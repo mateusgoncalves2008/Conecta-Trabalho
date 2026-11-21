@@ -191,7 +191,7 @@
       feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
     }
     try {
-      const query = '?limit=15&cursor=' + cursor + (followingOnly ? '&seguindo=1' : '');
+      const query = '?limit=15&cursor=' + cursor + (followingOnly ? '&seguindo=1' : '') + (searchTerm.trim() ? '&q=' + encodeURIComponent(searchTerm.trim()) : '');
       const result = await api('/api/publicacoes' + query);
       const posts = result.publicacoes || [];
       if (reset) feed.innerHTML = '';
@@ -605,7 +605,12 @@
       feed.appendChild(note);
     } else if ((!term || visible) && note) note.remove();
   }
-  searchInput.addEventListener('input', () => { searchTerm = searchInput.value; applyPostSearch(); });
+  let searchDebounce = null;
+  searchInput.addEventListener('input', () => {
+    searchTerm = searchInput.value;
+    if (searchDebounce) clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => loadPosts(true), 300);
+  });
   exploreButton.addEventListener('click', () => {
     followingOnly = false;
     followingButton.classList.remove('is-active');
