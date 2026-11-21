@@ -142,11 +142,9 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     if (!Number.isSafeInteger(companyId) || companyId < 1) return res.status(400).json({ erro: 'Empresa inválida.' });
     const company = await pool.query("SELECT id FROM usuarios WHERE id=$1 AND tipo='empresa'", [companyId]);
     if (!company.rowCount) return res.status(404).json({ erro: 'Empresa não encontrada.' });
-    const followingOnly = req.query.seguindo === '1';
-    if (followingOnly && !req.session.user) return res.status(401).json({ erro: 'Faça login para ver os perfis que você segue.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,u.titulo_profissional,COALESCE(NULLIF(u.nome_empresa,\\'\\'),NULLIF(u.nome_fantasia,\\'\\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto,(SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$3) AS seguindo FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id WHERE (NOT $4::boolean OR EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.usuario_id=$3 AND es.empresa_id=p.autor_id)) ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
-      [limit + 1, cursor, req.session.user?.id || null, followingOnly]
+      'SELECT p.id,p.descricao,p.criada_em,COUNT(v.usuario_id)::int AS visualizacoes,(SELECT COUNT(*)::int FROM publicacao_reacoes r WHERE r.publicacao_id=p.id) AS total_curtidas,EXISTS(SELECT 1 FROM publicacao_reacoes r WHERE r.publicacao_id=p.id AND r.usuario_id=$2) AS minha_curtida,(p.autor_id=$3) AS minha FROM publicacoes p LEFT JOIN publicacao_visualizacoes v ON v.publicacao_id=p.id WHERE p.autor_id=$1 GROUP BY p.id ORDER BY p.criada_em DESC,p.id DESC',
+      [companyId, req.session.user?.id || null, req.session.user?.id || null]
     );
     if (!posts.rowCount) return res.json({ publicacoes: [] });
     const ids = posts.rows.map(post => post.id);
@@ -224,9 +222,11 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     const limit = Math.min(Math.max(Number(req.query.limit) || 15, 1), 30);
     const cursor = Number(req.query.cursor) || 0;
     if (!Number.isSafeInteger(cursor) || cursor < 0) return res.status(400).json({ erro: 'Página inválida.' });
+    const followingOnly = req.query.seguindo === '1';
+    if (followingOnly && !req.session.user) return res.status(401).json({ erro: 'Faça login para ver os perfis que você segue.' });
     const posts = await pool.query(
-      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,u.titulo_profissional,COALESCE(NULLIF(u.nome_empresa,\'\'),NULLIF(u.nome_fantasia,\'\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto,(SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$3) AS seguindo FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
-      [limit + 1, cursor, req.session.user?.tipo === 'candidato' ? req.session.user.id : null]
+      'SELECT p.id,p.descricao,p.criada_em,u.id AS autor_id,u.nome,u.tipo,u.titulo_profissional,COALESCE(NULLIF(u.nome_empresa,\\'\\'),NULLIF(u.nome_fantasia,\\'\\'),u.nome) AS nome_exibicao,u.foto_perfil,u.visibilidade_foto,(SELECT COUNT(*)::int FROM empresas_seguidoras es WHERE es.empresa_id=u.id) AS total_seguidores,EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.empresa_id=u.id AND es.usuario_id=$3) AS seguindo FROM publicacoes p JOIN usuarios u ON u.id=p.autor_id WHERE (NOT $4::boolean OR EXISTS(SELECT 1 FROM empresas_seguidoras es WHERE es.usuario_id=$3 AND es.empresa_id=p.autor_id)) ORDER BY p.criada_em DESC,p.id DESC LIMIT $1 OFFSET $2',
+      [limit + 1, cursor, req.session.user?.id || null, followingOnly]
     );
     const hasMore = posts.rows.length > limit;
     const rows = posts.rows.slice(0, limit);
