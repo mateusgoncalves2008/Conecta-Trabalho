@@ -49,7 +49,7 @@ const probeVideoDuration = async inputPath => {
 const convertVideoToMp4 = (inputPath, outputPath) => runFfmpeg([
   '-hide_banner', '-loglevel', 'error', '-y', '-protocol_whitelist', 'file,pipe,data',
   '-i', inputPath, '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn',
-  '-map_metadata', '-1', '-map_chapters', '-1', '-c:v', 'libx264', '-preset', 'veryfast',
+  '-map_metadata', '-1', '-map_chapters', '-1', '-vf', 'scale=1920:1920:force_original_aspect_ratio=decrease:force_divisible_by=2', '-c:v', 'libx264', '-preset', 'veryfast',
   '-crf', '23', '-pix_fmt', 'yuv420p', '-threads', '2', '-c:a', 'aac', '-b:a', '128k',
   '-movflags', '+faststart', '-f', 'mp4', outputPath
 ]);
