@@ -740,13 +740,15 @@
         if (postTile) { openPostViewer(Number(postTile.dataset.companyPostIndex)); return; }
         const photoButton = event.target.closest('[data-company-photo-index]');
         if (photoButton) { openPhoto(Number(photoButton.dataset.companyPhotoIndex)); return; }
-        const descriptionToggle = event.target.closest('[data-toggle-description]');
+        const descriptionToggle = event.target.closest('[data-toggle-description],[data-post-description-toggle]');
         if (descriptionToggle) {
-          const description = tabContent.querySelector('#company-public-full-description');
+          const description = descriptionToggle.hasAttribute('data-post-description-toggle')
+            ? descriptionToggle.parentElement.querySelector('[data-description]')
+            : tabContent.querySelector('#company-public-full-description');
           if (description) {
-            const expanded = description.classList.toggle('is-expanded');
-            description.classList.toggle('is-collapsed', !expanded);
-            descriptionToggle.textContent = expanded ? 'Ver menos' : 'Ver mais';
+            const expanded = description.classList.toggle('is-collapsed') === false;
+            description.classList.toggle('is-expanded', expanded);
+            descriptionToggle.textContent = expanded ? 'Ver menos' : 'Ver mais...';
             descriptionToggle.setAttribute('aria-expanded', String(expanded));
           }
         }
