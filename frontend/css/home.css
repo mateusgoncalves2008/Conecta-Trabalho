@@ -1223,7 +1223,7 @@ html[data-theme="dark"] .company-public-nav button[aria-current="page"]{
 
 /* Publicações no perfil público da empresa */
 .company-public-posts-panel{min-width:0}
-.company-public-post-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:22px}
+.company-public-post-grid{display:flex;flex-direction:column;align-items:center;gap:22px;margin:22px auto 0;width:100%;max-width:760px}
 .company-public-post-tile{position:relative;display:block;min-width:0;aspect-ratio:1/1;padding:0;overflow:hidden;border:0;border-radius:3px;background:#e8edf2}
 .company-public-post-preview{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
 .company-public-post-preview img,.company-public-post-preview video{width:100%;height:100%;object-fit:cover}
@@ -1232,14 +1232,14 @@ html[data-theme="dark"] .company-public-nav button[aria-current="page"]{
 .company-public-post-views{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:7px;color:#fff;background:rgba(10,20,32,.48);opacity:0;transition:opacity .16s ease;font-size:14px}
 .company-public-post-tile:hover .company-public-post-views,.company-public-post-tile:focus-visible .company-public-post-views{opacity:1}
 .company-public-post-loading{grid-column:1/-1;color:var(--muted);font-size:14px}
-.company-public-post-grid .company-public-empty-state{grid-column:1/-1}
+.company-public-post-grid .company-public-empty-state{width:100%}
 .company-public-post-viewer{position:fixed;inset:0;z-index:1200;display:none;background:#f4f6f8}
 .company-public-post-viewer.is-open{display:flex;flex-direction:column}
 .company-public-post-viewer-top{height:58px;flex:0 0 58px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:#fff;border-bottom:1px solid #e1e6ec}
 .company-public-post-viewer-top strong{color:#142b49;font-size:16px}
 .company-public-post-viewer-top button{width:38px;height:38px;border:0;border-radius:50%;background:#f0f3f6;color:#26384b;font-size:19px}
 .company-public-post-stream{width:min(100%,760px);height:calc(100% - 58px);margin:0 auto;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y proximity;padding:22px 18px 50px}
-.company-public-post-detail{margin:0 auto 24px;overflow:hidden;border:1px solid #e1e6ec;border-radius:12px;background:#fff;scroll-snap-align:start}
+.company-public-post-detail{width:100%;margin:0 auto;overflow:hidden;border:1px solid #e1e6ec;border-radius:12px;background:#fff;}
 .company-public-post-detail-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 17px}
 .company-public-post-detail-heading strong{color:#142b49;font-size:14px}
 .company-public-post-detail-heading time{color:#7a8795;font-size:11px}
@@ -1256,7 +1256,7 @@ html[data-theme="dark"] .company-public-post-viewer-top strong,html[data-theme="
 html[data-theme="dark"] .company-public-post-viewer-top button{background:#26374b;color:#f1f5f9}
 html[data-theme="dark"] .company-public-post-detail-stats{border-color:#2c3c50;color:#aab8c8}
 @media(max-width:620px){
- .company-public-post-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;margin-inline:-12px}
+ .company-public-post-grid{gap:14px;margin-inline:0}
  .company-public-post-stream{padding:10px 0 30px}
  .company-public-post-detail{border-radius:0;border-left:0;border-right:0;margin-bottom:12px}
  .company-public-post-detail-media img,.company-public-post-detail-media video{max-height:72vh}
