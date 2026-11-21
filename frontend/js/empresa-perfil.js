@@ -346,7 +346,7 @@
             <footer class="publication-card-footer">
               <div class="publication-actions">
                 <div class="reaction-control">
-                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
+                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" data-efeito="icone-curtir" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
                     <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     <strong data-reaction-total>${formatViews(likeTotal)}</strong>
                   </button>
@@ -607,7 +607,7 @@
             <footer class="publication-card-footer">
               <div class="publication-actions">
                 <div class="reaction-control">
-                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
+                  <button type="button" class="like-toggle-button${post.minhaCurtida ? ' liked' : ''}" data-action="like" data-efeito="icone-curtir" aria-pressed="${Boolean(post.minhaCurtida)}" aria-label="${post.minhaCurtida ? 'Remover curtida' : 'Curtir publicação'}">
                     <svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     <strong data-reaction-total>${formatViews(likeTotal)}</strong>
                   </button>
