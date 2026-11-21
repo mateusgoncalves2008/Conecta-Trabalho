@@ -481,30 +481,60 @@
         return;
       }
       const card = button.closest('.publication-card');
-      if (!card || card.dataset.reacting === 'true') return;
-      const wasLiked = button.getAttribute('aria-pressed') === 'true';
+      if (!card) return;
       const totalElement = card.querySelector('[data-reaction-total]');
-      const previousTotal = Number((totalElement?.textContent || '0').replace(/\\D/g, '')) || 0;
-      const nextLiked = !wasLiked;
-      card.dataset.reacting = 'true';
-      button.disabled = true;
-      updateLikeUI(card, nextLiked, Math.max(0, previousTotal + (nextLiked ? 1 : -1)));
-      try {
-        if (nextLiked) {
-          await api('/api/publicacoes/' + id + '/reacao', {
-            method: 'PUT',
-            body: JSON.stringify({ emoji: '❤️' })
-          });
-        } else {
-          await api('/api/publicacoes/' + id + '/reacao', { method: 'DELETE' });
-        }
-      } catch (error) {
-        updateLikeUI(card, wasLiked, previousTotal);
-        toast(error.message);
-      } finally {
-        delete card.dataset.reacting;
-        button.disabled = false;
+      const currentTotal = Number((totalElement?.textContent || '0').replace(/\\D/g, '')) || 0;
+      const wasLiked = button.getAttribute('aria-pressed') === 'true';
+
+      if (card.dataset.reacting === 'true') {
+        const confirmedLiked = card.dataset.likeConfirmed === 'true';
+        const desiredLiked = ! (card.dataset.likeDesired === 'true');
+        card.dataset.likeDesired = String(desiredLiked);
+        const confirmedTotal = Number(card.dataset.likeConfirmedTotal || currentTotal);
+        updateLikeUI(card, desiredLiked, Math.max(0, confirmedTotal + (desiredLiked === confirmedLiked ? 0 : desiredLiked ? 1 : -1)));
+        return;
       }
+
+      card.dataset.reacting = 'true';
+      card.dataset.likeConfirmed = String(wasLiked);
+      card.dataset.likeDesired = String(!wasLiked);
+      card.dataset.likeConfirmedTotal = String(currentTotal);
+
+      const syncLike = async () => {
+        try {
+          while (card.dataset.likeDesired !== card.dataset.likeConfirmed) {
+            const targetLiked = card.dataset.likeDesired === 'true';
+            if (targetLiked) {
+              await api('/api/publicacoes/' + id + '/reacao', {
+                method: 'PUT',
+                body: JSON.stringify({ emoji: '❤️' })
+              });
+            } else {
+              await api('/api/publicacoes/' + id + '/reacao', { method: 'DELETE' });
+            }
+            const previousConfirmed = card.dataset.likeConfirmed === 'true';
+            let confirmedTotal = Number(card.dataset.likeConfirmedTotal || 0);
+            if (targetLiked !== previousConfirmed) confirmedTotal = Math.max(0, confirmedTotal + (targetLiked ? 1 : -1));
+            card.dataset.likeConfirmed = String(targetLiked);
+            card.dataset.likeConfirmedTotal = String(confirmedTotal);
+            const desiredLiked = card.dataset.likeDesired === 'true';
+            updateLikeUI(card, desiredLiked, Math.max(0, confirmedTotal + (desiredLiked === targetLiked ? 0 : desiredLiked ? 1 : -1)));
+          }
+        } catch (error) {
+          const confirmedLiked = card.dataset.likeConfirmed === 'true';
+          const confirmedTotal = Number(card.dataset.likeConfirmedTotal || 0);
+          card.dataset.likeDesired = String(confirmedLiked);
+          updateLikeUI(card, confirmedLiked, confirmedTotal);
+          toast(error.message);
+        } finally {
+          delete card.dataset.reacting;
+          delete card.dataset.likeConfirmed;
+          delete card.dataset.likeDesired;
+          delete card.dataset.likeConfirmedTotal;
+        }
+      };
+      updateLikeUI(card, true, Math.max(0, currentTotal + (wasLiked ? -1 : 1)));
+      void syncLike();
       return;
     }
     if (action === 'delete') {
