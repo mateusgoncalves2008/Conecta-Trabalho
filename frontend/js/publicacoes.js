@@ -17,6 +17,8 @@
   const fileInput = document.getElementById('publication-files');
   const preview = document.getElementById('upload-preview');
   const dropzone = document.getElementById('composer-dropzone');
+  const dropzoneTitle = document.getElementById('composer-dropzone-title');
+  const dropzoneDescription = document.getElementById('composer-dropzone-description');
   const publishButton = document.getElementById('publish-button');
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
@@ -383,6 +385,13 @@
       composer.querySelectorAll('.composer-dropzone-actions [data-open-picker]').forEach(option => {
         option.hidden = option.dataset.openPicker !== selectedType;
       });
+      if (selectedType === 'photos') {
+        dropzoneTitle.textContent = 'Selecione fotos para carregar';
+        dropzoneDescription.textContent = 'Ou arraste e solte-as aqui. Carregue até 10 fotos por publicação.';
+      } else {
+        dropzoneTitle.textContent = 'Selecione um vídeo para carregar';
+        dropzoneDescription.textContent = 'Ou arraste e solte-o aqui. Carregue um vídeo de até 60 segundos.';
+      }
       return;
     }
 
