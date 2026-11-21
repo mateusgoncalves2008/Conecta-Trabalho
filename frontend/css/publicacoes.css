@@ -239,3 +239,7 @@ html[data-theme=dark] .composer-guideline{border-color:#40536a;background:#18263
 html[data-theme=dark] .composer-guideline h3{color:#edf2f7}
 html[data-theme=dark] .composer-guideline p{color:#b9c5d2}
 @media(max-width:650px){.composer-media-guidelines{grid-template-columns:1fr 1fr;gap:9px}.composer-guideline{padding:12px}}
+
+.composer-media-feedback{margin:12px 0 0;padding:11px 14px;border:1px solid #e6b9b2;border-radius:8px;background:#fff4f2;color:#9b3328;font-size:13px;line-height:1.5}
+.composer-media-feedback[hidden]{display:none!important}
+html[data-theme=dark] .composer-media-feedback{border-color:#75443e;background:#352321;color:#ffc3b9}
