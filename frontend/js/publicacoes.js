@@ -309,6 +309,14 @@
     discardStagedMedia();
     preview.innerHTML = '';
     preview.hidden = true;
+    editorLayout.hidden = true;
+    composer.querySelector('.composer-media-tabs').hidden = false;
+    titleInput.value = '';
+    phoneMedia.innerHTML = '<i class="fa-regular fa-image"></i>';
+    phoneTitle.textContent = 'Seu título aparecerá aqui';
+    phoneDescription.textContent = 'Sua descrição aparecerá aqui.';
+    titleCount.textContent = '0/90';
+    descriptionCount.textContent = '0/4000';
     dropzone.hidden = false;
     descriptionField.hidden = true;
     publishButton.disabled = true;
@@ -456,13 +464,38 @@
   composer.addEventListener('keydown', event => { if (event.key === 'Escape' && progress.hidden) closeComposer(); });
 
   preview.addEventListener('click', event => {
+    if (event.target.closest('[data-add-media]')) { photoPicker.click(); return; }
     const button = event.target.closest('[data-remove-file]');
     if (!button) return;
     const index = Number(button.dataset.removeFile);
     const item = selectedFiles[index];
     if (item && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     selectedFiles.splice(index, 1);
-    renderPreview();
+    if (!selectedFiles.length) clearPreview(); else renderPreview();
+  });
+
+  addMediaButton.addEventListener('click', () => photoPicker.click());
+  titleInput.addEventListener('input', () => {
+    titleCount.textContent = titleInput.value.length + '/90';
+    phoneTitle.textContent = titleInput.value || 'Seu título aparecerá aqui';
+  });
+  descriptionInput.addEventListener('input', () => {
+    descriptionCount.textContent = descriptionInput.value.length + '/4000';
+    phoneDescription.textContent = descriptionInput.value || 'Sua descrição aparecerá aqui.';
+  });
+  composer.addEventListener('click', event => {
+    const tokenButton = event.target.closest('[data-insert-token]');
+    if (tokenButton) {
+      const token = tokenButton.dataset.insertToken;
+      descriptionInput.setRangeText(token, descriptionInput.selectionStart, descriptionInput.selectionEnd, 'end');
+      descriptionInput.dispatchEvent(new Event('input', { bubbles: true }));
+      descriptionInput.focus();
+    }
+    const previewTab = event.target.closest('[data-preview-mode]');
+    if (previewTab) {
+      composer.querySelectorAll('[data-preview-mode]').forEach(tab => tab.classList.toggle('is-active', tab === previewTab));
+      composer.querySelector('.composer-phone').dataset.previewMode = previewTab.dataset.previewMode;
+    }
   });
 
   async function uploadOne(item) {
