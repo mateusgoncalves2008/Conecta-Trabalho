@@ -875,6 +875,12 @@
       if (muteButton) muteButton.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
     }
   });
+  feed.addEventListener('change', event => {
+    const control = event.target.closest('[data-video-action="speed"]');
+    if (!control) return;
+    const video = control.closest('.short-video-player')?.querySelector('video');
+    if (video) video.playbackRate = Number(control.value);
+  });
   feed.addEventListener('timeupdate', event => {
     const video = event.target.closest('video');
     if (!video) return;
