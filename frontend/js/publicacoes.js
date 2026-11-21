@@ -1,6 +1,7 @@
 (() => {
   const feed = document.getElementById('publication-feed');
   if (!feed) return;
+  document.body.classList.add('publication-viewer-open');
 
   const api = window.Conecta && window.Conecta.api;
   const toast = message => window.Conecta && window.Conecta.toast(message);
@@ -72,6 +73,7 @@
       currentUser = null;
     }
     if (currentUser) {
+      openComposerButton.hidden = false;
       composer.hidden = true;
       const accountName = currentUser.nomeEmpresa || currentUser.nome || currentUser.nome_empresa || 'Minha conta';
       document.getElementById('composer-account').textContent = accountName;
@@ -85,6 +87,7 @@
         }
       } catch {}
     } else {
+      openComposerButton.hidden = true;
       composer.hidden = true;
     }
   }
