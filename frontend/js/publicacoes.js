@@ -155,7 +155,7 @@
     const saved = Boolean(post.minhaSalva);
     const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
     const followButton = post.autor.tipo === 'empresa' && currentUser && currentUser.tipo === 'candidato' && !post.minha
-      ? '<button type="button" class="short-follow-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" data-followers-count aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
+      ? '<button type="button" class="short-follow-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
       : '';
     const moreAction = post.minha
       ? '<button type="button" data-action="delete" data-id="' + post.id + '">Excluir publicação</button>'
