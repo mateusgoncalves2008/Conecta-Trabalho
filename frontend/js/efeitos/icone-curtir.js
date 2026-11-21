@@ -2,6 +2,20 @@
   const SELECTOR = 'button[data-efeito~="icone-curtir"]';
   const HEART = 'M12 20.4C12 20.4 3 14.9 3 8.9 3 6.1 5.1 4 7.7 4c1.8 0 3.4 1 4.3 2.6C12.9 5 14.5 4 16.3 4 18.9 4 21 6.1 21 8.9c0 6-9 11.5-9 11.5Z';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const motionIsReduced = () => reduceMotion.matches || document.body.classList.contains('a11y-motion');
+
+  function stopActiveEffects() {
+    document.querySelectorAll(SELECTOR).forEach(button => {
+      button.classList.remove('ef-curtir-pulo');
+      button.querySelectorAll('.ef-curtir-anel, .ef-curtir-faisca').forEach(element => {
+        element.getAnimations().forEach(animation => animation.cancel());
+        element.remove();
+      });
+      button.querySelectorAll('.ef-curtir-svg').forEach(svg => {
+        svg.getAnimations().forEach(animation => animation.cancel());
+      });
+    });
+  }
 
   if (!document.getElementById('ef-icone-curtir')) {
     const style = document.createElement('style');
@@ -82,6 +96,16 @@
         margin: -.15em 0 0 -.15em;
         background: var(--icone-curtir-faisca);
       }
+      body.a11y-motion .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-cheio {
+        transition: none !important;
+      }
+      body.a11y-motion .like-toggle-button[data-efeito~="icone-curtir"].ef-curtir-pulo .ef-curtir-svg {
+        animation: none !important;
+      }
+      body.a11y-motion .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-anel,
+      body.a11y-motion .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-faisca {
+        display: none !important;
+      }
       @media (prefers-reduced-motion: reduce) {
         .like-toggle-button[data-efeito~="icone-curtir"] .ef-curtir-cheio {
           transition: none !important;
@@ -154,7 +178,7 @@
       prepare(button);
       const liked = button.getAttribute('aria-pressed') === 'true';
       button.classList.remove('ef-curtir-pulo');
-      if (!liked || reduceMotion.matches || !button.isConnected) return;
+      if (!liked || motionIsReduced() || !button.isConnected) return;
       void button.offsetWidth;
       button.classList.add('ef-curtir-pulo');
       const target = button.querySelector('.ef-curtir-alvo');
@@ -164,5 +188,14 @@
 
   document.addEventListener('animationend', event => {
     if (event.target.matches(SELECTOR)) event.target.classList.remove('ef-curtir-pulo');
+  });
+
+  // A preferência do próprio ConectaTrabalho pode mudar sem recarregar a página.
+  const accessibilityObserver = new MutationObserver(() => {
+    if (document.body.classList.contains('a11y-motion')) stopActiveEffects();
+  });
+  accessibilityObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  reduceMotion.addEventListener?.('change', event => {
+    if (event.matches) stopActiveEffects();
   });
 })();
