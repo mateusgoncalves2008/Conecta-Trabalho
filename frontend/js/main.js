@@ -46,6 +46,52 @@
     return data;
   };
 
+  // Restaura o cabeçalho autenticado imediatamente quando a última sessão foi confirmada.
+  // A API continua sendo a autoridade: se a sessão expirou, o cabeçalho de visitante é restaurado.
+  const headerAuthCacheKey = 'conecta-header-authenticated';
+  const cachedHeaderIsAuthenticated = localStorage.getItem(headerAuthCacheKey) === '1';
+  const cachedHeaderActions = document.querySelector('.site-header .header-actions');
+  if (cachedHeaderIsAuthenticated && cachedHeaderActions) {
+    const cachedHeader = cachedHeaderActions.closest('.site-header');
+    cachedHeaderActions.style.visibility = 'hidden';
+    cachedHeader?.querySelectorAll('.mobile-login-link, .mobile-register-link, a[href*="login.html"], a[href*="cadastro.html"]').forEach(link => { link.hidden = true; });
+
+    const cachedSearch = document.createElement('form');
+    cachedSearch.className = 'site-header-search site-header-search-pending';
+    cachedSearch.setAttribute('role', 'search');
+    cachedSearch.setAttribute('aria-label', 'Pesquisar pessoas e empresas');
+    cachedSearch.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" maxlength="100" placeholder="Pesquisar" aria-label="Pesquisar pessoas e empresas" autocomplete="off">';
+    cachedHeader?.insertBefore(cachedSearch, cachedHeaderActions);
+
+    let cachedProfile = {};
+    try { cachedProfile = JSON.parse(localStorage.getItem('conecta-header-profile-cache') || '{}'); } catch {}
+    const cachedMenu = document.createElement('div');
+    cachedMenu.className = 'account-menu account-menu-pending';
+    const cachedTrigger = document.createElement('button');
+    cachedTrigger.type = 'button';
+    cachedTrigger.className = 'account-menu-trigger';
+    cachedTrigger.setAttribute('aria-label', 'Carregando menu da conta');
+    cachedTrigger.setAttribute('aria-haspopup', 'true');
+    cachedTrigger.setAttribute('aria-expanded', 'false');
+    if (typeof cachedProfile.fotoPerfil === 'string' && cachedProfile.fotoPerfil) {
+      const avatar = document.createElement('img');
+      avatar.src = cachedProfile.fotoPerfil;
+      avatar.alt = '';
+      avatar.decoding = 'async';
+      cachedTrigger.appendChild(avatar);
+    } else {
+      cachedTrigger.textContent = String(cachedProfile.nome || 'CT').trim().split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+    }
+    const cachedChevron = document.createElement('span');
+    cachedChevron.className = 'account-menu-chevron';
+    cachedChevron.setAttribute('aria-hidden', 'true');
+    cachedChevron.innerHTML = '<svg viewBox="0 0 16 16" focusable="false"><path d="m3.5 6 4.5 4 4.5-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    cachedTrigger.appendChild(cachedChevron);
+    cachedMenu.appendChild(cachedTrigger);
+    cachedHeaderActions.prepend(cachedMenu);
+    cachedHeaderActions.style.visibility = 'visible';
+  }
+
   let toastTimer;
   const toast = (message) => {
     const element = document.getElementById('toast');
@@ -444,6 +490,7 @@
     document.querySelectorAll('[data-logout]').forEach(button => {
       button.addEventListener('click', async () => {
         try {
+          localStorage.removeItem(headerAuthCacheKey);
           await api('/api/logout', { method: 'POST' });
           window.location.href = '/';
         } catch (error) { toast(error.message); }
@@ -456,10 +503,14 @@
       api('/api/me').then(async session => {
         const user = session.usuario;
         if (!user) {
-          document.querySelector('.site-header-search')?.remove();
+          localStorage.removeItem(headerAuthCacheKey);
+          document.querySelectorAll('.site-header-search').forEach(search => search.remove());
           publicHeaderActions.querySelector('.account-menu-pending')?.remove();
+          publicHeaderActions.style.visibility = '';
+          document.querySelectorAll('.site-header .mobile-login-link, .site-header .mobile-register-link').forEach(link => { link.hidden = false; });
           return;
         }
+        localStorage.setItem(headerAuthCacheKey, '1');
 
         // A chamada para criar conta é exclusiva de visitantes não autenticados.
         document.getElementById('footer-signup-cta')?.remove();
@@ -570,6 +621,7 @@
         logout.addEventListener('click', async () => {
           logout.disabled = true;
           try {
+            localStorage.removeItem(headerAuthCacheKey);
             await api('/api/logout', { method: 'POST' });
             window.location.href = '/';
           } catch (error) {
