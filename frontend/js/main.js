@@ -46,6 +46,11 @@
     return data;
   };
 
+  // Inicia a validação da sessão assim que o script é executado, sem esperar o DOMContentLoaded.
+  const headerSessionRequest = document.querySelector('.site-header .header-actions')
+    ? api('/api/me')
+    : null;
+
   // Restaura o cabeçalho autenticado imediatamente quando a última sessão foi confirmada.
   // A API continua sendo a autoridade: se a sessão expirou, o cabeçalho de visitante é restaurado.
   const headerAuthCacheKey = 'conecta-header-authenticated';
@@ -90,6 +95,7 @@
     cachedMenu.appendChild(cachedTrigger);
     cachedHeaderActions.prepend(cachedMenu);
     cachedHeaderActions.style.visibility = 'visible';
+    cachedHeader?.setAttribute('data-auth-state', 'ready');
   }
 
   let toastTimer;
@@ -500,7 +506,7 @@
     // Ações da conta no menu superior, em todas as páginas com cabeçalho.
     const publicHeaderActions = document.querySelector('.site-header .header-actions');
     if (publicHeaderActions) {
-      api('/api/me').then(async session => {
+      headerSessionRequest.then(async session => {
         const user = session.usuario;
         if (!user) {
           localStorage.removeItem(headerAuthCacheKey);
@@ -508,6 +514,7 @@
           publicHeaderActions.querySelector('.account-menu-pending')?.remove();
           publicHeaderActions.style.visibility = '';
           document.querySelectorAll('.site-header .mobile-login-link, .site-header .mobile-register-link').forEach(link => { link.hidden = false; });
+          document.querySelector('.site-header')?.setAttribute('data-auth-state', 'ready');
           return;
         }
         localStorage.setItem(headerAuthCacheKey, '1');
@@ -773,6 +780,7 @@
           const header = document.querySelector('.site-header');
           header.insertBefore(searchForm, publicHeaderActions.closest('.dashboard-user') || publicHeaderActions);
         }
+        document.querySelector('.site-header')?.setAttribute('data-auth-state', 'ready');
       }).catch(() => {});
     }
 
