@@ -135,6 +135,34 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     return false;
   };
   const mediaUrl = id => '/api/publicacoes/midia/' + encodeURIComponent(id);
+  let lastStagingCleanupAt = 0;
+  let stagingCleanupRunning = false;
+
+  const scheduleStagingCleanup = () => {
+    const now = Date.now();
+    if (!s3 || stagingCleanupRunning || now - lastStagingCleanupAt < 15 * 60 * 1000) return;
+    lastStagingCleanupAt = now;
+    stagingCleanupRunning = true;
+    setImmediate(async () => {
+      try {
+        const expired = await pool.query(
+          "SELECT id,storage_key FROM publicacao_midias WHERE publicacao_id IS NULL AND criada_em < NOW() - INTERVAL '24 hours' ORDER BY criada_em LIMIT 50"
+        );
+        for (const item of expired.rows) {
+          try {
+            await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: item.storage_key }));
+            await pool.query('DELETE FROM publicacao_midias WHERE id=$1 AND publicacao_id IS NULL', [item.id]);
+          } catch (error) {
+            console.warn('Não foi possível limpar uma mídia temporária:', error.message);
+          }
+        }
+      } catch (error) {
+        console.warn('Não foi possível iniciar a limpeza de mídias temporárias:', error.message);
+      } finally {
+        stagingCleanupRunning = false;
+      }
+    });
+  };
 
   router.get('/empresa/:id', asyncRoute(async (req, res) => {
     await schemaReady;
@@ -208,17 +236,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
 
   router.get('/', asyncRoute(async (req, res) => {
     await schemaReady;
-    if (s3) {
-      const expired = await pool.query("SELECT id,storage_key FROM publicacao_midias WHERE publicacao_id IS NULL AND criada_em < NOW() - INTERVAL '24 hours' ORDER BY criada_em LIMIT 50");
-      for (const item of expired.rows) {
-        try {
-          await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: item.storage_key }));
-          await pool.query('DELETE FROM publicacao_midias WHERE id=$1 AND publicacao_id IS NULL', [item.id]);
-        } catch (error) {
-          console.warn('Não foi possível limpar uma mídia temporária:', error.message);
-        }
-      }
-    }
+    scheduleStagingCleanup();
     const limit = Math.min(Math.max(Number(req.query.limit) || 15, 1), 30);
     const cursor = Number(req.query.cursor) || 0;
     if (!Number.isSafeInteger(cursor) || cursor < 0) return res.status(400).json({ erro: 'Página inválida.' });
