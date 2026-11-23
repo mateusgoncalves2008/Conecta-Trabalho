@@ -473,27 +473,20 @@
         let profilePhoto = user.fotoPerfil || '';
         let profileName = isCompany ? (user.nomeEmpresa || user.nome) : user.nome;
         let profileSummary = isCompany ? 'Perfil da empresa no ConectaTrabalho' : 'Conheça meu perfil profissional';
-        let profileDetail = '';
-
-        try {
-          if (isCompany) {
-            const companyData = await api('/api/empresa/perfil');
-            const profile = companyData.perfil || {};
+        const profileDetailsRequest = api(isCompany ? '/api/empresa/perfil' : '/api/perfil')
+          .then(data => {
+            const profile = data.perfil || {};
             profilePhoto = profile.foto_perfil || profilePhoto;
-            profileName = profile.nome_empresa || profileName;
-            profileSummary = profile.empresa_descricao_curta || profile.descricao || profile.empresa_setor || 'Conheça a empresa e suas oportunidades.';
-            profileDetail = profile.cidade || '';
-          } else {
-            const candidateData = await api('/api/perfil');
-            const profile = candidateData.perfil || {};
-            profilePhoto = profile.foto_perfil || profilePhoto;
-            profileName = profile.nome || profileName;
-            profileSummary = profile.titulo_profissional || profile.resumo_profissional || 'Complete seu perfil profissional.';
-            profileDetail = profile.cidade || '';
-          }
-        } catch (error) {
-          console.warn('Não foi possível carregar o resumo do perfil no menu:', error);
-        }
+            profileName = (isCompany ? profile.nome_empresa : profile.nome) || profileName;
+            profileSummary = isCompany
+              ? (profile.empresa_descricao_curta || profile.descricao || profile.empresa_setor || 'Conheça a empresa e suas oportunidades.')
+              : (profile.titulo_profissional || profile.resumo_profissional || 'Complete seu perfil profissional.');
+            return true;
+          })
+          .catch(error => {
+            console.warn('Não foi possível carregar o resumo do perfil no menu:', error);
+            return false;
+          });
 
         const initials = String(profileName || 'CT').trim()
           .split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
@@ -604,6 +597,44 @@
         });
         wrapper.append(trigger, dropdown);
         publicHeaderActions.prepend(wrapper);
+
+        // O cabeçalho aparece assim que a sessão é confirmada; os detalhes do perfil chegam depois.
+        void profileDetailsRequest.then(updated => {
+          if (!updated) return;
+          const updatedInitials = String(profileName || 'CT').trim()
+            .split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+          const existingTriggerPhoto = trigger.querySelector('img');
+          if (profilePhoto) {
+            if (existingTriggerPhoto) existingTriggerPhoto.src = profilePhoto;
+            else {
+              const photo = document.createElement('img');
+              photo.src = profilePhoto;
+              photo.alt = '';
+              photo.loading = 'eager';
+              photo.decoding = 'async';
+              trigger.insertBefore(photo, chevron);
+            }
+          } else if (!existingTriggerPhoto) {
+            trigger.firstChild && trigger.firstChild.nodeType === Node.TEXT_NODE
+              ? trigger.firstChild.textContent = updatedInitials
+              : trigger.insertBefore(document.createTextNode(updatedInitials), chevron);
+          }
+          const cardPhoto = profileCard.querySelector('img');
+          const fallback = profileCard.querySelector('.account-menu-avatar-fallback');
+          if (profilePhoto) {
+            if (cardPhoto) cardPhoto.src = profilePhoto;
+            else {
+              const photo = document.createElement('img');
+              photo.src = profilePhoto;
+              photo.alt = '';
+              photo.loading = 'lazy';
+              profileCard.insertBefore(photo, profileCopy);
+            }
+            fallback?.remove();
+          } else if (fallback) fallback.textContent = updatedInitials;
+          name.textContent = profileName || 'Minha conta';
+          summary.textContent = profileSummary;
+        });
 
         // Barra de pesquisa posicionada entre a navegação e os controles da conta.
         if (!document.querySelector('.site-header-search')) {
