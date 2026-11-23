@@ -1,19 +1,11 @@
 (() => {
   const feed = document.getElementById('publication-feed');
   if (!feed) return;
-  document.body.classList.add('publication-viewer-open');
 
   const api = window.Conecta && window.Conecta.api;
   const toast = message => window.Conecta && window.Conecta.toast(message);
   const composer = document.getElementById('publication-composer');
-  const followingButton = document.getElementById('publication-following');
-  const exploreButton = document.getElementById('publication-explore');
-  const searchInput = document.getElementById('publication-search');
-  const previousPostButton = document.getElementById('publication-prev');
-  const nextPostButton = document.getElementById('publication-next');
-  const backButton = document.getElementById('publication-back');
-  let followingOnly = false;
-  let searchTerm = '';
+  const createEntry = document.getElementById('create-publication-entry');
   const openComposerButton = document.getElementById('open-publication-composer');
   const closeComposerButton = document.getElementById('close-publication-composer');
   const profileAvatar = document.getElementById('composer-profile-avatar');
@@ -44,6 +36,7 @@
   const progress = document.getElementById('upload-progress');
   const progressText = document.getElementById('upload-progress-text');
   const mediaFeedback = document.getElementById('composer-media-feedback');
+  const loadMoreButton = document.getElementById('load-more');
   const reportDialog = document.getElementById('report-dialog');
   const reportForm = document.getElementById('report-form');
   const reportReason = document.getElementById('report-reason');
@@ -55,21 +48,6 @@
   let cursor = 0;
   let reportTarget = null;
   let loading = false;
-  const postObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const card = entry.target;
-      const video = card.querySelector('video');
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
-        if (video) video.play().catch(() => {});
-        if (currentUser && card.dataset.viewRegistered !== 'true') {
-          card.dataset.viewRegistered = 'true';
-          api('/api/publicacoes/' + encodeURIComponent(card.dataset.postId) + '/visualizacao', { method: 'POST' }).catch(() => {});
-        }
-      } else if (video) {
-        video.pause();
-      }
-    });
-  }, { threshold: [0, 0.65, 1] }) : null;
 
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -92,7 +70,7 @@
       currentUser = null;
     }
     if (currentUser) {
-      openComposerButton.hidden = false;
+      createEntry.hidden = false;
       composer.hidden = true;
       const accountName = currentUser.nomeEmpresa || currentUser.nome || currentUser.nome_empresa || 'Minha conta';
       document.getElementById('composer-account').textContent = accountName;
@@ -101,12 +79,15 @@
       try {
         const moderation = await api('/api/publicacoes/moderacao/acesso');
         if (moderation.autorizado) {
-          const shortcut = document.getElementById('moderation-shortcut');
-          if (shortcut) shortcut.hidden = false;
+          const shortcut = document.createElement('a');
+          shortcut.className = 'moderation-shortcut';
+          shortcut.href = '/pages/moderacao-publicacoes.html';
+          shortcut.textContent = 'Analisar denúncias';
+          document.querySelector('.publicacoes-heading').appendChild(shortcut);
         }
       } catch {}
     } else {
-      openComposerButton.hidden = true;
+      createEntry.hidden = true;
       composer.hidden = true;
     }
   }
@@ -114,11 +95,14 @@
   function renderMedia(media) {
     if (!media.length) return '';
     const classes = media.length === 1 ? 'publication-media single' : 'publication-media';
-    return '<div class="' + classes + '">' + media.map(item => {
+    return '<div class="' + classes + '">' + media.map((item, index) => {
+      const more = index === 3 && media.length > 4
+        ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
+        : '';
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><div class="short-video-player"><video playsinline muted loop preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video><div class="short-video-controls"><input data-video-action="seek" type="range" min="0" max="1000" value="0" aria-label="Progresso do vídeo"><div class="short-video-control-row"><button type="button" data-video-action="play" aria-label="Reproduzir vídeo"><i class="fa-solid fa-play"></i></button><span data-video-time>00:00 / 00:00</span><select data-video-action="speed" aria-label="Velocidade"><option value="0.5">0,5x</option><option value="0.75">0,75x</option><option value="1" selected>1,0x</option><option value="1.25">1,25x</option><option value="1.5">1,5x</option><option value="2">2,0x</option></select><button type="button" data-video-action="volume" aria-label="Ativar som"><i class="fa-solid fa-volume-xmark"></i></button><input data-video-action="volume-level" type="range" min="0" max="1" step="0.05" value="0" aria-label="Volume"><button type="button" class="short-video-fullscreen" data-video-action="fullscreen" aria-label="Tela cheia"><i class="fa-solid fa-expand"></i></button></div></div></div></div>';
+        return '<div class="publication-media-item"><video controls playsinline preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
-      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação"></div>';
+      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
   }
 
@@ -138,37 +122,29 @@
   }
 
   function renderPost(post) {
-    const longDescription = (post.descricao || '').length > 100;
+    const longDescription = (post.descricao || '').length > 260;
     const description = post.descricao
-      ? '<div class="short-description-row"><div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
-        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">mais</button>' : '') + '</div>'
+      ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
+        (longDescription ? '<button type="button" class="description-toggle" data-action="expand">Ver mais...</button>' : '')
       : '';
     const avatar = post.autor.foto
       ? '<img src="' + escapeHTML(post.autor.foto) + '" alt="">'
-      : '<span>' + escapeHTML(initials(post.autor.nome)) + '</span>';
+      : escapeHTML(initials(post.autor.nome));
+    const authorDetail = post.autor.tipo === 'empresa'
+      ? '<span data-followers-count>' + Number(post.autor.totalSeguidores || 0).toLocaleString('pt-BR') + '</span> seguidores'
+      : escapeHTML(post.autor.tituloProfissional || 'Título profissional não informado');
     const authorProfileUrl = post.autor.tipo === 'empresa'
       ? '/pages/empresa-perfil.html?id=' + encodeURIComponent(post.autor.id)
       : '/pages/candidato-perfil.html?id=' + encodeURIComponent(post.autor.id);
-    const media = renderMedia(post.midias || []);
-    const liked = Boolean(post.minhaCurtida);
-    const saved = Boolean(post.minhaSalva);
-    const total = (post.reacoes || []).reduce((sum, item) => sum + Number(item.total || 0), 0);
-    const followButton = post.autor.tipo === 'empresa' && currentUser && currentUser.tipo === 'candidato' && !post.minha
-      ? '<button type="button" class="short-follow-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
-      : '';
-    const moreAction = post.minha
-      ? '<button type="button" data-action="delete" data-id="' + post.id + '">Excluir publicação</button>'
-      : '<button type="button" data-action="report" data-id="' + post.id + '"><i class="fa-solid fa-flag" aria-hidden="true"></i> Denunciar</button>';
-    return '<article class="publication-card short-publication-card" data-post-id="' + post.id + '" data-search-text="' + escapeHTML((post.autor.nome + ' ' + (post.descricao || '')).toLowerCase()) + '">' +
-      '<div class="short-publication-media">' + media + '</div>' +
-      '<div class="short-publication-caption"><div class="short-caption-author"><a href="' + escapeHTML(authorProfileUrl) + '">' + avatar + '<strong>' + escapeHTML(post.autor.nome) + '</strong></a>' + followButton + '</div>' + description + '</div>' +
-      '<aside class="short-publication-actions">' +
-        '<button type="button" class="short-action-button like-toggle-button' + (liked ? ' liked' : '') + '" data-action="like" data-id="' + post.id + '" data-efeito="icone-curtir" aria-pressed="' + liked + '" aria-label="' + (liked ? 'Remover curtida' : 'Curtir publicação') + '">' +
-          '<svg class="like-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><strong data-reaction-total>' + total.toLocaleString('pt-BR') + '</strong></button>' +
-        '<button type="button" class="short-action-button save-toggle-button' + (saved ? ' is-saved' : '') + '" data-action="save" data-id="' + post.id + '" aria-pressed="' + saved + '" aria-label="' + (saved ? 'Remover dos salvos' : 'Salvar publicação') + '"><i class="fa-' + (saved ? 'solid' : 'regular') + ' fa-bookmark" aria-hidden="true"></i><span>Salvar</span></button>' +
-        '<div class="short-more-wrap"><button type="button" class="short-action-button short-more-button" data-action="toggle-menu" aria-label="Mais opções" aria-expanded="false"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button><div class="short-more-menu" hidden>' + moreAction + '</div></div>' +
-      '</aside>' +
-    '</article>';
+    const authorName = escapeHTML(post.autor.nome);
+    return '<article class="publication-card" data-post-id="' + post.id + '">' +
+      '<header class="publication-card-header"><a class="publication-avatar publication-author-link" href="' + escapeHTML(authorProfileUrl) + '" aria-label="Ver perfil de ' + authorName + '">' + avatar + '</a>' +
+      '<div class="publication-author"><a class="publication-author-name-link" href="' + escapeHTML(authorProfileUrl) + '">' + authorName + '</a><small>' + authorDetail + ' · ' + escapeHTML(formatDate(post.criadaEm)) + '</small></div>' +
+      (currentUser && currentUser.tipo === 'candidato' && post.autor.tipo === 'empresa' && !post.minha
+        ? '<button type="button" class="follow-company-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
+        : '') +
+      '</header>' + description + renderMedia(post.midias || []) +
+      '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
 
   function updateLikeUI(card, liked, total) {
@@ -184,32 +160,32 @@
   async function loadPosts(reset) {
     if (loading) return;
     loading = true;
+    loadMoreButton.disabled = true;
     if (reset) {
       cursor = 0;
       feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
     }
     try {
-      const query = '?limit=15&cursor=' + cursor + (followingOnly ? '&seguindo=1' : '') + (searchTerm.trim() ? '&q=' + encodeURIComponent(searchTerm.trim()) : '');
+      const query = '?limit=15&cursor=' + cursor;
       const result = await api('/api/publicacoes' + query);
       const posts = result.publicacoes || [];
       if (reset) feed.innerHTML = '';
       if (!posts.length && reset) {
-        feed.innerHTML = '<div class="feed-empty">' + (followingOnly ? 'Ainda não há publicações de perfis que você segue.' : 'Ainda não há publicações. Volte em breve para conferir as novidades.') + '</div>';
+        feed.innerHTML = '<div class="feed-empty">Ainda não há publicações. Volte em breve para conferir as novidades.</div>';
       } else {
         feed.insertAdjacentHTML('beforeend', posts.map(renderPost).join(''));
-        if (postObserver) feed.querySelectorAll('.short-publication-card:not([data-observed])').forEach(card => {
-          card.dataset.observed = 'true';
-          postObserver.observe(card);
-        });
       }
       cursor = result.proximoCursor;
-      applyPostSearch();
-      document.getElementById('feed-count-label').textContent = followingOnly ? 'Publicações dos perfis que você segue' : 'Publicações da comunidade';
+      loadMoreButton.hidden = cursor === null;
+      document.getElementById('feed-count-label').textContent = posts.length
+        ? 'Novidades de candidatos e empresas'
+        : 'Publicações da comunidade';
     } catch (error) {
       if (reset) feed.innerHTML = '<div class="feed-empty">Não foi possível carregar as publicações. Atualize a página para tentar novamente.</div>';
       toast(error.message);
     } finally {
       loading = false;
+      loadMoreButton.disabled = false;
     }
   }
 
@@ -585,110 +561,14 @@
     }
   });
 
-  function applyPostSearch() {
-    const term = searchTerm.trim().toLocaleLowerCase('pt-BR');
-    let visible = 0;
-    feed.querySelectorAll('.short-publication-card').forEach(card => {
-      const match = !term || (card.dataset.searchText || '').includes(term);
-      card.hidden = !match;
-      if (match) visible += 1;
-    });
-    let note = feed.querySelector('.search-empty');
-    if (term && !visible && !note) {
-      note = document.createElement('div');
-      note.className = 'feed-empty search-empty';
-      note.textContent = 'Nenhuma publicação encontrada entre as publicações carregadas.';
-      feed.appendChild(note);
-    } else if ((!term || visible) && note) note.remove();
-  }
-  let searchDebounce = null;
-  searchInput.addEventListener('input', () => {
-    searchTerm = searchInput.value;
-    if (searchDebounce) clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => loadPosts(true), 300);
-  });
-  exploreButton.addEventListener('click', () => {
-    followingOnly = false;
-    followingButton.classList.remove('is-active');
-    followingButton.setAttribute('aria-pressed', 'false');
-    exploreButton.classList.add('is-active');
-    exploreButton.setAttribute('aria-pressed', 'true');
-    document.getElementById('feed-title').textContent = 'Explorar';
-    loadPosts(true);
-  });
-  function movePublication(direction) {
-    const cards = [...feed.querySelectorAll('.short-publication-card:not([hidden])')];
-    if (!cards.length) return;
-    const current = cards.findIndex(card => {
-      const rect = card.getBoundingClientRect();
-      return rect.top >= -10 && rect.top < window.innerHeight * 0.55;
-    });
-    const index = Math.max(0, Math.min(cards.length - 1, (current < 0 ? 0 : current) + direction));
-    cards[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
-    if (index === cards.length - 1 && cursor !== null) loadPosts(false);
-  }
-  previousPostButton.addEventListener('click', () => movePublication(-1));
-  nextPostButton.addEventListener('click', () => movePublication(1));
-  let paginationCheckPending = false;
-  const checkAutomaticPagination = () => {
-    if (paginationCheckPending || loading || cursor === null) return;
-    const lastCard = feed.querySelector('.short-publication-card:last-of-type');
-    if (!lastCard) return;
-    const rect = lastCard.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 900) {
-      paginationCheckPending = true;
-      loadPosts(false).finally(() => { paginationCheckPending = false; });
-    }
-  };
-  window.addEventListener('scroll', checkAutomaticPagination, { passive: true });
-  feed.addEventListener('scroll', checkAutomaticPagination, { passive: true });
-  followingButton.addEventListener('click', () => {
-    if (!currentUser) { window.location.href = '/pages/login.html'; return; }
-    followingOnly = !followingOnly;
-    exploreButton.classList.toggle('is-active', !followingOnly);
-    exploreButton.setAttribute('aria-pressed', String(!followingOnly));
-    followingButton.classList.toggle('is-active', followingOnly);
-    followingButton.setAttribute('aria-pressed', String(followingOnly));
-    document.getElementById('feed-title').textContent = followingOnly ? 'Seguindo' : 'Para você';
-    loadPosts(true);
-  });
-  backButton.addEventListener('click', () => {
-    if (history.length > 1) history.back();
-    else window.location.href = '/';
-  });
+  loadMoreButton.addEventListener('click', () => loadPosts(false));
 
   feed.addEventListener('click', async event => {
     const expandButton = event.target.closest('[data-action="expand"]');
     if (expandButton) {
       const description = expandButton.parentElement.querySelector('[data-description]');
       const expanded = description.classList.toggle('is-collapsed') === false;
-      expandButton.textContent = expanded ? 'Ler menos' : 'Ler mais';
-      return;
-    }
-    const videoControl = event.target.closest('[data-video-action]');
-    if (videoControl) {
-      const player = videoControl.closest('.short-video-player');
-      const video = player && player.querySelector('video');
-      if (!video) return;
-      const action = videoControl.dataset.videoAction;
-      if (action === 'play') {
-        if (video.paused) video.play().catch(() => {}); else video.pause();
-      } else if (action === 'seek' && video.duration) {
-        video.currentTime = video.duration * Number(videoControl.value) / 1000;
-      } else if (action === 'volume') {
-        video.muted = !video.muted;
-        if (!video.muted && video.volume === 0) video.volume = 0.7;
-        player.querySelector('[data-video-action="volume-level"]').value = video.muted ? 0 : video.volume;
-        videoControl.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-      } else if (action === 'volume-level') {
-        video.volume = Number(videoControl.value);
-        video.muted = video.volume === 0;
-        player.querySelector('[data-video-action="volume"]').innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-      } else if (action === 'speed') video.playbackRate = Number(videoControl.value);
-      else if (action === 'fullscreen') {
-        if (document.fullscreenElement) document.exitFullscreen?.();
-        else player.requestFullscreen?.().catch(() => {});
-      }
+      expandButton.textContent = expanded ? 'Ver menos' : 'Ver mais...';
       return;
     }
     const button = event.target.closest('[data-action]');
@@ -722,32 +602,6 @@
       } finally {
         button.disabled = false;
       }
-      return;
-    }
-    if (action === 'toggle-menu') {
-      const menu = button.parentElement.querySelector('.short-more-menu');
-      const opening = menu.hidden;
-      feed.querySelectorAll('.short-more-menu').forEach(item => { item.hidden = true; });
-      feed.querySelectorAll('[data-action="toggle-menu"]').forEach(item => item.setAttribute('aria-expanded', 'false'));
-      menu.hidden = !opening;
-      button.setAttribute('aria-expanded', String(opening));
-      return;
-    }
-    if (action === 'save') {
-      if (!currentUser) { window.location.href = '/pages/login.html'; return; }
-      if (button.disabled) return;
-      const wasSaved = button.getAttribute('aria-pressed') === 'true';
-      button.disabled = true;
-      try {
-        const result = await api('/api/publicacoes/' + encodeURIComponent(id) + '/salvar', { method: wasSaved ? 'DELETE' : 'POST' });
-        const saved = Boolean(result.salva);
-        button.classList.toggle('is-saved', saved);
-        button.setAttribute('aria-pressed', String(saved));
-        button.setAttribute('aria-label', saved ? 'Remover dos salvos' : 'Salvar publicação');
-        button.querySelector('i').className = 'fa-' + (saved ? 'solid' : 'regular') + ' fa-bookmark';
-        toast(saved ? 'Publicação salva.' : 'Publicação removida dos salvos.');
-      } catch (error) { toast(error.message); }
-      finally { button.disabled = false; }
       return;
     }
     if (action === 'like') {
@@ -871,41 +725,6 @@
       submit.disabled = false;
     }
   });
-
-  feed.addEventListener('input', event => {
-    const control = event.target.closest('[data-video-action]');
-    if (!control) return;
-    const player = control.closest('.short-video-player');
-    const video = player && player.querySelector('video');
-    if (!video) return;
-    if (control.dataset.videoAction === 'seek' && video.duration) {
-      video.currentTime = video.duration * Number(control.value) / 1000;
-    } else if (control.dataset.videoAction === 'volume-level') {
-      video.volume = Number(control.value);
-      video.muted = video.volume === 0;
-      const muteButton = player.querySelector('[data-video-action="volume"]');
-      if (muteButton) muteButton.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-    }
-  });
-  feed.addEventListener('change', event => {
-    const control = event.target.closest('[data-video-action="speed"]');
-    if (!control) return;
-    const video = control.closest('.short-video-player')?.querySelector('video');
-    if (video) video.playbackRate = Number(control.value);
-  });
-  feed.addEventListener('timeupdate', event => {
-    const video = event.target.closest('video');
-    if (!video) return;
-    const player = video.closest('.short-video-player');
-    if (!player) return;
-    const seek = player.querySelector('[data-video-action="seek"]');
-    const time = player.querySelector('[data-video-time]');
-    const format = value => Number.isFinite(value) ? String(Math.floor(value / 60)).padStart(2, '0') + ':' + String(Math.floor(value % 60)).padStart(2, '0') : '00:00';
-    if (seek && video.duration) seek.value = String(Math.round(video.currentTime / video.duration * 1000));
-    if (time) time.textContent = format(video.currentTime) + ' / ' + format(video.duration);
-    const play = player.querySelector('[data-video-action="play"]');
-    if (play) play.innerHTML = video.paused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
-  }, true);
 
   (async () => {
     if (!api) {
