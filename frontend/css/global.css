@@ -2044,3 +2044,11 @@ html[data-theme="dark"] .search-suggestion-section+.search-suggestion-section{bo
 html[data-theme="dark"] .search-suggestion-item{color:#edf2f7}
 html[data-theme="dark"] .search-suggestion-item:hover,html[data-theme="dark"] .search-suggestion-item:focus-visible{background:#26384d}
 @media(max-width:650px){.search-suggestions{left:auto;right:0;width:min(360px,calc(100vw - 24px));max-height:65vh}}
+
+
+/* Evita mostrar os controles de visitante antes da primeira validação da sessão. */
+.site-header:not([data-auth-state="ready"]) .header-actions,
+.site-header:not([data-auth-state="ready"]) .main-nav .mobile-login-link,
+.site-header:not([data-auth-state="ready"]) .main-nav .mobile-register-link {
+  visibility: hidden !important;
+}
