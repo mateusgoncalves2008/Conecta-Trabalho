@@ -35,9 +35,6 @@
     }
   }
 
-  // Evita mostrar os links de visitante antes de confirmar a sessão.
-  document.querySelector('.site-header .header-actions')?.classList.add('auth-checking');
-
   const api = async (url, options = {}) => {
     const response = await fetch(url, {
       credentials: 'same-origin',
@@ -48,51 +45,6 @@
     if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
     return data;
   };
-
-  // Reserva o espaço do cabeçalho autenticado imediatamente, sem aguardar a sessão.
-  // Os dados visuais da conta são reaproveitados do último carregamento confirmado.
-  const headerActionsPending = document.querySelector('.site-header .header-actions');
-  if (headerActionsPending) {
-    const header = headerActionsPending.closest('.site-header');
-    if (header && !header.querySelector('.site-header-search')) {
-      const searchShell = document.createElement('form');
-      searchShell.className = 'site-header-search';
-      searchShell.setAttribute('role', 'search');
-      searchShell.setAttribute('aria-label', 'Pesquisar pessoas e empresas');
-      searchShell.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" maxlength="100" placeholder="Pesquisar" aria-label="Pesquisar pessoas e empresas" autocomplete="off">';
-      header.insertBefore(searchShell, headerActionsPending);
-    }
-
-    if (!headerActionsPending.querySelector('.account-menu')) {
-      let cachedAccount = {};
-      try { cachedAccount = JSON.parse(localStorage.getItem('conecta-header-profile-cache') || '{}'); } catch {}
-      const pendingMenu = document.createElement('div');
-      pendingMenu.className = 'account-menu account-menu-pending';
-      const pendingTrigger = document.createElement('button');
-      pendingTrigger.type = 'button';
-      pendingTrigger.className = 'account-menu-trigger';
-      pendingTrigger.setAttribute('aria-label', 'Carregando menu da conta');
-      pendingTrigger.setAttribute('aria-haspopup', 'true');
-      pendingTrigger.setAttribute('aria-expanded', 'false');
-      if (typeof cachedAccount.fotoPerfil === 'string' && cachedAccount.fotoPerfil) {
-        const cachedPhoto = document.createElement('img');
-        cachedPhoto.src = cachedAccount.fotoPerfil;
-        cachedPhoto.alt = '';
-        cachedPhoto.decoding = 'async';
-        pendingTrigger.appendChild(cachedPhoto);
-      } else {
-        const cachedName = String(cachedAccount.nome || 'CT').trim();
-        pendingTrigger.textContent = cachedName.split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
-      }
-      const pendingChevron = document.createElement('span');
-      pendingChevron.className = 'account-menu-chevron';
-      pendingChevron.setAttribute('aria-hidden', 'true');
-      pendingChevron.innerHTML = '<svg viewBox="0 0 16 16" focusable="false"><path d="m3.5 6 4.5 4 4.5-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      pendingTrigger.appendChild(pendingChevron);
-      pendingMenu.appendChild(pendingTrigger);
-      headerActionsPending.prepend(pendingMenu);
-    }
-  }
 
   let toastTimer;
   const toast = (message) => {
@@ -769,9 +721,7 @@
           const header = document.querySelector('.site-header');
           header.insertBefore(searchForm, publicHeaderActions.closest('.dashboard-user') || publicHeaderActions);
         }
-      }).catch(() => {}).finally(() => {
-        publicHeaderActions.classList.remove('auth-checking');
-      });
+      }).catch(() => {});
     }
 
     // Registro do PWA: permite instalar o site e disponibiliza o modo offline básico.
