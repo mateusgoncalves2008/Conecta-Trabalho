@@ -61,7 +61,7 @@
           video.removeAttribute('data-lazy-src');
           video.load();
         });
-      }, { rootMargin: '500px 0px' })
+      }, { rootMargin: '1000px 0px' })
     : null;
 
   function observeLazyVideos(root) {
@@ -102,33 +102,36 @@
       document.getElementById('composer-account').textContent = accountName;
       const avatarUrl = currentUser.fotoPerfil || currentUser.foto_perfil || currentUser.foto || currentUser.avatar || '';
       profileAvatar.innerHTML = avatarUrl ? '<img src="' + escapeHTML(avatarUrl) + '" alt="">' : '<span>' + escapeHTML(initials(accountName)) + '</span>';
-      try {
-        const moderation = await api('/api/publicacoes/moderacao/acesso');
-        if (moderation.autorizado) {
-          const shortcut = document.createElement('a');
-          shortcut.className = 'moderation-shortcut';
-          shortcut.href = '/pages/moderacao-publicacoes.html';
-          shortcut.textContent = 'Analisar denúncias';
-          document.querySelector('.publicacoes-heading').appendChild(shortcut);
-        }
-      } catch {}
+      void api('/api/publicacoes/moderacao/acesso').then(moderation => {
+        if (!moderation.autorizado) return;
+        const shortcut = document.createElement('a');
+        shortcut.className = 'moderation-shortcut';
+        shortcut.href = '/pages/moderacao-publicacoes.html';
+        shortcut.textContent = 'Analisar denúncias';
+        document.querySelector('.publicacoes-heading').appendChild(shortcut);
+      }).catch(() => {});
     } else {
       createEntry.hidden = true;
       composer.hidden = true;
     }
   }
 
-  function renderMedia(media) {
+  function renderMedia(media, prioritizeFirstPost) {
     if (!media.length) return '';
     const classes = media.length === 1 ? 'publication-media single' : 'publication-media';
     return '<div class="' + classes + '">' + media.map((item, index) => {
       const more = index === 3 && media.length > 4
         ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
         : '';
+      const prioritize = prioritizeFirstPost && index === 0;
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><video controls playsinline preload="none" data-lazy-src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
+        return '<div class="publication-media-item"><video controls playsinline preload="metadata" ' +
+          (prioritize ? 'fetchpriority="high" ' : '') +
+          'data-lazy-src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
-      return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
+      return '<div class="publication-media-item"><img loading="' + (prioritize ? 'eager' : 'lazy') + '" ' +
+        (prioritize ? 'fetchpriority="high" ' : '') +
+        'src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
   }
 
@@ -147,7 +150,7 @@
       '</div>';
   }
 
-  function renderPost(post) {
+  function renderPost(post, postIndex) {
     const longDescription = (post.descricao || '').length > 260;
     const description = post.descricao
       ? '<div class="publication-description' + (longDescription ? ' is-collapsed' : '') + '" data-description>' + escapeHTML(post.descricao) + '</div>' +
@@ -169,7 +172,7 @@
       (currentUser && currentUser.tipo === 'candidato' && post.autor.tipo === 'empresa' && !post.minha
         ? '<button type="button" class="follow-company-button' + (post.autor.seguindo ? ' is-following' : '') + '" data-action="follow-company" data-id="' + post.autor.id + '" aria-pressed="' + Boolean(post.autor.seguindo) + '">' + (post.autor.seguindo ? 'Seguindo' : 'Seguir') + '</button>'
         : '') +
-      '</header>' + description + renderMedia(post.midias || []) +
+      '</header>' + description + renderMedia(post.midias || [], postIndex === 0) +
       '<footer class="publication-card-footer">' + renderReactions(post) + '</footer></article>';
   }
 
@@ -199,7 +202,7 @@
       if (!posts.length && reset) {
         feed.innerHTML = '<div class="feed-empty">Ainda não há publicações. Volte em breve para conferir as novidades.</div>';
       } else {
-        feed.insertAdjacentHTML('beforeend', posts.map(renderPost).join(''));
+        feed.insertAdjacentHTML('beforeend', posts.map((post, index) => renderPost(post, index)).join(''));
         observeLazyVideos(feed);
       }
       cursor = result.proximoCursor;
