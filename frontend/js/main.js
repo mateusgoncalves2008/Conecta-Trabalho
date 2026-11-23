@@ -602,7 +602,7 @@
         void profileDetailsRequest.then(updated => {
           if (!updated) return;
           const updatedInitials = String(profileName || 'CT').trim()
-            .split(/\\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
+            .split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'CT';
           const existingTriggerPhoto = trigger.querySelector('img');
           if (profilePhoto) {
             if (existingTriggerPhoto) existingTriggerPhoto.src = profilePhoto;
