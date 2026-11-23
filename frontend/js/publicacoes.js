@@ -49,6 +49,32 @@
   let reportTarget = null;
   let loading = false;
 
+  const videoLoader = 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const video = entry.target;
+          videoLoader.unobserve(video);
+          const source = video.dataset.lazySrc;
+          if (!source) return;
+          video.src = source;
+          video.removeAttribute('data-lazy-src');
+          video.load();
+        });
+      }, { rootMargin: '500px 0px' })
+    : null;
+
+  function observeLazyVideos(root) {
+    const videos = root.querySelectorAll('video[data-lazy-src]');
+    videos.forEach(video => {
+      if (videoLoader) videoLoader.observe(video);
+      else {
+        video.src = video.dataset.lazySrc;
+        video.removeAttribute('data-lazy-src');
+      }
+    });
+  }
+
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
@@ -100,7 +126,7 @@
         ? '<span class="publication-media-more">+' + (media.length - 4) + '</span>'
         : '';
       if (item.tipo === 'video') {
-        return '<div class="publication-media-item"><video controls playsinline preload="metadata" src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
+        return '<div class="publication-media-item"><video controls playsinline preload="none" data-lazy-src="' + escapeHTML(item.url) + '" aria-label="Vídeo publicado"></video></div>';
       }
       return '<div class="publication-media-item"><img loading="lazy" src="' + escapeHTML(item.url) + '" alt="Foto da publicação">' + more + '</div>';
     }).join('') + '</div>';
@@ -166,7 +192,7 @@
       feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
     }
     try {
-      const query = '?limit=15&cursor=' + cursor;
+      const query = '?limit=10&cursor=' + cursor;
       const result = await api('/api/publicacoes' + query);
       const posts = result.publicacoes || [];
       if (reset) feed.innerHTML = '';
@@ -174,6 +200,7 @@
         feed.innerHTML = '<div class="feed-empty">Ainda não há publicações. Volte em breve para conferir as novidades.</div>';
       } else {
         feed.insertAdjacentHTML('beforeend', posts.map(renderPost).join(''));
+        observeLazyVideos(feed);
       }
       cursor = result.proximoCursor;
       loadMoreButton.hidden = cursor === null;
