@@ -762,7 +762,12 @@
       return;
     }
     await loadUser();
-    if (currentUser && new URLSearchParams(location.search).get('criar') === '1') openComposer();
+    if (!currentUser || !['candidato', 'empresa'].includes(currentUser.tipo)) {
+      window.location.replace('/pages/login.html');
+      return;
+    }
+    document.body.classList.remove('publicacoes-auth-pending');
+    if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
     await loadPosts(true);
   })();
 })();
