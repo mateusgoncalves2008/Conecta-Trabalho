@@ -2046,9 +2046,12 @@ html[data-theme="dark"] .search-suggestion-item:hover,html[data-theme="dark"] .s
 @media(max-width:650px){.search-suggestions{left:auto;right:0;width:min(360px,calc(100vw - 24px));max-height:65vh}}
 
 
-/* Evita mostrar os controles de visitante antes da primeira validação da sessão. */
-.site-header:not([data-auth-state="ready"]) .header-actions,
+/* Mantém somente os links de visitante ocultos até a validação inicial da sessão.
+   Não oculta a área inteira, para preservar o botão de tema e outros controles. */
+.site-header:not([data-auth-state="ready"]) .header-actions > a[href*="login.html"],
+.site-header:not([data-auth-state="ready"]) .header-actions > a[href*="cadastro.html"],
 .site-header:not([data-auth-state="ready"]) .main-nav .mobile-login-link,
 .site-header:not([data-auth-state="ready"]) .main-nav .mobile-register-link {
+  display: none !important;
   visibility: hidden !important;
 }
