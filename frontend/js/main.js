@@ -95,7 +95,6 @@
     cachedMenu.appendChild(cachedTrigger);
     cachedHeaderActions.prepend(cachedMenu);
     cachedHeaderActions.style.visibility = 'visible';
-    cachedHeader?.setAttribute('data-auth-state', 'ready');
   }
 
   let toastTimer;
