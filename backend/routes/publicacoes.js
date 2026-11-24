@@ -206,7 +206,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     res.json({ sucesso: true, registrada: result.rowCount > 0, visualizacoes: Number(total.rows[0]?.total || 0) });
   }));
 
-  router.get('/midia/:id', asyncRoute(async (req, res) => {
+  router.get('/midia/:id', member, asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) return res.status(404).end();
@@ -234,7 +234,7 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     return res.status(502).end();
   }));
 
-  router.get('/', asyncRoute(async (req, res) => {
+  router.get('/', member, asyncRoute(async (req, res) => {
     await schemaReady;
     scheduleStagingCleanup();
     const limit = Math.min(Math.max(Number(req.query.limit) || 15, 1), 30);
