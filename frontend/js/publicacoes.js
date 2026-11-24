@@ -763,7 +763,21 @@
     }
     await loadUser();
     if (!currentUser || !['candidato', 'empresa'].includes(currentUser.tipo)) {
-      window.location.replace('/pages/login.html');
+      document.body.classList.remove('publicacoes-auth-pending');
+      document.body.classList.add('publicacoes-access-denied');
+      const accessMessage = document.getElementById('publicacoes-access-message');
+      const backLink = document.getElementById('publicacoes-back-link');
+      if (accessMessage) accessMessage.hidden = false;
+      if (backLink) {
+        let previousPage = '/';
+        try {
+          const referrer = new URL(document.referrer);
+          if (referrer.origin === window.location.origin && !/\\/pages\\/publicacoes\\.html$/i.test(referrer.pathname)) {
+            previousPage = referrer.pathname + referrer.search + referrer.hash;
+          }
+        } catch {}
+        backLink.href = previousPage;
+      }
       return;
     }
     document.body.classList.remove('publicacoes-auth-pending');
