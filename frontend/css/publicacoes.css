@@ -387,3 +387,8 @@ body.publicacoes-auth-pending > .publicacoes-access-message:not([hidden]) {
   place-items: center;
   padding: 40px 20px;
 }
+
+/* Evita o flash do aviso enquanto a sessão ainda está sendo confirmada. */
+html.publicacoes-session-pending .publicacoes-access-message {
+  display: none !important;
+}
