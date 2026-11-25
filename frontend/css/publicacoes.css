@@ -378,7 +378,8 @@ body.publicacoes-access-denied > .publicacoes-main:not(.publicacoes-access-messa
 
 /* Exibe primeiro o aviso de acesso e impede qualquer flash do feed durante a validação. */
 body.publicacoes-auth-pending > .site-header,
-body.publicacoes-auth-pending > .publicacoes-main {
+body.publicacoes-auth-pending > .publicacoes-main,
+body.publicacoes-auth-pending > .site-footer {
   display: none !important;
 }
 body.publicacoes-auth-pending > .publicacoes-access-message:not([hidden]) {
