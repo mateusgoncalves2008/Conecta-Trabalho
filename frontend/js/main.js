@@ -58,6 +58,7 @@
   const cachedHeaderActions = document.querySelector('.site-header .header-actions');
   if (cachedHeaderIsAuthenticated && cachedHeaderActions) {
     const cachedHeader = cachedHeaderActions.closest('.site-header');
+    cachedHeader?.querySelectorAll('.mobile-login-link, .mobile-register-link, a[href*="login.html"], a[href*="cadastro.html"]').forEach(link => { link.hidden = true; });
     cachedHeaderActions.style.visibility = 'hidden';
 
     const cachedSearch = document.createElement('form');
@@ -521,6 +522,7 @@
         document.getElementById('footer-signup-cta')?.remove();
 
         // Usuário autenticado não precisa ver opções de entrar ou cadastrar.
+        document.querySelectorAll('.site-header a[href*="login.html"], .site-header a[href*="cadastro.html"]').forEach(item => item.remove());
 
         const isCompany = user.tipo === 'empresa';
         const profileUrl = isCompany
