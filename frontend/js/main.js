@@ -61,8 +61,21 @@
   // Restaura o cabeçalho autenticado imediatamente quando a última sessão foi confirmada.
   // A API continua sendo a autoridade: se a sessão expirou, o cabeçalho de visitante é restaurado.
   const headerAuthCacheKey = 'conecta-header-authenticated';
-  const cachedHeaderIsAuthenticated = localStorage.getItem(headerAuthCacheKey) === '1';
+  const cachedHeaderAuthState = localStorage.getItem(headerAuthCacheKey);
+  const cachedHeaderIsAuthenticated = cachedHeaderAuthState === '1';
   const cachedHeaderActions = document.querySelector('.site-header .header-actions');
+
+  // Visitantes já identificados não precisam esperar outra consulta à API
+  // para mostrar Entrar/Cadastrar em cada navegação.
+  if (!cachedHeaderIsAuthenticated) {
+    const header = document.querySelector('.site-header');
+    header?.setAttribute('data-auth-state', 'ready');
+    header?.querySelectorAll('.mobile-login-link, .mobile-register-link, a[href*="login.html"], a[href*="cadastro.html"]').forEach(link => {
+      link.hidden = false;
+    });
+    if (cachedHeaderActions) cachedHeaderActions.style.visibility = '';
+  }
+
   if (cachedHeaderIsAuthenticated && cachedHeaderActions) {
     const cachedHeader = cachedHeaderActions.closest('.site-header');
     cachedHeader?.querySelectorAll('.mobile-login-link, .mobile-register-link, a[href*="login.html"], a[href*="cadastro.html"]').forEach(link => { link.hidden = true; });
