@@ -89,11 +89,13 @@
     : Math.ceil(bytes / 1024) + ' KB';
 
   async function loadUser() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
     try {
-      const result = await api('/api/me');
+      const result = await api('/api/me', { signal: controller.signal });
       currentUser = result.usuario || null;
-    } catch {
-      currentUser = null;
+    } finally {
+      clearTimeout(timeout);
     }
     if (currentUser) {
       createEntry.hidden = false;
@@ -757,32 +759,38 @@
   });
 
   (async () => {
-    if (!api) {
-      document.body.classList.remove('publicacoes-auth-pending');
-      feed.innerHTML = '<div class="feed-empty">Não foi possível iniciar a página. Atualize para tentar novamente.</div>';
-      return;
-    }
-    await loadUser();
-    if (!currentUser || !['candidato', 'empresa'].includes(currentUser.tipo)) {
-      document.body.classList.remove('publicacoes-auth-pending');
-      document.body.classList.add('publicacoes-access-denied');
-      const accessMessage = document.getElementById('publicacoes-access-message');
-      const backLink = document.getElementById('publicacoes-back-link');
-      if (accessMessage) accessMessage.hidden = false;
-      if (backLink) {
-        let previousPage = '/';
-        try {
-          const referrer = new URL(document.referrer);
-          if (referrer.origin === window.location.origin && !/\\/pages\\/publicacoes\\.html$/i.test(referrer.pathname)) {
-            previousPage = referrer.pathname + referrer.search + referrer.hash;
-          }
-        } catch {}
-        backLink.href = previousPage;
+    try {
+      if (!api) {
+        feed.innerHTML = '<div class="feed-empty">Não foi possível iniciar a página. Atualize para tentar novamente.</div>';
+        return;
       }
-      return;
+      await loadUser();
+      if (!currentUser || !['candidato', 'empresa'].includes(currentUser.tipo)) {
+        document.body.classList.add('publicacoes-access-denied');
+        const accessMessage = document.getElementById('publicacoes-access-message');
+        const backLink = document.getElementById('publicacoes-back-link');
+        if (accessMessage) accessMessage.hidden = false;
+        if (backLink) {
+          let previousPage = '/';
+          try {
+            const referrer = new URL(document.referrer);
+            if (referrer.origin === window.location.origin && !/\\/pages\\/publicacoes\\.html$/i.test(referrer.pathname)) {
+              previousPage = referrer.pathname + referrer.search + referrer.hash;
+            }
+          } catch {}
+          backLink.href = previousPage;
+        }
+        return;
+      }
+      if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
+      await loadPosts(true);
+    } catch (error) {
+      console.error('Falha ao validar a sessão da página de publicações:', error);
+      createEntry.hidden = true;
+      composer.hidden = true;
+      feed.innerHTML = '<div class="feed-empty">Não foi possível verificar sua sessão. Confira sua conexão e atualize a página para tentar novamente.</div>';
+    } finally {
+      document.body.classList.remove('publicacoes-auth-pending');
     }
-    document.body.classList.remove('publicacoes-auth-pending');
-    if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
-    await loadPosts(true);
   })();
 })();
