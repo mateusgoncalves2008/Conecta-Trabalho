@@ -774,7 +774,7 @@
           let previousPage = '/';
           try {
             const referrer = new URL(document.referrer);
-            if (referrer.origin === window.location.origin && !/\\/pages\\/publicacoes\\.html$/i.test(referrer.pathname)) {
+            if (referrer.origin === window.location.origin && !/\/pages\/publicacoes\.html$/i.test(referrer.pathname)) {
               previousPage = referrer.pathname + referrer.search + referrer.hash;
             }
           } catch {}
