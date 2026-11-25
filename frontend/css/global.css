@@ -2055,3 +2055,105 @@ html[data-theme="dark"] .search-suggestion-item:hover,html[data-theme="dark"] .s
   display: none !important;
   visibility: hidden !important;
 }
+
+
+/* Carregamento global de páginas — usado pelo frontend/js/main.js */
+.page-transition-overlay.is-loading {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  padding: 24px !important;
+  background: #142b49 !important;
+  color: #fff !important;
+  clip-path: none !important;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto !important;
+  transition: none;
+}
+
+.page-transition-overlay.is-loaded {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #142b49 !important;
+  clip-path: none !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none !important;
+  transition: opacity 240ms ease, visibility 0s linear 240ms;
+}
+
+.page-loading-content {
+  width: min(340px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.page-loading-content > img {
+  display: block;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  margin-bottom: 15px;
+}
+
+.page-loading-brand {
+  color: #fff;
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -.8px;
+  line-height: 1.2;
+}
+
+.page-loading-brand span {
+  color: #f0a078;
+  font-weight: 550;
+}
+
+.page-loading-content > p {
+  margin: 20px 0 22px;
+  color: rgba(255, 255, 255, .78);
+  font-size: 14px;
+}
+
+.page-loading-progress {
+  width: 220px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .2);
+}
+
+.page-loading-progress span {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: #e27b4d;
+  animation: page-loading-progress 1.35s ease-in-out infinite;
+}
+
+@keyframes page-loading-progress {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(370%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loading-progress span {
+    animation: none;
+    width: 100%;
+    opacity: .75;
+  }
+
+  .page-transition-overlay.is-loaded {
+    transition: none;
+  }
+}
