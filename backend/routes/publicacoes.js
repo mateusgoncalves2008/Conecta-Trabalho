@@ -206,12 +206,30 @@ const createPublicacoesRouter = ({ pool, s3, storageBucket, imageReference, prof
     res.json({ sucesso: true, registrada: result.rowCount > 0, visualizacoes: Number(total.rows[0]?.total || 0) });
   }));
 
-  router.get('/midia/:id', member, asyncRoute(async (req, res) => {
+  router.get('/midia/:id', asyncRoute(async (req, res) => {
     await schemaReady;
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) return res.status(404).end();
-    const result = await pool.query('SELECT m.storage_key,m.mime_type FROM publicacao_midias m JOIN publicacoes p ON p.id=m.publicacao_id WHERE m.id=$1', [id]);
+    const result = await pool.query(
+      'SELECT m.storage_key,m.mime_type,u.tipo AS autor_tipo FROM publicacao_midias m JOIN publicacoes p ON p.id=m.publicacao_id JOIN usuarios u ON u.id=p.autor_id WHERE m.id=$1',
+      [id]
+    );
     if (!result.rowCount || !s3) return res.status(404).end();
+
+    // Publicações de empresas também aparecem em seus perfis públicos.
+    // Por isso, a mídia dessas publicações precisa poder ser carregada sem login.
+    if (!req.session.user && result.rows[0].autor_tipo !== 'empresa') {
+      return res.status(401).end();
+    }
+    if (req.session.user) {
+      if (!['candidato', 'empresa'].includes(req.session.user.tipo)) {
+        return res.status(403).end();
+      }
+      if (req.session.user.tipo === 'empresa' && !req.session.user.emailVerificado) {
+        return res.status(403).end();
+      }
+    }
+
     const rangeHeader = req.headers.range;
     if (rangeHeader && !/^bytes=\d*-\d*$/.test(rangeHeader)) return res.status(416).end();
     const object = await s3.send(new GetObjectCommand({
