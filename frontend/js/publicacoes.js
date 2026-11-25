@@ -785,8 +785,6 @@
       }
       const accessMessage = document.getElementById('publicacoes-access-message');
       if (accessMessage) accessMessage.hidden = true;
-      document.body.classList.remove('publicacoes-auth-pending');
-
       if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
       await loadPosts(true);
     } catch (error) {
