@@ -51,7 +51,10 @@
     ? (() => {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
-        return api('/api/me', { signal: controller.signal }).finally(() => clearTimeout(timeout));
+        return api('/api/me', { signal: controller.signal })
+          .then(session => ({ ok: true, session }))
+          .catch(error => ({ ok: false, error }))
+          .finally(() => clearTimeout(timeout));
       })()
     : null;
 
@@ -509,8 +512,9 @@
     // Ações da conta no menu superior, em todas as páginas com cabeçalho.
     const publicHeaderActions = document.querySelector('.site-header .header-actions');
     if (publicHeaderActions) {
-      headerSessionRequest.then(async session => {
-        const user = session.usuario;
+      headerSessionRequest.then(async sessionResult => {
+        if (!sessionResult.ok) throw sessionResult.error;
+        const user = sessionResult.session.usuario;
         if (!user) {
           localStorage.removeItem(headerAuthCacheKey);
           document.querySelectorAll('.site-header-search').forEach(search => search.remove());
