@@ -782,13 +782,27 @@
         }
         return;
       }
+      const accessMessage = document.getElementById('publicacoes-access-message');
+      if (accessMessage) accessMessage.hidden = true;
+      document.body.classList.remove('publicacoes-auth-pending');
+
       if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
       await loadPosts(true);
     } catch (error) {
       console.error('Falha ao validar a sessão da página de publicações:', error);
       createEntry.hidden = true;
       composer.hidden = true;
-      feed.innerHTML = '<div class="feed-empty">Não foi possível verificar sua sessão. Confira sua conexão e atualize a página para tentar novamente.</div>';
+      document.body.classList.add('publicacoes-access-denied');
+      const accessMessage = document.getElementById('publicacoes-access-message');
+      if (accessMessage) {
+        accessMessage.hidden = false;
+        const title = accessMessage.querySelector('h1');
+        const description = accessMessage.querySelector('p');
+        if (title) title.textContent = 'Não foi possível verificar sua sessão';
+        if (description) description.textContent = 'Confira sua conexão e atualize a página para tentar novamente.';
+        const registerLink = accessMessage.querySelector('.publicacoes-access-actions .button-primary');
+        if (registerLink) registerLink.hidden = true;
+      }
     } finally {
       document.body.classList.remove('publicacoes-auth-pending');
     }
