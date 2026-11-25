@@ -1,4 +1,56 @@
 (() => {
+  // Tela global de carregamento: aparece durante a abertura e navegação entre páginas.
+  const pageLoadingOverlay = document.createElement('div');
+  pageLoadingOverlay.className = 'page-transition-overlay is-loading';
+  pageLoadingOverlay.setAttribute('role', 'status');
+  pageLoadingOverlay.setAttribute('aria-live', 'polite');
+  pageLoadingOverlay.setAttribute('aria-label', 'Carregando página');
+  pageLoadingOverlay.innerHTML = `
+    <div class="page-loading-content">
+      <img src="/img/logo-conectatrabalho.svg" alt="" width="54" height="54" decoding="async">
+      <div class="page-loading-brand">Conecta<span>Trabalho</span></div>
+      <p>Aguarde, estamos preparando sua página.</p>
+      <div class="page-loading-progress" aria-hidden="true"><span></span></div>
+    </div>`;
+  document.documentElement.appendChild(pageLoadingOverlay);
+
+  let pageLoadingFinished = false;
+  const hidePageLoading = () => {
+    if (pageLoadingFinished) return;
+    pageLoadingFinished = true;
+    pageLoadingOverlay.classList.remove('is-loading');
+    pageLoadingOverlay.classList.add('is-loaded');
+    pageLoadingOverlay.setAttribute('aria-hidden', 'true');
+  };
+
+  // O evento load espera HTML, scripts, folhas de estilo e imagens da página.
+  window.addEventListener('load', hidePageLoading, { once: true });
+  // Compatibilidade com páginas restauradas pelo cache de navegação do navegador.
+  window.addEventListener('pageshow', event => {
+    if (event.persisted || document.readyState === 'complete') hidePageLoading();
+  });
+
+  // Exibe a tela antes de navegar por links internos, sem interferir em novas abas,
+  // downloads, âncoras da mesma página ou links externos.
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+
+    let destination;
+    try { destination = new URL(link.href, window.location.href); } catch { return; }
+    if (destination.origin !== window.location.origin) return;
+    if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash) return;
+    if (destination.href === window.location.href) return;
+
+    pageLoadingFinished = false;
+    pageLoadingOverlay.classList.remove('is-loaded');
+    pageLoadingOverlay.classList.add('is-loading');
+    pageLoadingOverlay.setAttribute('aria-hidden', 'false');
+  }, true);
+
+  if (document.readyState === 'complete') hidePageLoading();
+
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
   const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
   const isAuthPage = /\/(login|cadastro)\.html$/i.test(currentPath);
