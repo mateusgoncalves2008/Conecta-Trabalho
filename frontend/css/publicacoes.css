@@ -312,7 +312,8 @@ html[data-theme=dark] .upload-add-tile{background:#182638;border-color:#40536a;c
 
 
 /* A página só aparece depois que a sessão de um candidato ou empresa for confirmada. */
-body.publicacoes-auth-pending { visibility: hidden; }
+body.publicacoes-auth-pending > .publicacoes-main { visibility: hidden; }
+body.publicacoes-auth-pending > .site-header { visibility: visible; }
 
 
 /* Aviso exibido para visitantes sem conta conectada. */
