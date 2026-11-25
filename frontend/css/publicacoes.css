@@ -375,3 +375,15 @@ body.publicacoes-access-denied > .publicacoes-main:not(.publicacoes-access-messa
   .publicacoes-access-actions { flex-direction: column; }
   .publicacoes-access-actions .button { width: 100%; }
 }
+
+/* Exibe primeiro o aviso de acesso e impede qualquer flash do feed durante a validação. */
+body.publicacoes-auth-pending > .site-header,
+body.publicacoes-auth-pending > .publicacoes-main {
+  display: none !important;
+}
+body.publicacoes-auth-pending > .publicacoes-access-message:not([hidden]) {
+  min-height: calc(100vh - 40px);
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+}
