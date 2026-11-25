@@ -516,7 +516,9 @@
         if (!sessionResult.ok) throw sessionResult.error;
         const user = sessionResult.session.usuario;
         if (!user) {
-          localStorage.removeItem(headerAuthCacheKey);
+          // Memoriza também o estado de visitante para manter Entrar/Cadastrar visíveis
+          // desde o primeiro instante nas próximas páginas, sem alternância no cabeçalho.
+          localStorage.setItem(headerAuthCacheKey, '0');
           document.querySelectorAll('.site-header-search').forEach(search => search.remove());
           publicHeaderActions.querySelector('.account-menu-pending')?.remove();
           publicHeaderActions.style.visibility = '';
@@ -635,7 +637,7 @@
         logout.addEventListener('click', async () => {
           logout.disabled = true;
           try {
-            localStorage.removeItem(headerAuthCacheKey);
+            localStorage.setItem(headerAuthCacheKey, '0');
             await api('/api/logout', { method: 'POST' });
             window.location.href = '/';
           } catch (error) {
