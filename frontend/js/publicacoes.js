@@ -758,6 +758,7 @@
 
   (async () => {
     if (!api) {
+      document.body.classList.remove('publicacoes-auth-pending');
       feed.innerHTML = '<div class="feed-empty">Não foi possível iniciar a página. Atualize para tentar novamente.</div>';
       return;
     }
