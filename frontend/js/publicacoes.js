@@ -765,6 +765,7 @@
         return;
       }
       await loadUser();
+      document.documentElement.classList.remove('publicacoes-session-pending');
       if (!currentUser || !['candidato', 'empresa'].includes(currentUser.tipo)) {
         document.body.classList.add('publicacoes-access-denied');
         const accessMessage = document.getElementById('publicacoes-access-message');
@@ -789,6 +790,7 @@
       if (new URLSearchParams(location.search).get('criar') === '1') openComposer();
       await loadPosts(true);
     } catch (error) {
+      document.documentElement.classList.remove('publicacoes-session-pending');
       console.error('Falha ao validar a sessão da página de publicações:', error);
       createEntry.hidden = true;
       composer.hidden = true;
