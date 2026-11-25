@@ -46,9 +46,13 @@
     return data;
   };
 
-  // Inicia a validação da sessão assim que o script é executado, sem esperar o DOMContentLoaded.
+  // Inicia a validação da sessão assim que o script é executado, com limite de espera.
   const headerSessionRequest = document.querySelector('.site-header .header-actions')
-    ? api('/api/me')
+    ? (() => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+        return api('/api/me', { signal: controller.signal }).finally(() => clearTimeout(timeout));
+      })()
     : null;
 
   // Restaura o cabeçalho autenticado imediatamente quando a última sessão foi confirmada.
@@ -780,7 +784,17 @@
           header.insertBefore(searchForm, publicHeaderActions.closest('.dashboard-user') || publicHeaderActions);
         }
         document.querySelector('.site-header')?.setAttribute('data-auth-state', 'ready');
-      }).catch(() => {});
+      }).catch(error => {
+        console.warn('Não foi possível validar a sessão do cabeçalho:', error);
+        localStorage.removeItem(headerAuthCacheKey);
+        document.querySelectorAll('.site-header-search').forEach(search => search.remove());
+        publicHeaderActions.querySelector('.account-menu-pending')?.remove();
+        publicHeaderActions.style.visibility = '';
+        document.querySelectorAll('.site-header a[href*="login.html"], .site-header a[href*="cadastro.html"], .site-header .mobile-login-link, .site-header .mobile-register-link').forEach(link => {
+          link.hidden = false;
+        });
+        document.querySelector('.site-header')?.setAttribute('data-auth-state', 'ready');
+      });
     }
 
     // Registro do PWA: permite instalar o site e disponibiliza o modo offline básico.
