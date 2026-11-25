@@ -188,13 +188,39 @@
     totalElement.textContent = Math.max(0, total).toLocaleString('pt-BR');
   }
 
+  function renderFeedSkeleton() {
+    return Array.from({ length: 3 }, (_, index) => `
+      <article class="publication-skeleton" aria-hidden="true">
+        <div class="skeleton-header">
+          <div class="skeleton-avatar skeleton-pulse"></div>
+          <div class="skeleton-author">
+            <div class="skeleton-line skeleton-line-wide skeleton-pulse"></div>
+            <div class="skeleton-line skeleton-line-short skeleton-pulse"></div>
+          </div>
+        </div>
+        <div class="skeleton-description">
+          <div class="skeleton-line skeleton-pulse" style="width:96%"></div>
+          <div class="skeleton-line skeleton-pulse"></div>
+          <div class="skeleton-line skeleton-pulse"></div>
+        </div>
+        ${index !== 1 ? '<div class="skeleton-media skeleton-pulse"></div>' : ''}
+        <div class="skeleton-actions">
+          <div class="skeleton-action skeleton-pulse"></div>
+          <div class="skeleton-action skeleton-pulse"></div>
+          <div class="skeleton-action skeleton-pulse"></div>
+        </div>
+      </article>
+    `).join('');
+  }
+
   async function loadPosts(reset) {
     if (loading) return;
     loading = true;
     loadMoreButton.disabled = true;
     if (reset) {
       cursor = 0;
-      feed.innerHTML = '<div class="feed-loading">Carregando publicações...</div>';
+      feed.setAttribute('aria-busy', 'true');
+      feed.innerHTML = renderFeedSkeleton();
     }
     try {
       const query = '?limit=10&cursor=' + cursor;
@@ -207,13 +233,17 @@
         feed.insertAdjacentHTML('beforeend', posts.map((post, index) => renderPost(post, index)).join(''));
         observeLazyVideos(feed);
       }
+      feed.setAttribute('aria-busy', 'false');
       cursor = result.proximoCursor;
       loadMoreButton.hidden = cursor === null;
       document.getElementById('feed-count-label').textContent = posts.length
         ? 'Novidades de candidatos e empresas'
         : 'Publicações da comunidade';
     } catch (error) {
-      if (reset) feed.innerHTML = '<div class="feed-empty">Não foi possível carregar as publicações. Atualize a página para tentar novamente.</div>';
+      if (reset) {
+        feed.setAttribute('aria-busy', 'false');
+        feed.innerHTML = '<div class="feed-empty">Não foi possível carregar as publicações. Atualize a página para tentar novamente.</div>';
+      }
       toast(error.message);
     } finally {
       loading = false;
