@@ -213,6 +213,10 @@
     `).join('');
   }
 
+  // Mantém os espaços cinzas visíveis desde o início, antes da primeira consulta ao feed.
+  feed.innerHTML = renderFeedSkeleton();
+  feed.setAttribute('aria-busy', 'true');
+
   async function loadPosts(reset) {
     if (loading) return;
     loading = true;
