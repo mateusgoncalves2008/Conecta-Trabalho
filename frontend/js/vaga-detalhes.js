@@ -48,7 +48,7 @@
   }
   async function load() {
     const id = new URLSearchParams(window.location.search).get('id');
-    if (!id || !/^\d+$/.test(id)) { root.textContent = 'Identificador da vaga inválido.'; return; }
+    if (!id || !/^\d+$/.test(id)) { root.removeAttribute('aria-busy'); root.textContent = 'Identificador da vaga inválido.'; return; }
     try {
       const result = await Conecta.api('/api/vagas/' + encodeURIComponent(id));
       const vaga = result.vaga;
