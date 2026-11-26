@@ -408,7 +408,7 @@ body.publicacoes-access-denied > .publicacoes-main:not(.publicacoes-access-messa
 /* Skeleton de Publicações visível enquanto a sessão é verificada.
    Evita a tela branca antes da exibição do aviso de acesso ou do feed. */
 .publicacoes-page-skeleton { display:none; min-height:100vh; padding:32px 20px 60px; background:var(--page,#f5f7fa); }
-body.publicacoes-auth-pending > .publicacoes-page-skeleton { display:block; }
+body.publicacoes-auth-pending.publicacoes-skeleton-visible > .publicacoes-page-skeleton { display:block; }
 body.publicacoes-auth-pending > .site-header,
 body.publicacoes-auth-pending > .publicacoes-main,
 body.publicacoes-auth-pending > .site-footer { display:none !important; }
