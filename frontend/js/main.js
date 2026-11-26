@@ -21,16 +21,28 @@
     candidateProfile: `<div class="ct-skeleton-candidate" aria-hidden="true"><section class="ct-skeleton-panel"><div class="ct-skeleton-row"><i class="ct-skeleton-block ct-skeleton-candidate-avatar"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-55"></i><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-45"></i></div></div><div class="ct-skeleton-tags"><i></i><i></i><i></i></div><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-30"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-85"></i></section><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-40"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-70"></i></section><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i></section></section></div>`,
     directory: `<div class="ct-skeleton-directory" aria-hidden="true">${Array.from({length:5},()=>'<div class="ct-skeleton-panel ct-skeleton-directory-row"><i class="ct-skeleton-block ct-skeleton-directory-avatar"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-65"></i><i class="ct-skeleton-line ct-w-45"></i></div></div>').join('')}</div>`,
     companyJobs: `<div class="ct-skeleton-company-jobs" aria-hidden="true"><aside class="ct-skeleton-panel"><i class="ct-skeleton-line ct-w-70"></i>${Array.from({length:4},()=>'<div class="ct-skeleton-job-list-item"><i class="ct-skeleton-line ct-w-80"></i><i class="ct-skeleton-line ct-w-55"></i></div>').join('')}</aside><section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-heading ct-w-75"></i><i class="ct-skeleton-line ct-w-45"></i><div class="ct-skeleton-actions"><i></i><i></i></div><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-85"></i><i class="ct-skeleton-line ct-w-65"></i></section></div>`,
-    reports: `<div class="ct-skeleton-directory" aria-hidden="true">${Array.from({length:4},()=>'<div class="ct-skeleton-panel ct-skeleton-report"><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-80"></i><i class="ct-skeleton-line ct-w-65"></i><div class="ct-skeleton-actions"><i></i><i></i></div></div>').join('')}</div>`
+    reports: `<div class="ct-skeleton-directory" aria-hidden="true">${Array.from({length:4},()=>'<div class="ct-skeleton-panel ct-skeleton-report"><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-80"></i><i class="ct-skeleton-line ct-w-65"></i><div class="ct-skeleton-actions"><i></i><i></i></div></div>').join('')}</div>`,
+    line: `<i class="ct-skeleton-line ct-w-65" aria-hidden="true"></i>`
   };
 
+  const skeletonObservers = new WeakMap();
   const renderSkeleton = (target, type) => {
     const element = typeof target === 'string' ? document.querySelector(target) : target;
     if (!element || !skeletonTemplates[type]) return;
+    skeletonObservers.get(element)?.disconnect();
     element.classList.remove('empty-state');
     element.classList.add('ct-skeleton-container');
     element.setAttribute('aria-busy', 'true');
     element.innerHTML = skeletonTemplates[type];
+
+    const observer = new MutationObserver(() => {
+      observer.disconnect();
+      element.classList.remove('ct-skeleton-container');
+      element.removeAttribute('aria-busy');
+      skeletonObservers.delete(element);
+    });
+    observer.observe(element, { childList: true });
+    skeletonObservers.set(element, observer);
   };
 
   [
@@ -41,7 +53,12 @@
     ['#featured-jobs', 'jobCards'],
     ['#company-jobs-content', 'companyJobs'],
     ['#directory-results', 'directory'],
-    ['#moderation-list', 'reports']
+    ['#moderation-list', 'reports'],
+    ['#candidate-saved-jobs', 'directory'],
+    ['#candidate-followed-companies', 'directory'],
+    ['#candidate-company-notifications', 'directory'],
+    ['#candidate-applications', 'directory'],
+    ['#candidate-public-profile-status', 'line']
   ].forEach(([selector, type]) => {
     const target = document.querySelector(selector);
     if (target && /carregando|buscando/i.test(target.textContent || '')) renderSkeleton(target, type);
