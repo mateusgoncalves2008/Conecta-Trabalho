@@ -68,6 +68,7 @@
         saved = (savedResult.vagas || []).some(item => Number(item.id) === Number(vaga.id));
       }
       root.className = 'job-detail-layout';
+      root.removeAttribute('aria-busy');
       root.innerHTML = `
         <div class="job-detail-primary">
           <section class="job-detail-panel">
@@ -189,6 +190,7 @@
       }
       document.title = vaga.titulo + ' | ConectaTrabalho';
     } catch (error) {
+      root.removeAttribute('aria-busy');
       root.className = 'empty-state';
       root.textContent = error.message;
     }
