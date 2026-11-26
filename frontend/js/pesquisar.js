@@ -20,7 +20,7 @@
   async function loadResults() {
     const id = ++requestId;
     const query = input.value.trim();
-    resultsNode.innerHTML = '<div class="directory-loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Pesquisando...</div>';
+    Conecta.renderSkeleton(resultsNode, 'directory');
     try {
       const data = await Conecta.api('/api/pesquisar?q=' + encodeURIComponent(query) + '&tipo=' + encodeURIComponent(filter));
       if (id !== requestId) return;
@@ -48,6 +48,8 @@
           '<div class="directory-card-actions"><a class="button button-outline button-small" href="' + profileUrl + '">Ver empresa</a>' + followAction + '</div></article>');
       });
       resultsNode.innerHTML = cards.length ? cards.join('') : '<div class="directory-empty"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><h2>Nenhum resultado encontrado</h2><p>Tente pesquisar por outro nome, profissão, setor ou cidade.</p></div>';
+      resultsNode.classList.remove('ct-skeleton-container');
+      resultsNode.removeAttribute('aria-busy');
       resultsNode.querySelectorAll('[data-follow-company]').forEach(button => button.addEventListener('click', async () => {
         if (!currentUser) return window.location.href = 'login.html';
         const following = button.getAttribute('aria-pressed') === 'true';
@@ -67,6 +69,8 @@
     } catch (error) {
       if (id !== requestId) return;
       summary.textContent = 'Não foi possível concluir a pesquisa.';
+      resultsNode.classList.remove('ct-skeleton-container');
+      resultsNode.removeAttribute('aria-busy');
       resultsNode.innerHTML = '<div class="directory-empty"><p>' + escapeHTML(error.message) + '</p><button type="button" class="button button-outline" id="directory-retry">Tentar novamente</button></div>';
       document.getElementById('directory-retry')?.addEventListener('click', loadResults);
     }
