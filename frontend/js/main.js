@@ -1,55 +1,42 @@
 (() => {
-  // Tela global de carregamento: aparece durante a abertura e navegação entre páginas.
-  const pageLoadingOverlay = document.createElement('div');
-  pageLoadingOverlay.className = 'page-transition-overlay is-loading';
-  pageLoadingOverlay.setAttribute('role', 'status');
-  pageLoadingOverlay.setAttribute('aria-live', 'polite');
-  pageLoadingOverlay.setAttribute('aria-label', 'Carregando página');
-  pageLoadingOverlay.innerHTML = `
-    <div class="page-loading-content">
-      <img src="/img/logo-conectatrabalho.svg" alt="" width="54" height="54" decoding="async">
-      <div class="page-loading-brand">Conecta<span>Trabalho</span></div>
-      <p>Aguarde, estamos preparando sua página.</p>
-      <div class="page-loading-progress" aria-hidden="true"><span></span></div>
+  // Skeleton global: espaços neutros que representam a estrutura da página durante o carregamento.
+  const skeleton = document.createElement('div');
+  skeleton.className = 'page-skeleton-overlay';
+  skeleton.setAttribute('aria-hidden', 'true');
+  skeleton.innerHTML = `
+    <div class="page-skeleton-shell">
+      <div class="page-skeleton-header">
+        <span class="page-skeleton-logo"></span><span class="page-skeleton-nav"></span>
+        <span class="page-skeleton-nav"></span><span class="page-skeleton-nav"></span><span class="page-skeleton-user"></span>
+      </div>
+      <div class="page-skeleton-content">
+        <div class="page-skeleton-title"></div><div class="page-skeleton-subtitle"></div>
+        <div class="page-skeleton-layout">
+          <div class="page-skeleton-primary">
+            <div class="page-skeleton-card">
+              <div class="page-skeleton-row"><span class="page-skeleton-avatar"></span><span class="page-skeleton-lines"><i></i><i></i></span></div>
+              <i class="page-skeleton-line"></i><i class="page-skeleton-line"></i><i class="page-skeleton-line page-skeleton-line-short"></i>
+              <i class="page-skeleton-media"></i><div class="page-skeleton-row page-skeleton-actions"><i></i><i></i><i></i></div>
+            </div>
+            <div class="page-skeleton-card page-skeleton-secondary">
+              <div class="page-skeleton-row"><span class="page-skeleton-avatar"></span><span class="page-skeleton-lines"><i></i><i></i></span></div>
+              <i class="page-skeleton-line"></i><i class="page-skeleton-line page-skeleton-line-short"></i><i class="page-skeleton-media page-skeleton-media-small"></i>
+            </div>
+          </div>
+          <div class="page-skeleton-aside"><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
     </div>`;
-  document.documentElement.appendChild(pageLoadingOverlay);
-
-  let pageLoadingFinished = false;
-  const hidePageLoading = () => {
-    if (pageLoadingFinished) return;
-    pageLoadingFinished = true;
-    pageLoadingOverlay.classList.remove('is-loading');
-    pageLoadingOverlay.classList.add('is-loaded');
-    pageLoadingOverlay.setAttribute('aria-hidden', 'true');
+  document.documentElement.appendChild(skeleton);
+  const hideSkeleton = () => {
+    skeleton.classList.add('is-hidden');
+    window.setTimeout(() => skeleton.remove(), 260);
   };
-
-  // O evento load espera HTML, scripts, folhas de estilo e imagens da página.
-  window.addEventListener('load', hidePageLoading, { once: true });
-  // Compatibilidade com páginas restauradas pelo cache de navegação do navegador.
+  window.addEventListener('load', hideSkeleton, { once: true });
   window.addEventListener('pageshow', event => {
-    if (event.persisted || document.readyState === 'complete') hidePageLoading();
+    if (event.persisted || document.readyState === 'complete') hideSkeleton();
   });
-
-  // Exibe a tela antes de navegar por links internos, sem interferir em novas abas,
-  // downloads, âncoras da mesma página ou links externos.
-  document.addEventListener('click', event => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const link = event.target.closest('a[href]');
-    if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
-
-    let destination;
-    try { destination = new URL(link.href, window.location.href); } catch { return; }
-    if (destination.origin !== window.location.origin) return;
-    if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash) return;
-    if (destination.href === window.location.href) return;
-
-    pageLoadingFinished = false;
-    pageLoadingOverlay.classList.remove('is-loaded');
-    pageLoadingOverlay.classList.add('is-loading');
-    pageLoadingOverlay.setAttribute('aria-hidden', 'false');
-  }, true);
-
-  if (document.readyState === 'complete') hidePageLoading();
+  if (document.readyState === 'complete') hideSkeleton();
 
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
   const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
