@@ -70,7 +70,65 @@
     } catch {}
   };
 
+  let vacanciesSkeletonTimer = null;
+
+  function showVacanciesPageSkeleton() {
+    const page = document.querySelector('.listing-main');
+    if (!page) return;
+    window.clearTimeout(vacanciesSkeletonTimer);
+    page.querySelector('.ct-vacancies-skeleton')?.remove();
+    vacanciesSkeletonTimer = window.setTimeout(() => {
+      if (!page.isConnected || page.querySelector('.ct-vacancies-skeleton')) return;
+      const cards = Array.from({ length: 6 }, () => `
+        <article class="ct-vacancy-skeleton-card" aria-hidden="true">
+          <div class="ct-vacancy-skeleton-top">
+            <div class="ct-vacancy-skeleton-company"><i class="ct-vacancy-skeleton-logo"></i><i class="ct-vacancy-skeleton-bar ct-vacancy-company-name"></i></div>
+            <i class="ct-vacancy-skeleton-tag"></i>
+          </div>
+          <i class="ct-vacancy-skeleton-bar ct-vacancy-title"></i>
+          <div class="ct-vacancy-skeleton-description"><i></i><i></i></div>
+          <div class="ct-vacancy-skeleton-details">
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-value"></i></div>
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-value"></i></div>
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-value"></i></div>
+          </div>
+          <div class="ct-vacancy-skeleton-bottom">
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-salary"></i></div>
+            <i class="ct-vacancy-skeleton-button"></i>
+          </div>
+        </article>`).join('');
+      page.insertAdjacentHTML('beforeend', `
+        <div class="ct-vacancies-skeleton" aria-hidden="true">
+          <div class="ct-vacancy-skeleton-heading">
+            <i class="ct-vacancy-skeleton-eyebrow"></i>
+            <i class="ct-vacancy-skeleton-main-title"></i>
+            <i class="ct-vacancy-skeleton-subtitle"></i>
+          </div>
+          <div class="ct-vacancy-skeleton-search">
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-input"></i></div>
+            <div><i class="ct-vacancy-skeleton-label"></i><i class="ct-vacancy-skeleton-input"></i></div>
+            <i class="ct-vacancy-skeleton-search-button"></i>
+          </div>
+          <div class="ct-vacancy-skeleton-results"><i></i><i></i></div>
+          <div class="ct-vacancy-skeleton-grid">${cards}</div>
+        </div>`);
+      page.classList.add('ct-vacancies-loading');
+      page.setAttribute('aria-busy', 'true');
+    }, 400);
+  }
+
+  function hideVacanciesPageSkeleton() {
+    window.clearTimeout(vacanciesSkeletonTimer);
+    vacanciesSkeletonTimer = null;
+    const page = document.querySelector('.listing-main');
+    if (!page) return;
+    page.classList.remove('ct-vacancies-loading');
+    page.removeAttribute('aria-busy');
+    page.querySelector('.ct-vacancies-skeleton')?.remove();
+  }
+
   function renderJobs(vagas, { homeContainer, listContainer, container, hasFilters }) {
+    if (listContainer) hideVacanciesPageSkeleton();
     if (listContainer) {
       const count = document.getElementById('results-count');
       if (count) count.textContent = vagas.length + (vagas.length === 1 ? ' vaga encontrada' : ' vagas encontradas');
@@ -107,6 +165,8 @@
 
     if (cachedJobs) {
       renderJobs(cachedJobs, { homeContainer, listContainer, container, hasFilters });
+    } else if (listContainer) {
+      showVacanciesPageSkeleton();
     } else {
       Conecta.renderSkeleton(container, 'jobCards');
     }
@@ -118,6 +178,7 @@
       renderJobs(vagas, { homeContainer, listContainer, container, hasFilters });
     } catch (error) {
       if (!cachedJobs) {
+        if (listContainer) hideVacanciesPageSkeleton();
         container.classList.remove('ct-skeleton-container');
         container.removeAttribute('aria-busy');
         container.innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
