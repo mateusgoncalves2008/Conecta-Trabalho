@@ -25,24 +25,42 @@
     line: `<i class="ct-skeleton-line ct-w-65" aria-hidden="true"></i>`
   };
 
-  const skeletonObservers = new WeakMap();
+  const skeletonStates = new WeakMap();
   const renderSkeleton = (target, type) => {
     const element = typeof target === 'string' ? document.querySelector(target) : target;
     if (!element || !skeletonTemplates[type]) return;
-    skeletonObservers.get(element)?.disconnect();
-    element.classList.remove('empty-state');
-    element.classList.add('ct-skeleton-container');
-    element.setAttribute('aria-busy', 'true');
-    element.innerHTML = skeletonTemplates[type];
 
-    const observer = new MutationObserver(() => {
-      observer.disconnect();
-      element.classList.remove('ct-skeleton-container');
-      element.removeAttribute('aria-busy');
-      skeletonObservers.delete(element);
+    const previous = skeletonStates.get(element);
+    if (previous) {
+      window.clearTimeout(previous.timer);
+      previous.observer?.disconnect();
+    }
+
+    const state = { timer: null, observer: null };
+    state.observer = new MutationObserver(() => {
+      window.clearTimeout(state.timer);
+      state.observer?.disconnect();
+      skeletonStates.delete(element);
     });
-    observer.observe(element, { childList: true });
-    skeletonObservers.set(element, observer);
+    state.observer.observe(element, { childList: true });
+
+    state.timer = window.setTimeout(() => {
+      state.observer?.disconnect();
+      element.classList.remove('empty-state');
+      element.classList.add('ct-skeleton-container');
+      element.setAttribute('aria-busy', 'true');
+      element.innerHTML = skeletonTemplates[type];
+
+      state.observer = new MutationObserver(() => {
+        state.observer?.disconnect();
+        element.classList.remove('ct-skeleton-container');
+        element.removeAttribute('aria-busy');
+        skeletonStates.delete(element);
+      });
+      state.observer.observe(element, { childList: true });
+    }, 400);
+
+    skeletonStates.set(element, state);
   };
 
   [
