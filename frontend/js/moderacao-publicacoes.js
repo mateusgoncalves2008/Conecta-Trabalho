@@ -26,13 +26,15 @@
   };
 
   async function loadReports() {
-    list.innerHTML = '<div class="feed-loading">Carregando denúncias...</div>';
+    Conecta.renderSkeleton(list, 'reports');
     list.hidden = false;
     try {
       const result = await api('/api/publicacoes/denuncias?status=' + encodeURIComponent(filter.value));
       const reports = result.denuncias || [];
       count.textContent = reports.length + (reports.length === 1 ? ' denúncia' : ' denúncias');
       if (!reports.length) {
+        list.classList.remove('ct-skeleton-container');
+        list.removeAttribute('aria-busy');
         list.innerHTML = '<div class="feed-empty">Não há denúncias nesta situação.</div>';
         return;
       }
@@ -52,10 +54,14 @@
           (report.detalhe ? '<p><strong>Detalhes da denúncia:</strong> ' + escapeHTML(report.detalhe) + '</p>' : '') +
           '<div class="moderation-actions">' + buttons + '</div></article>';
       }).join('');
+      list.classList.remove('ct-skeleton-container');
+      list.removeAttribute('aria-busy');
     } catch (error) {
       if (/acesso|login|conta/i.test(error.message)) {
         showMessage(error.message + ' Se você administra a plataforma, configure seu e-mail em PUBLICACOES_ADMIN_EMAILS nas variáveis de ambiente do servidor.');
       } else {
+        list.classList.remove('ct-skeleton-container');
+        list.removeAttribute('aria-busy');
         list.innerHTML = '<div class="feed-empty">' + escapeHTML(error.message) + '</div>';
       }
     }
