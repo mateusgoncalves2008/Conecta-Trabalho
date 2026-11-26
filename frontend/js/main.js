@@ -1,78 +1,50 @@
 (() => {
-  // Skeleton global: espaços neutros que representam a estrutura da página durante o carregamento.
-  const skeleton = document.createElement('div');
-  skeleton.className = 'page-skeleton-overlay';
-  skeleton.setAttribute('aria-hidden', 'true');
-  skeleton.innerHTML = `
-    <div class="page-skeleton-shell">
-      <div class="page-skeleton-header">
-        <span class="page-skeleton-logo"></span><span class="page-skeleton-nav"></span>
-        <span class="page-skeleton-nav"></span><span class="page-skeleton-nav"></span><span class="page-skeleton-user"></span>
-      </div>
-      <div class="page-skeleton-content">
-        <div class="page-skeleton-title"></div><div class="page-skeleton-subtitle"></div>
-        <div class="page-skeleton-layout">
-          <div class="page-skeleton-primary">
-            <div class="page-skeleton-card">
-              <div class="page-skeleton-row"><span class="page-skeleton-avatar"></span><span class="page-skeleton-lines"><i></i><i></i></span></div>
-              <i class="page-skeleton-line"></i><i class="page-skeleton-line"></i><i class="page-skeleton-line page-skeleton-line-short"></i>
-              <i class="page-skeleton-media"></i><div class="page-skeleton-row page-skeleton-actions"><i></i><i></i><i></i></div>
-            </div>
-            <div class="page-skeleton-card page-skeleton-secondary">
-              <div class="page-skeleton-row"><span class="page-skeleton-avatar"></span><span class="page-skeleton-lines"><i></i><i></i></span></div>
-              <i class="page-skeleton-line"></i><i class="page-skeleton-line page-skeleton-line-short"></i><i class="page-skeleton-media page-skeleton-media-small"></i>
-            </div>
-          </div>
-          <div class="page-skeleton-aside"><i></i><i></i><i></i><i></i></div>
+  // Skeletons aparecem dentro do conteúdo que está aguardando dados, sem cobrir a página.
+  const skeletonTemplates = {
+    jobDetail: `
+      <div class="ct-skeleton-job-layout" aria-hidden="true">
+        <div class="ct-skeleton-stack">
+          <section class="ct-skeleton-panel">
+            <div class="ct-skeleton-row"><i class="ct-skeleton-block ct-skeleton-company-mark"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-55"></i><i class="ct-skeleton-line ct-w-35"></i></div></div>
+            <i class="ct-skeleton-line ct-skeleton-heading ct-w-80"></i><i class="ct-skeleton-line ct-w-65"></i>
+            <div class="ct-skeleton-actions"><i></i><i></i></div>
+          </section>
+          <section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-45"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-75"></i><i class="ct-skeleton-line ct-w-90"></i></section>
+          <section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-70"></i></section>
+          <section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-45"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-80"></i></section>
+          <section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-40"></i><div class="ct-skeleton-media-grid"><i></i><i></i><i></i></div></section>
         </div>
-      </div>
-    </div>`;
-  const isPublicationsPage = /\/pages\/publicacoes\.html$/i.test(window.location.pathname);
-  let skeletonShown = false;
-  let skeletonTimer = null;
-  let skeletonHideTimer = null;
-  let resourcesLoaded = document.readyState === 'complete';
-  let pendingApiRequests = 0;
-
-  const showSkeleton = () => {
-    if (isPublicationsPage || skeletonShown) return;
-    skeletonShown = true;
-    document.documentElement.appendChild(skeleton);
+        <aside class="ct-skeleton-panel ct-skeleton-facts"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-75"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-70"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-60"></i><i class="ct-skeleton-line"></i></aside>
+      </div>`,
+    jobCards: `<div class="ct-skeleton-job-grid" aria-hidden="true">${Array.from({length:6},()=>'<article class="ct-skeleton-panel ct-skeleton-job-card"><div class="ct-skeleton-row"><i class="ct-skeleton-block ct-skeleton-small-mark"></i><i class="ct-skeleton-line ct-w-45"></i></div><i class="ct-skeleton-line ct-skeleton-subheading ct-w-80"></i><i class="ct-skeleton-line ct-w-65"></i><i class="ct-skeleton-line ct-w-50"></i><div class="ct-skeleton-job-bottom"><i></i><i></i></div></article>').join('')}</div>`,
+    companyProfile: `<div class="ct-skeleton-profile" aria-hidden="true"><section class="ct-skeleton-panel"><i class="ct-skeleton-cover"></i><div class="ct-skeleton-profile-identity"><i class="ct-skeleton-block ct-skeleton-profile-logo"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-55"></i><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-45"></i></div></div></section><div class="ct-skeleton-tabs"><i></i><i></i><i></i><i></i></div><section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-85"></i><i class="ct-skeleton-line ct-w-65"></i></section><section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-40"></i><div class="ct-skeleton-media-grid"><i></i><i></i><i></i></div></section></div>`,
+    candidateProfile: `<div class="ct-skeleton-candidate" aria-hidden="true"><section class="ct-skeleton-panel"><div class="ct-skeleton-row"><i class="ct-skeleton-block ct-skeleton-candidate-avatar"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-55"></i><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-45"></i></div></div><div class="ct-skeleton-tags"><i></i><i></i><i></i></div><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-30"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-85"></i></section><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-40"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-70"></i></section><section class="ct-skeleton-inner-section"><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i></section></section></div>`,
+    directory: `<div class="ct-skeleton-directory" aria-hidden="true">${Array.from({length:5},()=>'<div class="ct-skeleton-panel ct-skeleton-directory-row"><i class="ct-skeleton-block ct-skeleton-directory-avatar"></i><div class="ct-skeleton-copy"><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-65"></i><i class="ct-skeleton-line ct-w-45"></i></div></div>').join('')}</div>`,
+    companyJobs: `<div class="ct-skeleton-company-jobs" aria-hidden="true"><aside class="ct-skeleton-panel"><i class="ct-skeleton-line ct-w-70"></i>${Array.from({length:4},()=>'<div class="ct-skeleton-job-list-item"><i class="ct-skeleton-line ct-w-80"></i><i class="ct-skeleton-line ct-w-55"></i></div>').join('')}</aside><section class="ct-skeleton-panel"><i class="ct-skeleton-line ct-skeleton-heading ct-w-75"></i><i class="ct-skeleton-line ct-w-45"></i><div class="ct-skeleton-actions"><i></i><i></i></div><i class="ct-skeleton-line ct-skeleton-subheading ct-w-35"></i><i class="ct-skeleton-line"></i><i class="ct-skeleton-line ct-w-85"></i><i class="ct-skeleton-line ct-w-65"></i></section></div>`,
+    reports: `<div class="ct-skeleton-directory" aria-hidden="true">${Array.from({length:4},()=>'<div class="ct-skeleton-panel ct-skeleton-report"><i class="ct-skeleton-line ct-w-35"></i><i class="ct-skeleton-line ct-w-80"></i><i class="ct-skeleton-line ct-w-65"></i><div class="ct-skeleton-actions"><i></i><i></i></div></div>').join('')}</div>`
   };
 
-  const hideSkeleton = () => {
-    if (skeletonTimer) window.clearTimeout(skeletonTimer);
-    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
-    if (!skeletonShown) return;
-    skeleton.classList.add('is-hidden');
-    window.setTimeout(() => skeleton.remove(), 260);
+  const renderSkeleton = (target, type) => {
+    const element = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!element || !skeletonTemplates[type]) return;
+    element.classList.remove('empty-state');
+    element.classList.add('ct-skeleton-container');
+    element.setAttribute('aria-busy', 'true');
+    element.innerHTML = skeletonTemplates[type];
   };
 
-  const scheduleSkeletonHide = () => {
-    if (!resourcesLoaded || pendingApiRequests > 0) return;
-    if (skeletonTimer) window.clearTimeout(skeletonTimer);
-    if (!skeletonShown) return;
-    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
-    skeletonHideTimer = window.setTimeout(hideSkeleton, 250);
-  };
-
-  if (!resourcesLoaded) {
-    skeletonTimer = window.setTimeout(showSkeleton, 400);
-    window.addEventListener('load', () => {
-      resourcesLoaded = true;
-      scheduleSkeletonHide();
-      if (!skeletonShown && pendingApiRequests === 0 && skeletonTimer) {
-        window.clearTimeout(skeletonTimer);
-      }
-    }, { once: true });
-  }
-
-  window.addEventListener('pageshow', event => {
-    if (event.persisted) {
-      resourcesLoaded = true;
-      pendingApiRequests = 0;
-      hideSkeleton();
-    }
+  [
+    ['#job-detail-content', 'jobDetail'],
+    ['#company-public-content', 'companyProfile'],
+    ['#public-candidate-content', 'candidateProfile'],
+    ['#all-jobs', 'jobCards'],
+    ['#featured-jobs', 'jobCards'],
+    ['#company-jobs-content', 'companyJobs'],
+    ['#directory-results', 'directory'],
+    ['#moderation-list', 'reports']
+  ].forEach(([selector, type]) => {
+    const target = document.querySelector(selector);
+    if (target && /carregando|buscando/i.test(target.textContent || '')) renderSkeleton(target, type);
   });
 
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
@@ -112,30 +84,14 @@
   }
 
   const api = async (url, options = {}) => {
-    const { trackForSkeleton = true, ...requestOptions } = options;
-    if (trackForSkeleton) {
-      if (pendingApiRequests === 0 && resourcesLoaded && !skeletonShown && !skeletonTimer) {
-        skeletonTimer = window.setTimeout(showSkeleton, 400);
-      }
-      pendingApiRequests++;
-      if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
-    }
-
-    try {
-      const response = await fetch(url, {
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json', ...(requestOptions.headers || {}) },
-        ...requestOptions
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
-      return data;
-    } finally {
-      if (trackForSkeleton) {
-        pendingApiRequests = Math.max(0, pendingApiRequests - 1);
-        scheduleSkeletonHide();
-      }
-    }
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
+    return data;
   };
 
   // Inicia a validação da sessão assim que o script é executado, com limite de espera.
@@ -143,7 +99,7 @@
     ? (() => {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
-        return api('/api/me', { signal: controller.signal, trackForSkeleton: false })
+        return api('/api/me', { signal: controller.signal })
           .then(session => ({ ok: true, session }))
           .catch(error => ({ ok: false, error }))
           .finally(() => clearTimeout(timeout));
@@ -966,5 +922,5 @@
 
   });
 
-  window.Conecta = { api, toast, redirectByUser };
+  window.Conecta = { api, toast, redirectByUser, renderSkeleton };
 })();
