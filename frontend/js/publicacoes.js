@@ -213,9 +213,7 @@
     `).join('');
   }
 
-  // Mantém os espaços cinzas visíveis desde o início, antes da primeira consulta ao feed.
-  feed.innerHTML = renderFeedSkeleton();
-  feed.setAttribute('aria-busy', 'true');
+  let feedSkeletonTimer = null;
 
   async function loadPosts(reset) {
     if (loading) return;
@@ -224,11 +222,18 @@
     if (reset) {
       cursor = 0;
       feed.setAttribute('aria-busy', 'true');
-      feed.innerHTML = renderFeedSkeleton();
+      feed.innerHTML = '';
+      feedSkeletonTimer = window.setTimeout(() => {
+        if (loading) feed.innerHTML = renderFeedSkeleton();
+      }, 400);
     }
     try {
       const query = '?limit=10&cursor=' + cursor;
       const result = await api('/api/publicacoes' + query);
+      if (feedSkeletonTimer) {
+        clearTimeout(feedSkeletonTimer);
+        feedSkeletonTimer = null;
+      }
       const posts = result.publicacoes || [];
       if (reset) feed.innerHTML = '';
       if (!posts.length && reset) {
@@ -250,6 +255,10 @@
       }
       toast(error.message);
     } finally {
+      if (feedSkeletonTimer) {
+        clearTimeout(feedSkeletonTimer);
+        feedSkeletonTimer = null;
+      }
       loading = false;
       loadMoreButton.disabled = false;
     }
@@ -792,6 +801,10 @@
     }
   });
 
+  const sessionSkeletonTimer = window.setTimeout(() => {
+    document.body.classList.add('publicacoes-skeleton-visible');
+  }, 400);
+
   (async () => {
     try {
       if (!api) {
@@ -838,6 +851,8 @@
         if (registerLink) registerLink.hidden = true;
       }
     } finally {
+      window.clearTimeout(sessionSkeletonTimer);
+      document.body.classList.remove('publicacoes-skeleton-visible');
       document.body.classList.remove('publicacoes-auth-pending');
     }
   })();
