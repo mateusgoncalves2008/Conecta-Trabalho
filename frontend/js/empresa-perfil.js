@@ -189,6 +189,7 @@
   async function load() {
     const id = new URLSearchParams(location.search).get('id');
     if (!id || !/^\d+$/.test(id)) {
+      root.removeAttribute('aria-busy');
       root.textContent = 'Identificador da empresa inválido.';
       return;
     }
