@@ -79,6 +79,7 @@
     const companyId = params.get('empresa');
     const requestedJobId = params.get('vaga');
     if (!companyId || !/^\d+$/.test(companyId)) {
+      root.removeAttribute('aria-busy');
       root.textContent = 'Identificador da empresa inválido.';
       return;
     }
