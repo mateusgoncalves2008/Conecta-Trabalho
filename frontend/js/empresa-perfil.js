@@ -217,6 +217,7 @@
       ].filter(Boolean);
 
       root.className = 'company-public-layout';
+      root.removeAttribute('aria-busy');
       root.innerHTML = `
         <section class="company-public-hero" aria-labelledby="company-public-name">
           <div class="company-public-cover">${banner}</div>
@@ -862,6 +863,7 @@
 
       document.title = name + ' | ConectaTrabalho';
     } catch (error) {
+      root.removeAttribute('aria-busy');
       root.className = 'empty-state';
       root.textContent = error.message || 'Não foi possível carregar o perfil desta empresa.';
     }
