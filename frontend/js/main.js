@@ -27,27 +27,52 @@
         </div>
       </div>
     </div>`;
+  const isPublicationsPage = /\/pages\/publicacoes\.html$/i.test(window.location.pathname);
   let skeletonShown = false;
   let skeletonTimer = null;
+  let skeletonHideTimer = null;
+  let resourcesLoaded = document.readyState === 'complete';
+  let pendingApiRequests = 0;
+
   const showSkeleton = () => {
-    if (skeletonShown) return;
+    if (isPublicationsPage || skeletonShown) return;
     skeletonShown = true;
     document.documentElement.appendChild(skeleton);
   };
+
   const hideSkeleton = () => {
     if (skeletonTimer) window.clearTimeout(skeletonTimer);
+    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
     if (!skeletonShown) return;
     skeleton.classList.add('is-hidden');
     window.setTimeout(() => skeleton.remove(), 260);
   };
-  if (document.readyState === 'complete') {
-    hideSkeleton();
-  } else {
+
+  const scheduleSkeletonHide = () => {
+    if (!resourcesLoaded || pendingApiRequests > 0) return;
+    if (skeletonTimer) window.clearTimeout(skeletonTimer);
+    if (!skeletonShown) return;
+    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
+    skeletonHideTimer = window.setTimeout(hideSkeleton, 180);
+  };
+
+  if (!resourcesLoaded) {
     skeletonTimer = window.setTimeout(showSkeleton, 400);
-    window.addEventListener('load', hideSkeleton, { once: true });
+    window.addEventListener('load', () => {
+      resourcesLoaded = true;
+      scheduleSkeletonHide();
+      if (!skeletonShown && pendingApiRequests === 0 && skeletonTimer) {
+        window.clearTimeout(skeletonTimer);
+      }
+    }, { once: true });
   }
+
   window.addEventListener('pageshow', event => {
-    if (event.persisted || document.readyState === 'complete') hideSkeleton();
+    if (event.persisted) {
+      resourcesLoaded = true;
+      pendingApiRequests = 0;
+      hideSkeleton();
+    }
   });
 
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
@@ -87,14 +112,22 @@
   }
 
   const api = async (url, options = {}) => {
-    const response = await fetch(url, {
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-      ...options
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
-    return data;
+    pendingApiRequests++;
+    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
+
+    try {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
+      return data;
+    } finally {
+      pendingApiRequests = Math.max(0, pendingApiRequests - 1);
+      scheduleSkeletonHide();
+    }
   };
 
   // Inicia a validação da sessão assim que o script é executado, com limite de espera.
