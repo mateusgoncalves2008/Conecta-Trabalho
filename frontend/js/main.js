@@ -27,16 +27,28 @@
         </div>
       </div>
     </div>`;
-  document.documentElement.appendChild(skeleton);
+  let skeletonShown = false;
+  let skeletonTimer = null;
+  const showSkeleton = () => {
+    if (skeletonShown) return;
+    skeletonShown = true;
+    document.documentElement.appendChild(skeleton);
+  };
   const hideSkeleton = () => {
+    if (skeletonTimer) window.clearTimeout(skeletonTimer);
+    if (!skeletonShown) return;
     skeleton.classList.add('is-hidden');
     window.setTimeout(() => skeleton.remove(), 260);
   };
-  window.addEventListener('load', hideSkeleton, { once: true });
+  if (document.readyState === 'complete') {
+    hideSkeleton();
+  } else {
+    skeletonTimer = window.setTimeout(showSkeleton, 400);
+    window.addEventListener('load', hideSkeleton, { once: true });
+  }
   window.addEventListener('pageshow', event => {
     if (event.persisted || document.readyState === 'complete') hideSkeleton();
   });
-  if (document.readyState === 'complete') hideSkeleton();
 
   // Padroniza o cabeçalho da página inicial em todas as páginas públicas e autenticadas.
   const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
