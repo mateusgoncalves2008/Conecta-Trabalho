@@ -96,6 +96,7 @@
       document.getElementById('company-jobs-back').href = profileUrl;
       document.getElementById('company-jobs-back').textContent = '← Voltar ao perfil da empresa';
       root.className = 'company-jobs-split';
+      root.removeAttribute('aria-busy');
       root.innerHTML = '<aside class="company-jobs-list-pane"><div class="company-jobs-list-heading"><span>' +
         jobs.length + (jobs.length === 1 ? ' vaga disponível' : ' vagas disponíveis') + '</span><a href="' + profileUrl + '">Ver empresa</a></div>' +
         '<div class="company-jobs-list" id="company-jobs-list">' +
@@ -121,6 +122,7 @@
       });
       document.title = 'Vagas de ' + (company.nome_empresa || company.nome_fantasia || 'empresa') + ' | ConectaTrabalho';
     } catch (error) {
+      root.removeAttribute('aria-busy');
       root.className = 'company-jobs-empty';
       root.textContent = error.message || 'Não foi possível carregar as vagas desta empresa.';
     }
