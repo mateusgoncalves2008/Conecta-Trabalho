@@ -112,6 +112,9 @@
   }
 
   const api = async (url, options = {}) => {
+    if (pendingApiRequests === 0 && resourcesLoaded && !skeletonShown && !skeletonTimer) {
+      skeletonTimer = window.setTimeout(showSkeleton, 400);
+    }
     pendingApiRequests++;
     if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
 
