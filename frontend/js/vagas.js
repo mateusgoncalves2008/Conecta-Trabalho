@@ -85,6 +85,8 @@
     }
     const shown = listContainer ? vagas : (hasFilters ? vagas : vagas.slice(0, 3));
     container.innerHTML = shown.length ? shown.map(card).join('') : '<div class="empty-state">Nenhuma vaga encontrada com esses filtros.</div>';
+    container.classList.remove('ct-skeleton-container');
+    container.removeAttribute('aria-busy');
     container.querySelectorAll('[data-apply]').forEach(button => {
       button.addEventListener('click', () => applyToJob(button.dataset.apply, button));
     });
@@ -106,7 +108,7 @@
     if (cachedJobs) {
       renderJobs(cachedJobs, { homeContainer, listContainer, container, hasFilters });
     } else {
-      container.innerHTML = '<div class="empty-state">Buscando oportunidades...</div>';
+      Conecta.renderSkeleton(container, 'jobCards');
     }
 
     try {
@@ -116,6 +118,8 @@
       renderJobs(vagas, { homeContainer, listContainer, container, hasFilters });
     } catch (error) {
       if (!cachedJobs) {
+        container.classList.remove('ct-skeleton-container');
+        container.removeAttribute('aria-busy');
         container.innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
       }
     }
