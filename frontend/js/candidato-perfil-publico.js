@@ -18,6 +18,7 @@
       ['Experiência profissional',p.experiencias],['Formação e cursos',p.formacao],['Competências',p.competencias]
     ].filter(([,value])=>value);
     container.className = 'public-candidate-profile';
+    container.removeAttribute('aria-busy');
     container.innerHTML = '<section class="public-candidate-hero"><div class="public-candidate-avatar">' + photo + '</div><div class="public-candidate-heading"><span class="eyebrow">PERFIL PROFISSIONAL</span><h1>' + name + '</h1><p>' + escapeHTML(p.titulo_profissional || 'Profissional') + '</p><small>' + escapeHTML(p.cidade || 'Localização não informada') + '</small><div class="public-candidate-social"><button class="public-candidate-follow' + (p.seguindo ? ' is-following' : '') + '" type="button" data-follow-candidate aria-pressed="' + String(Boolean(p.seguindo)) + '"> ' + (p.seguindo ? 'Seguindo' : 'Seguir') + '</button><span class="public-candidate-followers" aria-live="polite"><strong data-followers-count>' + Number(p.total_seguidores || 0).toLocaleString('pt-BR') + '</strong> seguidores</span></div></div></section>' +
       (p.tipo_oportunidade || p.modalidade_preferida ? '<div class="public-candidate-tags">' + [p.tipo_oportunidade,p.modalidade_preferida].filter(Boolean).map(x=>'<span>' + escapeHTML(x) + '</span>').join('') + '</div>' : '') +
       sections.map(([title,value])=>'<section class="public-candidate-section"><h2>' + title + '</h2><p>' + escapeHTML(value).replace(/\n/g,'<br>') + '</p></section>').join('') +
@@ -44,5 +45,5 @@
         finally { followButton.disabled = false; }
       });
     }
-  }).catch(error => { container.className='empty-state'; container.textContent=error.message; });
+  }).catch(error => { container.removeAttribute('aria-busy'); container.className='empty-state'; container.textContent=error.message; });
 })();
