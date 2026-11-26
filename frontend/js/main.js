@@ -53,7 +53,7 @@
     if (skeletonTimer) window.clearTimeout(skeletonTimer);
     if (!skeletonShown) return;
     if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
-    skeletonHideTimer = window.setTimeout(hideSkeleton, 180);
+    skeletonHideTimer = window.setTimeout(hideSkeleton, 250);
   };
 
   if (!resourcesLoaded) {
@@ -112,24 +112,29 @@
   }
 
   const api = async (url, options = {}) => {
-    if (pendingApiRequests === 0 && resourcesLoaded && !skeletonShown && !skeletonTimer) {
-      skeletonTimer = window.setTimeout(showSkeleton, 400);
+    const { trackForSkeleton = true, ...requestOptions } = options;
+    if (trackForSkeleton) {
+      if (pendingApiRequests === 0 && resourcesLoaded && !skeletonShown && !skeletonTimer) {
+        skeletonTimer = window.setTimeout(showSkeleton, 400);
+      }
+      pendingApiRequests++;
+      if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
     }
-    pendingApiRequests++;
-    if (skeletonHideTimer) window.clearTimeout(skeletonHideTimer);
 
     try {
       const response = await fetch(url, {
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-        ...options
+        headers: { 'Content-Type': 'application/json', ...(requestOptions.headers || {}) },
+        ...requestOptions
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.erro || 'Não foi possível concluir a solicitação.');
       return data;
     } finally {
-      pendingApiRequests = Math.max(0, pendingApiRequests - 1);
-      scheduleSkeletonHide();
+      if (trackForSkeleton) {
+        pendingApiRequests = Math.max(0, pendingApiRequests - 1);
+        scheduleSkeletonHide();
+      }
     }
   };
 
@@ -138,7 +143,7 @@
     ? (() => {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
-        return api('/api/me', { signal: controller.signal })
+        return api('/api/me', { signal: controller.signal, trackForSkeleton: false })
           .then(session => ({ ok: true, session }))
           .catch(error => ({ ok: false, error }))
           .finally(() => clearTimeout(timeout));
