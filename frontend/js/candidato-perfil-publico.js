@@ -4,7 +4,7 @@
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
-  if (!id || !/^\d+$/.test(id)) { container.textContent = 'Perfil não encontrado.'; return; }
+  if (!id || !/^\d+$/.test(id)) { container.removeAttribute('aria-busy'); container.textContent = 'Perfil não encontrado.'; return; }
 
   Promise.all([
     Conecta.api('/api/candidatos/' + encodeURIComponent(id) + '/publico'),
