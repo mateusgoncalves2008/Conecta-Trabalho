@@ -350,16 +350,6 @@ html[data-theme=dark] .upload-add-tile{background:#182638;border-color:#40536a;c
 }
 
 
-/* Mantém a estrutura da página visível mesmo se a validação da sessão falhar.
-   Somente o feed e a criação ficam ocultos enquanto a sessão é verificada. */
-body.publicacoes-auth-pending > .publicacoes-main { visibility: visible; }
-body.publicacoes-auth-pending > .publicacoes-main .feed-section,
-body.publicacoes-auth-pending > .publicacoes-main .create-publication-entry {
-  visibility: hidden;
-}
-body.publicacoes-auth-pending > .site-header { visibility: visible; }
-
-
 /* Aviso exibido para visitantes sem conta conectada. */
 body.publicacoes-access-denied > .site-header,
 body.publicacoes-access-denied > .publicacoes-main:not(.publicacoes-access-message) {
@@ -415,20 +405,43 @@ body.publicacoes-access-denied > .publicacoes-main:not(.publicacoes-access-messa
   .publicacoes-access-actions .button { width: 100%; }
 }
 
-/* Exibe primeiro o aviso de acesso e impede qualquer flash do feed durante a validação. */
+/* Skeleton de Publicações visível enquanto a sessão é verificada.
+   Evita a tela branca antes da exibição do aviso de acesso ou do feed. */
+.publicacoes-page-skeleton { display:none; min-height:100vh; padding:32px 20px 60px; background:var(--page,#f5f7fa); }
+body.publicacoes-auth-pending > .publicacoes-page-skeleton { display:block; }
 body.publicacoes-auth-pending > .site-header,
 body.publicacoes-auth-pending > .publicacoes-main,
-body.publicacoes-auth-pending > .site-footer {
-  display: none !important;
+body.publicacoes-auth-pending > .site-footer { display:none !important; }
+.publicacoes-skeleton-inner { width:min(900px,100%); margin:0 auto; }
+.publicacoes-skeleton-header { height:58px; display:flex; align-items:center; gap:22px; margin-bottom:55px; border-bottom:1px solid var(--line,#e4e8ee); }
+.publicacoes-skeleton-header i,.publicacoes-skeleton-heading i,.publicacoes-skeleton-author>i,.publicacoes-skeleton-author span i,.publicacoes-skeleton-line,.publicacoes-skeleton-media,.publicacoes-skeleton-actions i { display:block; background:var(--soft,#e8edf2); animation:publicacoes-skeleton-pulse 1.35s ease-in-out infinite; }
+.publicacoes-skeleton-header i:first-child { width:145px; height:20px; border-radius:7px; margin-right:auto; }
+.publicacoes-skeleton-header i:not(:first-child) { width:65px; height:10px; border-radius:20px; }
+.publicacoes-skeleton-heading { display:grid; gap:12px; margin-bottom:28px; }
+.publicacoes-skeleton-heading i:first-child { width:min(280px,75%); height:29px; border-radius:7px; }
+.publicacoes-skeleton-heading i:last-child { width:min(440px,95%); height:12px; border-radius:20px; }
+.publicacoes-skeleton-card { padding:20px; border:1px solid var(--line,#e4e8ee); border-radius:15px; background:var(--surface,#fff); }
+.publicacoes-skeleton-author { display:flex; align-items:center; gap:13px; margin-bottom:20px; }
+.publicacoes-skeleton-author>i { width:52px; height:52px; flex:0 0 52px; border-radius:50%; }
+.publicacoes-skeleton-author span { flex:1; display:grid; gap:9px; }
+.publicacoes-skeleton-author span i { width:210px; max-width:70%; height:10px; border-radius:20px; }
+.publicacoes-skeleton-author span i:last-child { width:135px; }
+.publicacoes-skeleton-line { height:10px; margin-bottom:10px; border-radius:20px; }
+.publicacoes-skeleton-line.short { width:62%; }
+.publicacoes-skeleton-media { height:clamp(170px,30vw,310px); margin-top:18px; border-radius:10px; }
+.publicacoes-skeleton-actions { display:flex; gap:22px; margin-top:19px; }
+.publicacoes-skeleton-actions i { width:68px; height:10px; border-radius:20px; }
+@keyframes publicacoes-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.42} }
+@media(max-width:600px) {
+  .publicacoes-page-skeleton { padding:20px 12px 40px; }
+  .publicacoes-skeleton-header { margin-bottom:38px; }
+  .publicacoes-skeleton-header i:not(:first-child) { display:none; }
+  .publicacoes-skeleton-card { padding:15px; }
+  .publicacoes-skeleton-media { height:210px; }
 }
-body.publicacoes-auth-pending > .publicacoes-access-message:not([hidden]) {
-  min-height: calc(100vh - 40px);
-  display: grid;
-  place-items: center;
-  padding: 40px 20px;
+@media(prefers-reduced-motion:reduce) {
+  .publicacoes-page-skeleton * { animation:none !important; }
 }
 
 /* Evita o flash do aviso enquanto a sessão ainda está sendo confirmada. */
-html.publicacoes-session-pending .publicacoes-access-message {
-  display: none !important;
-}
+html.publicacoes-session-pending .publicacoes-access-message { display:none !important; }
