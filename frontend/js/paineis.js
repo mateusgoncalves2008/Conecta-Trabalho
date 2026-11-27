@@ -1917,7 +1917,9 @@
       button.disabled = true;
       button.textContent = 'Publicando...';
       try {
-        await Conecta.api('/api/vagas', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+        const dadosVaga = Object.fromEntries(new FormData(form));
+        dadosVaga.perguntasCandidatura = String(dadosVaga.perguntasCandidatura || '').split(/\r?\n/).map(item => item.trim()).filter(Boolean).slice(0, 5);
+        await Conecta.api('/api/vagas', { method: 'POST', body: JSON.stringify(dadosVaga) });
         feedback.textContent = 'Vaga publicada com sucesso.';
         feedback.classList.add('success');
         form.reset();
