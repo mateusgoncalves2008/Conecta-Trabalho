@@ -120,7 +120,7 @@
       };
       const validateResumeFile = async file => {
         if (!file) return '';
-        if (!/\\.pdf$/i.test(file.name)) return 'O arquivo selecionado não é um PDF. Escolha um arquivo com extensão .pdf.';
+        if (!/\.pdf$/i.test(file.name)) return 'O arquivo selecionado não é um PDF. Escolha um arquivo com extensão .pdf.';
         if (file.type && file.type !== 'application/pdf') return 'O navegador identificou esse arquivo como ' + file.type + ', não como PDF. Exporte ou salve o documento no formato PDF.';
         if (file.size === 0) return 'O arquivo está vazio. Escolha outro PDF.';
         if (file.size > 5 * 1024 * 1024) return 'O PDF ultrapassa o limite de 5 MB. Escolha um arquivo menor.';
