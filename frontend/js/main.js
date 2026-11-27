@@ -957,5 +957,68 @@
 
   });
 
+  // Solicita a localização uma única vez por navegador e salva apenas cidade/estado.
+  // A permissão em si é administrada pelo navegador; não armazenamos coordenadas GPS.
+  const initializeSavedLocation = () => {
+    const requestedKey = 'conecta-location-requested-v1';
+    const pendingKey = 'conecta-location-pending-v1';
+
+    const savePendingLocation = async () => {
+      let pending;
+      try { pending = JSON.parse(localStorage.getItem(pendingKey) || 'null'); } catch { pending = null; }
+      if (!pending || !pending.cidade || !pending.estado) return;
+      try {
+        const session = await api('/api/me');
+        if (!session.usuario) return;
+        await api('/api/localizacao', {
+          method: 'PUT',
+          body: JSON.stringify({ cidade: pending.cidade, estado: pending.estado })
+        });
+        localStorage.removeItem(pendingKey);
+      } catch (error) {
+        console.warn('Não foi possível sincronizar a localização da conta:', error);
+      }
+    };
+
+    // Se a localização foi obtida antes do login, sincroniza assim que houver uma conta ativa.
+    savePendingLocation();
+
+    if (localStorage.getItem(requestedKey) === '1') return;
+    if (!window.isSecureContext || !navigator.geolocation) return;
+
+    // Marca antes de abrir a solicitação para não repetir em cada navegação.
+    localStorage.setItem(requestedKey, '1');
+    navigator.geolocation.getCurrentPosition(async position => {
+      try {
+        const params = new URLSearchParams({
+          latitude: String(position.coords.latitude),
+          longitude: String(position.coords.longitude),
+          localityLanguage: 'pt'
+        });
+        const response = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?' + params.toString());
+        if (!response.ok) throw new Error('Falha ao consultar a cidade.');
+        const place = await response.json();
+        const cidade = String(place.city || place.locality || '').trim().slice(0, 100);
+        const estado = String(place.principalSubdivision || '').trim().slice(0, 100);
+        if (cidade.length < 2 || estado.length < 2) return;
+
+        // O navegador nunca envia as coordenadas ao servidor do ConectaTrabalho.
+        localStorage.setItem(pendingKey, JSON.stringify({ cidade, estado }));
+        await savePendingLocation();
+      } catch (error) {
+        console.warn('Não foi possível identificar a cidade pela localização:', error);
+      }
+    }, error => {
+      // A pessoa pode continuar usando o site mesmo se negar ou não disponibilizar a localização.
+      console.info('Localização não compartilhada:', error.message);
+    }, {
+      enableHighAccuracy: false,
+      timeout: 12000,
+      maximumAge: 3600000
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', initializeSavedLocation);
+
   window.Conecta = { api, toast, redirectByUser, renderSkeleton };
 })();
