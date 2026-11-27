@@ -2196,3 +2196,9 @@ html[data-theme="dark"] .application-upload-copy small,html[data-theme="dark"] .
 .application-private-note>svg{width:15px;height:15px;flex:0 0 15px}
 .application-selected-file button svg{width:17px;height:17px}
 .application-selected-file[hidden]{display:none!important}
+
+
+/* Mensagens claras de validação do currículo */
+.application-upload-error{margin:0;padding:10px 12px;border:1px solid #efb7b2;border-radius:8px;background:#fff2f1;color:#a52c25;font-size:12px;font-weight:600;line-height:1.5}
+.application-upload-error[hidden]{display:none!important}
+html[data-theme="dark"] .application-upload-error{border-color:#814743;background:#3b2528;color:#ffc4bd}
