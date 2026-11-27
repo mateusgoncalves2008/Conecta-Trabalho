@@ -63,7 +63,7 @@
               <label>Telefone<input name="telefone" maxlength="30" value="${escapeHTML(profile.telefone || '')}" placeholder="Informe um telefone para contato"></label>
               <div class="application-resume">
                 <div class="application-resume-heading">
-                  <span class="application-resume-icon" aria-hidden="true"><i class="fa-solid fa-file-arrow-up"></i></span>
+                  <span class="application-resume-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg></span>
                   <div><strong>Adicione seu currículo</strong><p>Envie seu currículo em PDF para a empresa conhecer sua experiência.</p></div>
                   <span class="application-resume-required">Recomendado</span>
                 </div>
@@ -71,18 +71,18 @@
                 <div class="application-upload-zone">
                   <input class="application-file-input" id="application-resume-file" type="file" name="curriculo" accept="application/pdf,.pdf">
                   <label class="application-upload-label" for="application-resume-file">
-                    <span class="application-upload-symbol"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i></span>
+                    <span class="application-upload-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 1 1 .7-7.94A5.5 5.5 0 0 1 18.5 12a3 3 0 0 1-.5 6M12 16V8m0 0L9 11m3-3 3 3" /></svg></span>
                     <span class="application-upload-copy"><strong>Arraste seu PDF até aqui</strong><small>ou clique para escolher um arquivo no dispositivo</small></span>
                     <span class="application-upload-button">Escolher arquivo</span>
                   </label>
                   <div class="application-selected-file" data-resume-selected hidden>
-                    <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 0v6h5M8 14h8M8 18h6" /></svg>
                     <span data-resume-filename></span>
-                    <button type="button" data-resume-remove aria-label="Remover currículo selecionado"><i class="fa-solid fa-xmark"></i></button>
+                    <button type="button" data-resume-remove aria-label="Remover currículo selecionado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
                   </div>
                   <small class="application-upload-hint">Formato PDF · Tamanho máximo: 5 MB</small>
                 </div>
-                <small class="application-private-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Seu currículo será enviado com segurança e ficará disponível somente para você e para a empresa desta vaga.</small>
+                <small class="application-private-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3" /></svg> Seu currículo será enviado com segurança e ficará disponível somente para você e para a empresa desta vaga.</small>
               </div>
             </section>
             ${questions.length ? '<section class="application-step" data-step="2"><h3>Perguntas da empresa</h3><p>Responda às perguntas para concluir sua candidatura.</p>' + questions.map((question,index) => '<label>' + (index+1) + '. ' + escapeHTML(question) + '<textarea name="resposta-' + index + '" maxlength="1000" rows="3" required placeholder="Digite sua resposta"></textarea></label>').join('') + '</section>' : ''}
