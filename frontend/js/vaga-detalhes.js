@@ -81,6 +81,7 @@
                     <button type="button" data-resume-remove aria-label="Remover currículo selecionado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
                   </div>
                   <small class="application-upload-hint">Formato PDF · Tamanho máximo: 5 MB</small>
+                  <p class="application-upload-error" data-resume-error role="alert" aria-live="polite" hidden></p>
                 </div>
                 <small class="application-private-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3" /></svg> Seu currículo será enviado com segurança e ficará disponível somente para você e para a empresa desta vaga.</small>
               </div>
@@ -106,15 +107,48 @@
       const resumeInput = form.elements.curriculo;
       const selectedFile = modal.querySelector('[data-resume-selected]');
       const selectedFilename = modal.querySelector('[data-resume-filename]');
+      const resumeError = modal.querySelector('[data-resume-error]');
+      const showResumeError = message => {
+        resumeError.textContent = message || '';
+        resumeError.hidden = !message;
+        feedback.textContent = message || '';
+      };
       const updateSelectedResume = () => {
         const file = resumeInput.files[0];
         selectedFile.hidden = !file;
         selectedFilename.textContent = file ? file.name : '';
       };
-      resumeInput.addEventListener('change', updateSelectedResume);
+      const validateResumeFile = async file => {
+        if (!file) return '';
+        if (!/\\.pdf$/i.test(file.name)) return 'O arquivo selecionado não é um PDF. Escolha um arquivo com extensão .pdf.';
+        if (file.type && file.type !== 'application/pdf') return 'O navegador identificou esse arquivo como ' + file.type + ', não como PDF. Exporte ou salve o documento no formato PDF.';
+        if (file.size === 0) return 'O arquivo está vazio. Escolha outro PDF.';
+        if (file.size > 5 * 1024 * 1024) return 'O PDF ultrapassa o limite de 5 MB. Escolha um arquivo menor.';
+        try {
+          const signature = await file.slice(0, 5).arrayBuffer();
+          if (new TextDecoder().decode(signature) !== '%PDF-') return 'O arquivo tem extensão PDF, mas seu conteúdo não parece ser um PDF válido. Gere o PDF novamente e tente outra vez.';
+        } catch {
+          return 'Não foi possível verificar a leitura do arquivo. Tente selecionar o PDF novamente.';
+        }
+        return '';
+      };
+      const handleResumeSelection = async file => {
+        showResumeError('');
+        if (!file) { updateSelectedResume(); return; }
+        const error = await validateResumeFile(file);
+        if (error) {
+          resumeInput.value = '';
+          updateSelectedResume();
+          showResumeError(error);
+          return;
+        }
+        updateSelectedResume();
+      };
+      resumeInput.addEventListener('change', () => handleResumeSelection(resumeInput.files[0]));
       modal.querySelector('[data-resume-remove]').addEventListener('click', () => {
         resumeInput.value = '';
         updateSelectedResume();
+        showResumeError('');
       });
       const uploadZone = modal.querySelector('.application-upload-zone');
       ['dragenter','dragover'].forEach(type => uploadZone.addEventListener(type, event => {
@@ -132,7 +166,7 @@
           const transfer = new DataTransfer();
           transfer.items.add(file);
           resumeInput.files = transfer.files;
-          updateSelectedResume();
+          handleResumeSelection(file);
         }
       });
       const back = modal.querySelector('[data-application-back]');
@@ -175,8 +209,9 @@
         const invalid = fields.find(field => !field.checkValidity());
         if (invalid) { invalid.reportValidity(); return; }
         const file = form.elements.curriculo.files[0];
-        if (file && (file.type !== 'application/pdf' || file.size > 5 * 1024 * 1024)) {
-          feedback.textContent = 'Anexe um currículo PDF de até 5 MB.';
+        const resumeValidationError = await validateResumeFile(file);
+        if (resumeValidationError) {
+          showResumeError(resumeValidationError);
           return;
         }
         currentStep = Math.min(stepCount, currentStep + 1);
@@ -194,7 +229,9 @@
           let curriculo = null;
           if (file) {
             const dataUrl = await readFileAsDataUrl(file);
-            curriculo = { nome: file.name, conteudo: dataUrl.split(',')[1] || '' };
+            const encoded = dataUrl.split(',')[1] || '';
+            if (!encoded) throw new Error('O navegador não conseguiu ler o conteúdo do PDF. Tente selecionar o arquivo novamente.');
+            curriculo = { nome: file.name, conteudo: encoded };
           }
           const respostas = questions.map((pergunta,index) => ({ pergunta, resposta: String(values.get('resposta-' + index) || '').trim() }));
           await Conecta.api('/api/vagas/' + id + '/candidatar', {
@@ -214,7 +251,9 @@
           button.disabled = true;
           Conecta.toast('Sua candidatura foi enviada com sucesso. Acompanhe o andamento em Minhas candidaturas.');
         } catch (error) {
-          feedback.textContent = error.message;
+          const message = error?.message || 'Ocorreu um erro inesperado ao enviar sua candidatura.';
+          feedback.textContent = message;
+          showResumeError(message.toLowerCase().includes('currículo') || message.toLowerCase().includes('pdf') || message.toLowerCase().includes('arquivo') ? message : '');
           submit.disabled = false;
           submit.textContent = 'Enviar candidatura';
         }
