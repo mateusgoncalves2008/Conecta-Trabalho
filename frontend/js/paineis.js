@@ -232,7 +232,11 @@
     if (!applications.length) {
       container.innerHTML = '<div class="dashboard-empty">Você ainda não se candidatou a nenhuma vaga. <a class="text-link" href="vagas.html">Explore as oportunidades disponíveis.</a></div>';
     } else {
-      container.innerHTML = applications.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.titulo)}</h3><p>${escapeHTML(item.nome_empresa || 'Empresa')} · ${escapeHTML(item.cidade)}</p><p>Candidatura enviada em ${dateLabel(item.criada_em)}</p></div><div class="dashboard-item-actions"><span class="status-label">${statusText(item.status)}</span></div></article>`).join('');
+      container.innerHTML = applications.map(item => {
+        const answers = Array.isArray(item.respostas) ? item.respostas : [];
+        const answerSummary = answers.length ? '<p>' + answers.length + ' pergunta(s) respondida(s)</p>' : '';
+        return '<article class="dashboard-item"><div><h3>' + escapeHTML(item.titulo) + '</h3><p>' + escapeHTML(item.nome_empresa || 'Empresa') + ' · ' + escapeHTML(item.cidade) + '</p><p>Candidatura enviada em ' + dateLabel(item.criada_em) + '</p>' + answerSummary + '</div><div class="dashboard-item-actions"><span class="status-label">' + statusText(item.status) + '</span></div></article>';
+      }).join('');
     }
   }
 
@@ -1897,7 +1901,18 @@
         await loadCompany();
       } catch (error) { Conecta.toast(error.message); }
     }));
-    applications.innerHTML = data.candidaturas.length ? data.candidaturas.map(item => `<article class="dashboard-item"><div><h3>${escapeHTML(item.candidato_nome)}</h3><p>${escapeHTML(item.candidato_email)} · ${escapeHTML(item.telefone || 'Sem telefone')}</p><p>Vaga: ${escapeHTML(item.vaga_titulo)} · ${dateLabel(item.criada_em)}</p>${item.mensagem ? '<div class="candidate-message">' + escapeHTML(item.mensagem) + '</div>' : ''}</div><div class="dashboard-item-actions"><select aria-label="Atualizar situação da candidatura" data-application-status="${item.id}"><option value="recebida" ${item.status === 'recebida' ? 'selected' : ''}>Recebida</option><option value="em_analise" ${item.status === 'em_analise' ? 'selected' : ''}>Em análise</option><option value="entrevista" ${item.status === 'entrevista' ? 'selected' : ''}>Entrevista</option><option value="aprovada" ${item.status === 'aprovada' ? 'selected' : ''}>Aprovada</option><option value="rejeitada" ${item.status === 'rejeitada' ? 'selected' : ''}>Não aprovada</option></select></div></article>`).join('') : '<div class="dashboard-empty">Ainda não há candidaturas para suas vagas.</div>';
+    applications.innerHTML = data.candidaturas.length ? data.candidaturas.map(item => {
+      const answers = Array.isArray(item.respostas) ? item.respostas : [];
+      const answerHtml = answers.length
+        ? '<div class="candidate-message"><strong>Respostas às perguntas</strong>' + answers.map(answer => '<p><strong>' + escapeHTML(answer.pergunta) + '</strong><br>' + escapeHTML(answer.resposta) + '</p>').join('') + '</div>'
+        : '';
+      const resumeLink = item.curriculo_storage_key
+        ? '<a class="button button-outline button-small" href="/api/candidaturas/' + encodeURIComponent(item.id) + '/curriculo" target="_blank" rel="noopener">Baixar currículo PDF</a>'
+        : item.curriculo_url
+          ? '<a class="button button-outline button-small" href="' + escapeHTML(item.curriculo_url) + '" target="_blank" rel="noopener noreferrer">Abrir currículo</a>'
+          : '<span class="status-label">Sem currículo</span>';
+      return '<article class="dashboard-item"><div><h3>' + escapeHTML(item.candidato_nome) + '</h3><p>' + escapeHTML(item.candidato_email) + ' · ' + escapeHTML(item.telefone || 'Sem telefone') + '</p><p>Vaga: ' + escapeHTML(item.vaga_titulo) + ' · ' + dateLabel(item.criada_em) + '</p>' + (item.mensagem ? '<div class="candidate-message">' + escapeHTML(item.mensagem) + '</div>' : '') + answerHtml + '<div class="dashboard-item-actions">' + resumeLink + '</div></div><div class="dashboard-item-actions"><select aria-label="Atualizar situação da candidatura" data-application-status="' + escapeHTML(item.id) + '"><option value="recebida" ' + (item.status === 'recebida' ? 'selected' : '') + '>Recebida</option><option value="em_analise" ' + (item.status === 'em_analise' ? 'selected' : '') + '>Em análise</option><option value="entrevista" ' + (item.status === 'entrevista' ? 'selected' : '') + '>Entrevista</option><option value="aprovada" ' + (item.status === 'aprovada' ? 'selected' : '') + '>Aprovada</option><option value="rejeitada" ' + (item.status === 'rejeitada' ? 'selected' : '') + '>Não aprovada</option></select></div></article>';
+    }).join('') : '<div class="dashboard-empty">Ainda não há candidaturas para suas vagas.</div>';
     applications.querySelectorAll('[data-application-status]').forEach(select => select.addEventListener('change', async () => {
       try {
         await Conecta.api('/api/candidaturas/' + select.dataset.applicationStatus + '/status', { method: 'PATCH', body: JSON.stringify({ status: select.value }) });
