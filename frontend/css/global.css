@@ -2186,3 +2186,13 @@ html[data-theme="dark"] .application-upload-label,html[data-theme="dark"] .appli
 html[data-theme="dark"] .application-upload-label:hover,html[data-theme="dark"] .application-upload-zone.is-dragging .application-upload-label{background:#2b3040;border-color:#e07a4f}
 html[data-theme="dark"] .application-upload-copy small,html[data-theme="dark"] .application-upload-hint,html[data-theme="dark"] .application-private-note{color:#b4c1d0}
 @media(max-width:560px){.application-resume{padding:15px}.application-upload-label{flex-wrap:wrap;justify-content:flex-start;gap:10px}.application-upload-copy{min-width:calc(100% - 65px)}.application-upload-button{margin-left:58px}.application-resume-required{font-size:9px}}
+
+
+/* Ícones vetoriais independentes de bibliotecas externas */
+.application-resume-icon svg,.application-upload-symbol svg,.application-selected-file>svg,.application-private-note>svg,.application-selected-file button svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.application-resume-icon svg{width:23px;height:23px}
+.application-upload-symbol svg{width:27px;height:27px}
+.application-selected-file>svg{width:21px;height:21px;flex:0 0 21px}
+.application-private-note>svg{width:15px;height:15px;flex:0 0 15px}
+.application-selected-file button svg{width:17px;height:17px}
+.application-selected-file[hidden]{display:none!important}
