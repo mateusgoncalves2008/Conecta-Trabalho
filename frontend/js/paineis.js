@@ -344,7 +344,7 @@
     cover.classList.toggle('has-image', Boolean(profile.banner_perfil));
     const values = {
       'candidate-edit-name': name, 'candidate-edit-email': profile.email || '',
-      'candidate-edit-phone': formatBrazilPhone(profile.telefone || '+55 (33) '), 'candidate-edit-city': profile.cidade || '',
+      'candidate-edit-phone': profile.telefone ? formatBrazilPhone(profile.telefone) : '', 'candidate-edit-city': profile.cidade || '',
       'candidate-edit-title-input': profile.titulo_profissional || '',
       'candidate-edit-summary': profile.resumo_profissional || '',
       'candidate-edit-objective': profile.objetivo_profissional || '',
@@ -980,8 +980,9 @@
       button.textContent = 'Salvando...';
       feedback.textContent = '';
       const payload = Object.fromEntries(new FormData(form));
-      payload.telefone = normalizeBrazilPhone(payload.telefone);
-      if (!payload.telefone) {
+      const telefoneInformado = String(payload.telefone || '').trim();
+      payload.telefone = telefoneInformado ? normalizeBrazilPhone(telefoneInformado) : '';
+      if (telefoneInformado && !payload.telefone) {
         feedback.textContent = 'Informe um telefone válido com DDD.';
         button.disabled = false;
         button.textContent = 'Salvar alterações';
