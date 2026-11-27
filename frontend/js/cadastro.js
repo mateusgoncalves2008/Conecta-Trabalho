@@ -54,8 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const normalizeCnpj = value => value.replace(/[^0-9a-z]/gi, '').toUpperCase();
   const phoneDigits = value => {
-    let digits = String(value || '').replace(/\D/g, '');
-    if (digits.length > 11 && digits.startsWith('55')) digits = digits.slice(2);
+    const raw = String(value || '').trim();
+    let digits = raw.replace(/\D/g, '');
+    if (raw.startsWith('+55') || (digits.length > 11 && digits.startsWith('55'))) digits = digits.slice(2);
     return digits.slice(0, 11);
   };
   const formatBrazilPhone = value => {
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!digits) return '';
     const ddd = digits.slice(0, 2);
     const number = digits.slice(2);
-    if (digits.length <= 2) return '+55 (' + ddd;
+    if (digits.length < 2) return '+55 (' + ddd;
+    if (digits.length === 2) return '+55 (' + ddd + ')';
     if (number.length <= 4) return '+55 (' + ddd + ') ' + number;
     if (number.length <= 8) return '+55 (' + ddd + ') ' + number.slice(0, 4) + '-' + number.slice(4);
     return '+55 (' + ddd + ') ' + number.slice(0, 5) + '-' + number.slice(5);
@@ -72,6 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const digits = phoneDigits(value);
     return digits.length === 10 || digits.length === 11 ? '+55' + digits : '';
   };
+  async function detectAndFillCity(input, button, feedback) {
+    if (!navigator.geolocation) { feedback.textContent = 'Este navegador não oferece acesso à localização.'; return; }
+    const original = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Localizando...';
+    feedback.textContent = 'Aguardando sua autorização de localização...';
+    try {
+      const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }));
+      const { latitude, longitude } = position.coords;
+      const response = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + encodeURIComponent(latitude) + '&longitude=' + encodeURIComponent(longitude) + '&localityLanguage=pt');
+      if (!response.ok) throw new Error('Não foi possível identificar sua cidade.');
+      const data = await response.json();
+      const city = data.city || data.locality || data.localityInfo?.administrative?.find(item => item.adminLevel === 8)?.name;
+      const region = String(data.principalSubdivisionCode || '').split('-').pop() || data.principalSubdivision;
+      if (!city) throw new Error('Não foi possível identificar a cidade pela localização.');
+      input.value = region ? city + ' - ' + region : city;
+      feedback.textContent = 'Cidade preenchida. Confira antes de salvar.';
+    } catch (error) {
+      feedback.textContent = error.code === 1 ? 'Permissão de localização negada. Você pode preencher a cidade manualmente.' : error.code === 3 ? 'A localização demorou demais. Tente novamente.' : (error.message || 'Não foi possível obter sua localização.');
+    } finally {
+      button.disabled = false;
+      button.textContent = original;
+    }
+  }
+
   const formatCnpj = value => {
     const raw = normalizeCnpj(value).slice(0, 14);
     let formatted = raw.slice(0, 2);
@@ -124,9 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
   type.addEventListener('change', updateType);
   updateType();
 
-  phoneInput.addEventListener('input', () => {
-    phoneInput.value = formatBrazilPhone(phoneInput.value);
-  });
+  phoneInput.addEventListener('focus', () => { if (!phoneInput.value.trim()) phoneInput.value = '+55 (33) '; });
+  phoneInput.addEventListener('input', () => { phoneInput.value = formatBrazilPhone(phoneInput.value); });
+  const detectLocationButton = document.getElementById('detect-signup-location');
+  detectLocationButton?.addEventListener('click', () => detectAndFillCity(cityInput, detectLocationButton, document.getElementById('signup-location-feedback')));
 
   cnpjInput.addEventListener('input', () => {
     const cursor = cnpjInput.selectionStart;
