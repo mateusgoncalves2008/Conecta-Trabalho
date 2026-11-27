@@ -62,10 +62,27 @@
               <label>E-mail<input name="email" type="email" maxlength="160" required value="${escapeHTML(profile.email || session.usuario.email || '')}"></label>
               <label>Telefone<input name="telefone" maxlength="30" value="${escapeHTML(profile.telefone || '')}" placeholder="Informe um telefone para contato"></label>
               <div class="application-resume">
-                <strong>Currículo</strong><p>Você pode usar o currículo cadastrado no perfil ou anexar um arquivo PDF de até 5 MB.</p>
-                ${profile.curriculo_url ? '<label class="application-resume-option"><input type="checkbox" name="usarCurriculoPerfil" checked><span>Usar currículo do meu perfil <a href="' + escapeHTML(profile.curriculo_url) + '" target="_blank" rel="noopener noreferrer">Visualizar</a></span></label>' : '<p class="application-muted">Você ainda não cadastrou um link de currículo no perfil.</p>'}
-                <label>Anexar outro currículo (PDF)<input type="file" name="curriculo" accept="application/pdf,.pdf"></label>
-                <small class="application-muted">O arquivo é enviado de forma privada e só pode ser acessado por você e pela empresa desta vaga.</small>
+                <div class="application-resume-heading">
+                  <span class="application-resume-icon" aria-hidden="true"><i class="fa-solid fa-file-arrow-up"></i></span>
+                  <div><strong>Adicione seu currículo</strong><p>Envie seu currículo em PDF para a empresa conhecer sua experiência.</p></div>
+                  <span class="application-resume-required">Recomendado</span>
+                </div>
+                ${profile.curriculo_url ? '<label class="application-resume-option"><input type="checkbox" name="usarCurriculoPerfil" checked><span>Usar currículo salvo no meu perfil <a href="' + escapeHTML(profile.curriculo_url) + '" target="_blank" rel="noopener noreferrer">Visualizar</a></span></label>' : '<p class="application-muted">Ainda não há currículo cadastrado no seu perfil. Você pode anexar um arquivo abaixo.</p>'}
+                <div class="application-upload-zone">
+                  <input class="application-file-input" id="application-resume-file" type="file" name="curriculo" accept="application/pdf,.pdf">
+                  <label class="application-upload-label" for="application-resume-file">
+                    <span class="application-upload-symbol"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i></span>
+                    <span class="application-upload-copy"><strong>Arraste seu PDF até aqui</strong><small>ou clique para escolher um arquivo no dispositivo</small></span>
+                    <span class="application-upload-button">Escolher arquivo</span>
+                  </label>
+                  <div class="application-selected-file" data-resume-selected hidden>
+                    <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                    <span data-resume-filename></span>
+                    <button type="button" data-resume-remove aria-label="Remover currículo selecionado"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
+                  <small class="application-upload-hint">Formato PDF · Tamanho máximo: 5 MB</small>
+                </div>
+                <small class="application-private-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Seu currículo será enviado com segurança e ficará disponível somente para você e para a empresa desta vaga.</small>
               </div>
             </section>
             ${questions.length ? '<section class="application-step" data-step="2"><h3>Perguntas da empresa</h3><p>Responda às perguntas para concluir sua candidatura.</p>' + questions.map((question,index) => '<label>' + (index+1) + '. ' + escapeHTML(question) + '<textarea name="resposta-' + index + '" maxlength="1000" rows="3" required placeholder="Digite sua resposta"></textarea></label>').join('') + '</section>' : ''}
@@ -86,6 +103,38 @@
       document.body.classList.add('application-modal-open');
       const form = modal.querySelector('form');
       const feedback = modal.querySelector('.application-feedback');
+      const resumeInput = form.elements.curriculo;
+      const selectedFile = modal.querySelector('[data-resume-selected]');
+      const selectedFilename = modal.querySelector('[data-resume-filename]');
+      const updateSelectedResume = () => {
+        const file = resumeInput.files[0];
+        selectedFile.hidden = !file;
+        selectedFilename.textContent = file ? file.name : '';
+      };
+      resumeInput.addEventListener('change', updateSelectedResume);
+      modal.querySelector('[data-resume-remove]').addEventListener('click', () => {
+        resumeInput.value = '';
+        updateSelectedResume();
+      });
+      const uploadZone = modal.querySelector('.application-upload-zone');
+      ['dragenter','dragover'].forEach(type => uploadZone.addEventListener(type, event => {
+        event.preventDefault();
+        uploadZone.classList.add('is-dragging');
+      }));
+      ['dragleave','drop'].forEach(type => uploadZone.addEventListener(type, event => {
+        event.preventDefault();
+        uploadZone.classList.remove('is-dragging');
+      }));
+      uploadZone.addEventListener('drop', event => {
+        const file = event.dataTransfer?.files?.[0];
+        if (!file) return;
+        if (typeof DataTransfer !== 'undefined') {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          resumeInput.files = transfer.files;
+          updateSelectedResume();
+        }
+      });
       const back = modal.querySelector('[data-application-back]');
       const next = modal.querySelector('[data-application-next]');
       const submit = modal.querySelector('[data-application-submit]');
