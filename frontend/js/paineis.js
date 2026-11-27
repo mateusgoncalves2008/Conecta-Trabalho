@@ -3,6 +3,27 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
   const dateLabel = value => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(value));
+  const phoneDigits = value => {
+    const raw = String(value || '').trim();
+    let digits = raw.replace(/\D/g, '');
+    if (raw.startsWith('+55') || (digits.length > 11 && digits.startsWith('55'))) digits = digits.slice(2);
+    return digits.slice(0, 11);
+  };
+  const formatBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    if (!digits) return '';
+    const ddd = digits.slice(0, 2);
+    const number = digits.slice(2);
+    if (digits.length < 2) return '+55 (' + ddd;
+    if (digits.length === 2) return '+55 (' + ddd + ')';
+    if (number.length <= 4) return '+55 (' + ddd + ') ' + number;
+    if (number.length <= 8) return '+55 (' + ddd + ') ' + number.slice(0, 4) + '-' + number.slice(4);
+    return '+55 (' + ddd + ') ' + number.slice(0, 5) + '-' + number.slice(5);
+  };
+  const normalizeBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    return digits.length === 10 || digits.length === 11 ? '+55' + digits : '';
+  };
   const whatsappDigits = value => {
     let digits = String(value || '').replace(/\D/g, '');
     if (digits.length === 10 || digits.length === 11) digits = '55' + digits;
@@ -323,7 +344,7 @@
     cover.classList.toggle('has-image', Boolean(profile.banner_perfil));
     const values = {
       'candidate-edit-name': name, 'candidate-edit-email': profile.email || '',
-      'candidate-edit-phone': profile.telefone || '', 'candidate-edit-city': profile.cidade || '',
+      'candidate-edit-phone': formatBrazilPhone(profile.telefone || '+55 (33) '), 'candidate-edit-city': profile.cidade || '',
       'candidate-edit-title-input': profile.titulo_profissional || '',
       'candidate-edit-summary': profile.resumo_profissional || '',
       'candidate-edit-objective': profile.objetivo_profissional || '',
@@ -374,11 +395,42 @@
     });
   }
 
+  async function detectAndFillCity(input, button, feedback) {
+    if (!navigator.geolocation) { feedback.textContent = 'Este navegador não oferece acesso à localização.'; return; }
+    const original = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Localizando...';
+    feedback.textContent = 'Aguardando sua autorização de localização...';
+    try {
+      const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }));
+      const { latitude, longitude } = position.coords;
+      const response = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + encodeURIComponent(latitude) + '&longitude=' + encodeURIComponent(longitude) + '&localityLanguage=pt');
+      if (!response.ok) throw new Error('Não foi possível identificar sua cidade.');
+      const data = await response.json();
+      const city = data.city || data.locality || data.localityInfo?.administrative?.find(item => item.adminLevel === 8)?.name;
+      const region = String(data.principalSubdivisionCode || '').split('-').pop() || data.principalSubdivision;
+      if (!city) throw new Error('Não foi possível identificar a cidade pela localização.');
+      input.value = region ? city + ' - ' + region : city;
+      feedback.textContent = 'Cidade preenchida. Confira antes de salvar.';
+    } catch (error) {
+      feedback.textContent = error.code === 1 ? 'Permissão de localização negada. Você pode preencher a cidade manualmente.' : error.code === 3 ? 'A localização demorou demais. Tente novamente.' : (error.message || 'Não foi possível obter sua localização.');
+    } finally {
+      button.disabled = false;
+      button.textContent = original;
+    }
+  }
+
   function setupCandidateProfileEditor() {
     const modal = document.getElementById('candidate-edit-modal');
     const form = document.getElementById('candidate-profile-form');
     if (!modal || !form) return;
     const open = () => { candidatePhotoData = null; renderCandidateProfile(candidateProfileCache); modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('candidate-edit-open'); };
+    const phoneInput = document.getElementById('candidate-edit-phone');
+    phoneInput.addEventListener('focus', () => { if (!phoneInput.value.trim()) phoneInput.value = '+55 (33) '; });
+    phoneInput.addEventListener('input', () => { phoneInput.value = formatBrazilPhone(phoneInput.value); });
+    const cityInput = document.getElementById('candidate-edit-city');
+    const locationButton = document.getElementById('candidate-detect-location');
+    locationButton?.addEventListener('click', () => detectAndFillCity(cityInput, locationButton, document.getElementById('candidate-location-feedback')));
     const close = () => { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('candidate-edit-open'); };
     ['candidate-edit-profile', 'candidate-edit-profile-side'].forEach(id => document.getElementById(id)?.addEventListener('click', open));
     ['candidate-edit-close', 'candidate-edit-cancel'].forEach(id => document.getElementById(id)?.addEventListener('click', close));
@@ -928,6 +980,13 @@
       button.textContent = 'Salvando...';
       feedback.textContent = '';
       const payload = Object.fromEntries(new FormData(form));
+      payload.telefone = normalizeBrazilPhone(payload.telefone);
+      if (!payload.telefone) {
+        feedback.textContent = 'Informe um telefone válido com DDD.';
+        button.disabled = false;
+        button.textContent = 'Salvar alterações';
+        return;
+      }
       delete payload.nome;
       delete payload.email;
       if (candidatePhotoData !== null) payload.foto_perfil = candidatePhotoData;
