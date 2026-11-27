@@ -75,6 +75,12 @@ const normalizeEmail = value => {
   return email && !email.includes('@') ? email + '@gmail.com' : email;
 };
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const normalizeBrazilPhone = value => {
+  let digits = clean(value, 30).replace(/\D/g, '');
+  if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) digits = digits.slice(2);
+  return digits.length === 10 || digits.length === 11 ? '+55' + digits : '';
+};
+const validBrazilPhone = value => /^\+55\d{10,11}$/.test(value);
 const storageBucket = 'conecta-trabalho-imagens';
 const storageConfigured = [
   process.env.AWS_ENDPOINT_URL_S3, process.env.AWS_ACCESS_KEY_ID,
@@ -418,12 +424,12 @@ app.post('/api/cadastro/empresa/solicitar-codigo', limitCompanySignup, asyncRout
   const nome = clean(req.body.nome, 120);
   const email = normalizeEmail(req.body.email);
   const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
-  const telefone = clean(req.body.telefone, 30);
+  const telefone = normalizeBrazilPhone(req.body.telefone);
   let cnpj = normalizeCnpj(req.body.cnpj);
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe o nome completo do responsável.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
-  if (telefone.replace(/\D/g, '').length < 10) return res.status(400).json({ erro: 'Informe um telefone de contato válido.' });
+  if (!validBrazilPhone(telefone)) return res.status(400).json({ erro: 'Informe um telefone válido com DDD e código do Brasil (+55).' });
   if (!companyCnpjTestMode && !validCnpj(cnpj)) return res.status(400).json({ erro: 'Informe um CNPJ válido.' });
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     return res.status(503).json({ erro: 'A confirmação por e-mail ainda não está configurada no servidor.' });
@@ -549,13 +555,15 @@ app.post('/api/cadastro', limitLogin, asyncRoute(async (req, res) => {
   const email = normalizeEmail(req.body.email);
   const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
   const tipo = clean(req.body.tipo, 20);
-  const telefone = clean(req.body.telefone, 30);
+  const telefoneInformado = clean(req.body.telefone, 30);
+  const telefone = telefoneInformado ? normalizeBrazilPhone(telefoneInformado) : '';
   const cidade = clean(req.body.cidade, 100) || 'Capelinha';
   const nomeEmpresa = clean(req.body.nomeEmpresa, 160);
   if (nome.length < 3) return res.status(400).json({ erro: 'Informe seu nome completo.' });
   if (!validEmail(email)) return res.status(400).json({ erro: 'Informe um e-mail válido.' });
   if (senha.length < 8 || senha.length > 72) return res.status(400).json({ erro: 'A senha deve ter entre 8 e 72 caracteres.' });
   if (!['candidato', 'empresa'].includes(tipo)) return res.status(400).json({ erro: 'Tipo de cadastro inválido.' });
+  if (telefoneInformado && !validBrazilPhone(telefone)) return res.status(400).json({ erro: 'Informe um telefone válido com DDD e código do Brasil (+55).' });
   if (tipo === 'empresa') return res.status(400).json({ erro: 'Use a confirmação de CNPJ e e-mail para criar uma conta empresarial.' });
   const hash = await bcrypt.hash(senha, 12);
   try {
@@ -1323,8 +1331,9 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
 
   const nomeCandidato = clean(req.body.nome, 120);
   const emailCandidato = clean(req.body.email, 160).toLowerCase();
-  const telefoneCandidato = clean(req.body.telefone, 30);
+  const telefoneCandidato = normalizeBrazilPhone(req.body.telefone);
   if (nomeCandidato.length < 2 || !validEmail(emailCandidato)) return res.status(400).json({ erro: 'Confira seu nome e e-mail antes de continuar.' });
+  if (!validBrazilPhone(telefoneCandidato)) return res.status(400).json({ erro: 'Informe um WhatsApp válido com DDD e número brasileiro.' });
   const resumeUrl = clean(req.body.curriculoUrl, 500);
   if (resumeUrl && !/^https:\/\//i.test(resumeUrl)) return res.status(400).json({ erro: 'O link do currículo precisa começar com HTTPS.' });
 
