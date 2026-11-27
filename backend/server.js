@@ -184,6 +184,7 @@ const publicUser = user => Usuario.fromDatabase(user).toSessionUser({
 });
 
 const profileSchemaReady = pool.query(`
+  ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS estado VARCHAR(100);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_perfil TEXT;
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visibilidade_foto VARCHAR(20) NOT NULL DEFAULT 'todos';
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS perfil_publico BOOLEAN NOT NULL DEFAULT FALSE;
@@ -253,6 +254,23 @@ const profileSchemaReady = pool.query(`
   );
 `);
 const auth = (req, res, next) => req.session.user ? next() : res.status(401).json({ erro: 'Faça login para continuar.' });
+
+app.put('/api/localizacao', auth, asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const cidade = clean(req.body.cidade, 100);
+  const estado = clean(req.body.estado, 100);
+  if (cidade.length < 2 || estado.length < 2) {
+    return res.status(400).json({ erro: 'Não foi possível identificar a cidade e o estado.' });
+  }
+  const result = await pool.query(
+    'UPDATE usuarios SET cidade=$1, estado=$2 WHERE id=$3 RETURNING cidade, estado',
+    [cidade, estado, req.session.user.id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Conta não encontrada.' });
+  req.session.user.cidade = result.rows[0].cidade;
+  req.session.user.estado = result.rows[0].estado;
+  res.json({ sucesso: true, localizacao: result.rows[0] });
+}));
 const role = type => (req, res, next) => {
   if (!req.session.user) return res.status(401).json({ erro: 'Faça login para continuar.' });
   if (req.session.user.tipo !== type) return res.status(403).json({ erro: 'Você não tem permissão para esta ação.' });
