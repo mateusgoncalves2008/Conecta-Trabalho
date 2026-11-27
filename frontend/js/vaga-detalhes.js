@@ -24,8 +24,9 @@
   };
   const initials = value => String(value || 'Empresa').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase();
   const phoneDigits = value => {
-    let digits = String(value || '').replace(/\D/g, '');
-    if (digits.length > 11 && digits.startsWith('55')) digits = digits.slice(2);
+    const raw = String(value || '').trim();
+    let digits = raw.replace(/\D/g, '');
+    if (raw.startsWith('+55') || (digits.length > 11 && digits.startsWith('55'))) digits = digits.slice(2);
     return digits.slice(0, 11);
   };
   const formatBrazilPhone = value => {
@@ -33,7 +34,8 @@
     if (!digits) return '';
     const ddd = digits.slice(0, 2);
     const number = digits.slice(2);
-    if (digits.length <= 2) return '+55 (' + ddd;
+    if (digits.length < 2) return '+55 (' + ddd;
+    if (digits.length === 2) return '+55 (' + ddd + ')';
     if (number.length <= 4) return '+55 (' + ddd + ') ' + number;
     if (number.length <= 8) return '+55 (' + ddd + ') ' + number.slice(0, 4) + '-' + number.slice(4);
     return '+55 (' + ddd + ') ' + number.slice(0, 5) + '-' + number.slice(5);
