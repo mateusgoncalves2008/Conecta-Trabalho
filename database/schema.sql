@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('candidato','empresa')),
   telefone VARCHAR(30),
   cidade VARCHAR(100) NOT NULL DEFAULT 'Capelinha',
+  estado VARCHAR(100),
   nome_empresa VARCHAR(160),
   descricao TEXT,
   criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
