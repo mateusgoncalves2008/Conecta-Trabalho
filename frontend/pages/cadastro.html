@@ -71,12 +71,14 @@
           <label class="field">
             <span id="phone-label">Telefone (opcional)</span>
             <input name="telefone" id="phone-input" type="tel" maxlength="20" autocomplete="tel" placeholder="+55 (33) 99999-9999">
-            <small class="field-hint">Informe o DDD e o número. O código do Brasil (+55) será incluído automaticamente.</small>
+            <small class="field-hint">O código +55 e o DDD 33 aparecem como padrão. Você pode alterar o DDD se seu número for de outra região.</small>
           </label>
 
           <label class="field">
             Cidade
             <input name="cidade" id="city-input" type="text" required maxlength="100" value="Capelinha">
+            <button type="button" class="button button-outline button-small" id="detect-signup-location">Usar minha localização</button>
+            <small class="field-hint" id="signup-location-feedback" aria-live="polite">Com sua autorização, podemos preencher a cidade automaticamente.</small>
           </label>
 
           <label class="field">
