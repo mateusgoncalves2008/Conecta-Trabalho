@@ -3,6 +3,11 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
   const dateLabel = value => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(value));
+  const whatsappDigits = value => {
+    let digits = String(value || '').replace(/\D/g, '');
+    if (digits.length === 10 || digits.length === 11) digits = '55' + digits;
+    return /^55\d{10,11}$/.test(digits) ? digits : '';
+  };
   const statusText = status => ({
     recebida: 'Recebida', em_analise: 'Em análise', entrevista: 'Entrevista',
     aprovada: 'Aprovada', rejeitada: 'Não aprovada',
@@ -1906,12 +1911,17 @@
       const answerHtml = answers.length
         ? '<div class="candidate-message"><strong>Respostas às perguntas</strong>' + answers.map(answer => '<p><strong>' + escapeHTML(answer.pergunta) + '</strong><br>' + escapeHTML(answer.resposta) + '</p>').join('') + '</div>'
         : '';
+      const phone = whatsappDigits(item.telefone);
+      const whatsappMessage = 'Olá, ' + (item.candidato_nome || 'tudo bem') + '! Recebemos sua candidatura para a vaga de ' + (item.vaga_titulo || 'nossa oportunidade') + ' pelo ConectaTrabalho e gostaríamos de conversar com você.';
+      const whatsappLink = phone
+        ? '<a class="button button-outline button-small" href="https://wa.me/' + phone + '?text=' + encodeURIComponent(whatsappMessage) + '" target="_blank" rel="noopener noreferrer">Conversar pelo WhatsApp</a>'
+        : '<span class="status-label">WhatsApp indisponível: telefone não informado</span>';
       const resumeLink = item.curriculo_storage_key
         ? '<a class="button button-outline button-small" href="/api/candidaturas/' + encodeURIComponent(item.id) + '/curriculo" target="_blank" rel="noopener">Baixar currículo PDF</a>'
         : item.curriculo_url
           ? '<a class="button button-outline button-small" href="' + escapeHTML(item.curriculo_url) + '" target="_blank" rel="noopener noreferrer">Abrir currículo</a>'
           : '<span class="status-label">Sem currículo</span>';
-      return '<article class="dashboard-item"><div><h3>' + escapeHTML(item.candidato_nome) + '</h3><p>' + escapeHTML(item.candidato_email) + ' · ' + escapeHTML(item.telefone || 'Sem telefone') + '</p><p>Vaga: ' + escapeHTML(item.vaga_titulo) + ' · ' + dateLabel(item.criada_em) + '</p>' + (item.mensagem ? '<div class="candidate-message">' + escapeHTML(item.mensagem) + '</div>' : '') + answerHtml + '<div class="dashboard-item-actions">' + resumeLink + '</div></div><div class="dashboard-item-actions"><select aria-label="Atualizar situação da candidatura" data-application-status="' + escapeHTML(item.id) + '"><option value="recebida" ' + (item.status === 'recebida' ? 'selected' : '') + '>Recebida</option><option value="em_analise" ' + (item.status === 'em_analise' ? 'selected' : '') + '>Em análise</option><option value="entrevista" ' + (item.status === 'entrevista' ? 'selected' : '') + '>Entrevista</option><option value="aprovada" ' + (item.status === 'aprovada' ? 'selected' : '') + '>Aprovada</option><option value="rejeitada" ' + (item.status === 'rejeitada' ? 'selected' : '') + '>Não aprovada</option></select></div></article>';
+      return '<article class="dashboard-item"><div><h3>' + escapeHTML(item.candidato_nome) + '</h3><p>' + escapeHTML(item.candidato_email) + ' · ' + escapeHTML(item.telefone || 'Sem telefone') + '</p><p>Vaga: ' + escapeHTML(item.vaga_titulo) + ' · ' + dateLabel(item.criada_em) + '</p>' + (item.mensagem ? '<div class="candidate-message">' + escapeHTML(item.mensagem) + '</div>' : '') + answerHtml + '<div class="dashboard-item-actions">' + resumeLink + whatsappLink + '</div></div><div class="dashboard-item-actions"><select aria-label="Atualizar situação da candidatura" data-application-status="' + escapeHTML(item.id) + '"><option value="recebida" ' + (item.status === 'recebida' ? 'selected' : '') + '>Recebida</option><option value="em_analise" ' + (item.status === 'em_analise' ? 'selected' : '') + '>Em análise</option><option value="entrevista" ' + (item.status === 'entrevista' ? 'selected' : '') + '>Entrevista</option><option value="aprovada" ' + (item.status === 'aprovada' ? 'selected' : '') + '>Aprovada</option><option value="rejeitada" ' + (item.status === 'rejeitada' ? 'selected' : '') + '>Não aprovada</option></select></div></article>';
     }).join('') : '<div class="dashboard-empty">Ainda não há candidaturas para suas vagas.</div>';
     applications.querySelectorAll('[data-application-status]').forEach(select => select.addEventListener('change', async () => {
       try {
