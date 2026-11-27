@@ -203,6 +203,11 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_setor VARCHAR(100);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_descricao_curta VARCHAR(240);
+  ALTER TABLE vagas ADD COLUMN IF NOT EXISTS perguntas_candidatura JSONB NOT NULL DEFAULT '[]'::jsonb;
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_storage_key TEXT;
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_nome VARCHAR(255);
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_url TEXT;
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS respostas JSONB NOT NULL DEFAULT '[]'::jsonb;
   CREATE TABLE IF NOT EXISTS vagas_salvas (
     candidato_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
@@ -827,7 +832,7 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
     `SELECT v.id,v.titulo,v.descricao,v.requisitos,v.tipo_contrato,v.modalidade,v.cidade,v.salario,v.criado_em,
       u.id AS empresa_id,u.nome_empresa,u.cidade AS empresa_cidade,u.descricao AS empresa_descricao,
       u.foto_perfil AS empresa_logo,u.banner_perfil AS empresa_banner,
-      u.empresa_site,u.empresa_setor,u.empresa_porte,
+      u.empresa_site,u.empresa_setor,u.empresa_porte,v.perguntas_candidatura,
       (SELECT COUNT(*)::int FROM candidaturas c WHERE c.vaga_id=v.id) AS total_candidaturas
      FROM vagas v JOIN usuarios u ON u.id=v.empresa_id
      WHERE v.id=$1 AND v.status='aberta' AND u.tipo='empresa'`,
@@ -1183,6 +1188,8 @@ app.patch('/api/notificacoes-empresas/:id/lida', role('candidato'), asyncRoute(a
 app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const vaga = Vaga.fromRequest(req.body);
+  const perguntasCandidatura = (Array.isArray(req.body.perguntasCandidatura) ? req.body.perguntasCandidatura : [])
+    .map(item => clean(item, 180)).filter(Boolean).slice(0, 5);
   const erroValidacao = vaga.validarCadastro();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
 
@@ -1191,8 +1198,9 @@ app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
   try {
     await client.query('BEGIN');
     const result = await client.query(
-      'INSERT INTO vagas (empresa_id,titulo,descricao,requisitos,tipo_contrato,modalidade,cidade,salario) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-      vaga.paraInsercao(req.session.user.id)
+      `INSERT INTO vagas (empresa_id,titulo,descricao,requisitos,tipo_contrato,modalidade,cidade,salario,perguntas_candidatura)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [...vaga.paraInsercao(req.session.user.id), JSON.stringify(perguntasCandidatura)]
     );
     createdJob = result.rows[0];
     await client.query(
@@ -1212,7 +1220,8 @@ app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
 app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
   const vagas = await pool.query('SELECT * FROM vagas WHERE empresa_id=$1 ORDER BY criado_em DESC', [req.session.user.id]);
   const candidaturas = await pool.query(
-    `SELECT c.id,c.status,c.criada_em,c.mensagem,u.nome candidato_nome,u.email candidato_email,u.telefone,
+    `SELECT c.id,c.status,c.criada_em,c.mensagem,c.curriculo_storage_key,c.curriculo_nome,c.curriculo_url,c.respostas,
+      u.nome candidato_nome,u.email candidato_email,u.telefone,
       v.id vaga_id,v.titulo vaga_titulo FROM candidaturas c
       JOIN usuarios u ON u.id=c.candidato_id JOIN vagas v ON v.id=c.vaga_id
       WHERE v.empresa_id=$1 ORDER BY c.criada_em DESC`, [req.session.user.id]
@@ -1222,7 +1231,8 @@ app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
 
 app.get('/api/painel/candidato', role('candidato'), asyncRoute(async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id,c.status,c.criada_em,c.mensagem,v.id vaga_id,v.titulo,v.cidade,empresa.nome_empresa
+    `SELECT c.id,c.status,c.criada_em,c.mensagem,c.curriculo_nome,c.curriculo_url,c.respostas,
+      v.id vaga_id,v.titulo,v.cidade,empresa.nome_empresa
      FROM candidaturas c
      JOIN vagas v ON v.id=c.vaga_id
      JOIN usuarios empresa ON empresa.id=v.empresa_id
@@ -1289,22 +1299,86 @@ app.delete('/api/vagas/:id/salvar', role('candidato'), asyncRoute(async (req, re
 }));
 
 app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const candidatura = Candidatura.fromRequest(req.params.id, req.body.mensagem);
   const erroValidacao = candidatura.validarNova();
   if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
 
-  const vaga = await pool.query("SELECT id FROM vagas WHERE id=$1 AND status='aberta'", [candidatura.vagaId]);
-  if (!vaga.rowCount) return res.status(404).json({ erro: 'Esta vaga não está mais disponível.' });
+  const vagaResult = await pool.query(
+    "SELECT id,perguntas_candidatura FROM vagas WHERE id=$1 AND status='aberta'",
+    [candidatura.vagaId]
+  );
+  if (!vagaResult.rowCount) return res.status(404).json({ erro: 'Esta vaga não está mais disponível.' });
+  const questions = Array.isArray(vagaResult.rows[0].perguntas_candidatura) ? vagaResult.rows[0].perguntas_candidatura : [];
+  const answers = Array.isArray(req.body.respostas) ? req.body.respostas : [];
+  if (answers.length !== questions.length || answers.some((item, index) =>
+    clean(item?.pergunta, 180) !== questions[index] || clean(item?.resposta, 1000).length < 1
+  )) return res.status(400).json({ erro: 'Responda a todas as perguntas da empresa.' });
+
+  const resumeUrl = clean(req.body.curriculoUrl, 500);
+  if (resumeUrl && !/^https:\/\//i.test(resumeUrl)) return res.status(400).json({ erro: 'O link do currículo precisa começar com HTTPS.' });
+
+  let resumeKey = null;
+  let resumeName = '';
+  const resume = req.body.curriculo;
+  if (resume && typeof resume === 'object') {
+    if (!s3) return res.status(503).json({ erro: 'O envio de currículo está indisponível no momento.' });
+    const filename = clean(resume.nome, 255);
+    const encoded = typeof resume.conteudo === 'string' ? resume.conteudo : '';
+    if (!filename.toLowerCase().endsWith('.pdf') || !/^[A-Za-z0-9+/=]+$/.test(encoded) || encoded.length > 7_000_000) {
+      return res.status(400).json({ erro: 'Anexe um currículo em PDF de até 5 MB.' });
+    }
+    const body = Buffer.from(encoded, 'base64');
+    if (!body.length || body.length > 5 * 1024 * 1024 || body.subarray(0, 5).toString('ascii') !== '%PDF-') {
+      return res.status(400).json({ erro: 'O arquivo enviado não é um PDF válido ou ultrapassa 5 MB.' });
+    }
+    resumeKey = 'candidaturas/' + req.session.user.id + '/' + crypto.randomUUID() + '.pdf';
+    resumeName = filename.replace(/[\\/\r\n"]/g, '_');
+    await s3.send(new PutObjectCommand({
+      Bucket: storageBucket, Key: resumeKey, Body: body,
+      ContentType: 'application/pdf', CacheControl: 'private, no-store'
+    }));
+  }
+
   try {
     await pool.query(
-      'INSERT INTO candidaturas (vaga_id,candidato_id,mensagem) VALUES ($1,$2,$3)',
-      [candidatura.vagaId,req.session.user.id,candidatura.mensagem || null]
+      `INSERT INTO candidaturas (vaga_id,candidato_id,mensagem,curriculo_storage_key,curriculo_nome,curriculo_url,respostas)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [candidatura.vagaId, req.session.user.id, candidatura.mensagem || null,
+        resumeKey, resumeName || null, resumeUrl || null, JSON.stringify(answers)]
     );
     res.status(201).json({ sucesso: true, mensagem: 'Candidatura enviada com sucesso.' });
   } catch (error) {
+    if (resumeKey && s3) await s3.send(new DeleteObjectCommand({ Bucket: storageBucket, Key: resumeKey })).catch(() => {});
     if (error.code === '23505') return res.status(409).json({ erro: 'Você já se candidatou a esta vaga.' });
     throw error;
   }
+}));
+
+app.get('/api/candidaturas/:id/curriculo', auth, asyncRoute(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Candidatura inválida.' });
+  const result = await pool.query(
+    `SELECT c.candidato_id,c.curriculo_storage_key,c.curriculo_nome,v.empresa_id
+     FROM candidaturas c JOIN vagas v ON v.id=c.vaga_id WHERE c.id=$1`,
+    [id]
+  );
+  if (!result.rowCount) return res.status(404).json({ erro: 'Currículo não encontrado.' });
+  const application = result.rows[0];
+  const user = req.session.user;
+  if (Number(user.id) !== Number(application.candidato_id) &&
+      !(user.tipo === 'empresa' && Number(user.id) === Number(application.empresa_id))) {
+    return res.status(403).json({ erro: 'Você não tem permissão para acessar este currículo.' });
+  }
+  if (!application.curriculo_storage_key || !s3) return res.status(404).json({ erro: 'Esta candidatura não possui currículo anexado.' });
+  const object = await s3.send(new GetObjectCommand({ Bucket: storageBucket, Key: application.curriculo_storage_key }));
+  const filename = (application.curriculo_nome || 'curriculo.pdf').replace(/[\\/\r\n"]/g, '_');
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': 'attachment; filename="' + encodeURIComponent(filename) + '"',
+    'Cache-Control': 'private, no-store'
+  });
+  object.Body.pipe(res);
 }));
 
 app.patch('/api/candidaturas/:id/status', role('empresa'), asyncRoute(async (req, res) => {
