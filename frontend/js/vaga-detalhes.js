@@ -127,6 +127,7 @@
       const feedback = modal.querySelector('.application-feedback');
       const resumeInput = form.elements.curriculo;
       const phoneInput = form.elements.telefone;
+      phoneInput.addEventListener('focus', () => { if (!phoneInput.value.trim()) phoneInput.value = '+55 (33) '; });
       phoneInput.addEventListener('input', () => { phoneInput.value = formatBrazilPhone(phoneInput.value); });
       const selectedFile = modal.querySelector('[data-resume-selected]');
       const selectedFilename = modal.querySelector('[data-resume-filename]');
