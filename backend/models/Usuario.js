@@ -6,6 +6,7 @@ class Usuario {
     tipo = 'usuario',
     telefone = null,
     cidade = null,
+    estado = null,
     nomeEmpresa = null,
     nomeFantasia = null,
     razaoSocial = null,
@@ -18,6 +19,7 @@ class Usuario {
     this.tipo = tipo;
     this.telefone = telefone;
     this.cidade = cidade;
+    this.estado = estado;
     this.nomeEmpresa = nomeEmpresa;
     this.nomeFantasia = nomeFantasia;
     this.razaoSocial = razaoSocial;
@@ -37,6 +39,7 @@ class Usuario {
       tipo: row.tipo,
       telefone: row.telefone,
       cidade: row.cidade,
+      estado: row.estado,
       nomeEmpresa: row.nome_empresa,
       nomeFantasia: row.nome_fantasia,
       razaoSocial: row.razao_social,
@@ -65,6 +68,7 @@ class Usuario {
       tipo: this.tipo,
       telefone: this.telefone,
       cidade: this.cidade,
+      estado: this.estado,
       nomeEmpresa: this.nomeEmpresa,
       fotoPerfil,
       emailVerificado: this.emailVerificado
