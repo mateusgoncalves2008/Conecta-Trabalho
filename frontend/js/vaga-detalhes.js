@@ -54,7 +54,7 @@
             <div><span class="application-eyebrow">CONECTATRABALHO</span><h2 id="application-title">Candidatar-se</h2><p>${escapeHTML(vaga.titulo)} · ${escapeHTML(vaga.nome_empresa || 'Empresa')}</p></div>
             <button type="button" class="application-close" aria-label="Fechar">&times;</button>
           </header>
-          <div class="application-progress"><span class="is-active" data-step-indicator="1">1. Seus dados</span>${questions.length ? '<span data-step-indicator="2">2. Perguntas</span>' : ''}<span data-step-indicator="3">${questions.length ? '3. Revisão' : '2. Revisão'}</span></div>
+          <div class="application-progress"><span class="is-active" data-step-indicator="1">1. Seus dados</span>${questions.length ? '<span data-step-indicator="2">2. Perguntas</span>' : ''}<span data-step-indicator="${questions.length ? 3 : 2}">${questions.length ? '3. Revisão' : '2. Revisão'}</span></div>
           <form class="application-form">
             <section class="application-step is-active" data-step="1">
               <h3>Confirme seus dados</h3><p>Confira as informações que serão enviadas à empresa.</p>
@@ -69,7 +69,7 @@
               </div>
             </section>
             ${questions.length ? '<section class="application-step" data-step="2"><h3>Perguntas da empresa</h3><p>Responda às perguntas para concluir sua candidatura.</p>' + questions.map((question,index) => '<label>' + (index+1) + '. ' + escapeHTML(question) + '<textarea name="resposta-' + index + '" maxlength="1000" rows="3" required placeholder="Digite sua resposta"></textarea></label>').join('') + '</section>' : ''}
-            <section class="application-step" data-step="3">
+            <section class="application-step" data-step="${questions.length ? 3 : 2}">
               <h3>Revise sua candidatura</h3><p>Confira tudo antes de enviar para a empresa.</p>
               <div class="application-review" data-application-review></div>
               <p class="application-consent">Ao enviar, você confirma que as informações estão corretas e autoriza o compartilhamento delas com a empresa responsável pela vaga.</p>
