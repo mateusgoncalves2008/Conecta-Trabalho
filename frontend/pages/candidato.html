@@ -250,8 +250,8 @@
           <div class="candidate-edit-grid">
             <label>Nome completo<input name="nome" id="candidate-edit-name" disabled></label>
             <label>E-mail<input name="email" id="candidate-edit-email" type="email" disabled></label>
-            <label>Telefone<input name="telefone" id="candidate-edit-phone" maxlength="30"></label>
-            <label>Cidade<input name="cidade" id="candidate-edit-city" maxlength="100"></label>
+            <label>WhatsApp<input name="telefone" id="candidate-edit-phone" type="tel" maxlength="20" autocomplete="tel" placeholder="+55 (33) 99999-9999"><small class="field-hint">O código +55 e o DDD 33 aparecem como padrão. Você pode alterar o DDD.</small></label>
+            <label>Cidade<input name="cidade" id="candidate-edit-city" maxlength="100"><button type="button" class="button button-outline button-small" id="candidate-detect-location">Usar minha localização</button><small class="field-hint" id="candidate-location-feedback" aria-live="polite">Com sua autorização, preencheremos sua cidade.</small></label>
             <label class="full">Título profissional<input name="titulo_profissional" id="candidate-edit-title-input" maxlength="120" placeholder="Ex.: Auxiliar administrativo"></label>
             <label class="full">Resumo profissional<textarea name="resumo_profissional" id="candidate-edit-summary" rows="4" maxlength="3000" placeholder="Apresente sua trajetória e seus conhecimentos."></textarea></label>
             <label class="full">Objetivos profissionais<textarea name="objetivo_profissional" id="candidate-edit-objective" rows="3" maxlength="2000"></textarea></label>
