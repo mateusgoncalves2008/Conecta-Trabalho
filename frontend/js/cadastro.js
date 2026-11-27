@@ -53,6 +53,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return email.includes('@') ? email : email + '@gmail.com';
   };
   const normalizeCnpj = value => value.replace(/[^0-9a-z]/gi, '').toUpperCase();
+  const phoneDigits = value => {
+    let digits = String(value || '').replace(/\D/g, '');
+    if (digits.length > 11 && digits.startsWith('55')) digits = digits.slice(2);
+    return digits.slice(0, 11);
+  };
+  const formatBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    if (!digits) return '';
+    const ddd = digits.slice(0, 2);
+    const number = digits.slice(2);
+    if (digits.length <= 2) return '+55 (' + ddd;
+    if (number.length <= 4) return '+55 (' + ddd + ') ' + number;
+    if (number.length <= 8) return '+55 (' + ddd + ') ' + number.slice(0, 4) + '-' + number.slice(4);
+    return '+55 (' + ddd + ') ' + number.slice(0, 5) + '-' + number.slice(5);
+  };
+  const normalizeBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    return digits.length === 10 || digits.length === 11 ? '+55' + digits : '';
+  };
   const formatCnpj = value => {
     const raw = normalizeCnpj(value).slice(0, 14);
     let formatted = raw.slice(0, 2);
@@ -104,6 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   type.addEventListener('change', updateType);
   updateType();
+
+  phoneInput.addEventListener('input', () => {
+    phoneInput.value = formatBrazilPhone(phoneInput.value);
+  });
 
   cnpjInput.addEventListener('input', () => {
     const cursor = cnpjInput.selectionStart;
@@ -215,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const values = Object.fromEntries(new FormData(form));
       values.email = normalizeEmail(values.email);
+      values.telefone = values.telefone ? normalizeBrazilPhone(values.telefone) : '';
       if (values.senha !== values.confirmarSenha) {
         feedback.textContent = 'As senhas não são iguais.';
         form.elements.confirmarSenha.focus();
