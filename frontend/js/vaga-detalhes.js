@@ -203,7 +203,7 @@
       const escapeHandler = event => { if (event.key === 'Escape' && document.body.classList.contains('application-modal-open')) { close(); document.removeEventListener('keydown', escapeHandler); } };
       document.addEventListener('keydown', escapeHandler);
       back.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); renderStep(); });
-      next.addEventListener('click', () => {
+      next.addEventListener('click', async () => {
         const active = steps.find(step => Number(step.dataset.step) === currentStep);
         const fields = [...active.querySelectorAll('input,textarea')].filter(field => field.type !== 'checkbox' && field.type !== 'file');
         const invalid = fields.find(field => !field.checkValidity());
