@@ -204,6 +204,9 @@ const profileSchemaReady = pool.query(`
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_porte VARCHAR(50);
   ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS empresa_descricao_curta VARCHAR(240);
   ALTER TABLE vagas ADD COLUMN IF NOT EXISTS perguntas_candidatura JSONB NOT NULL DEFAULT '[]'::jsonb;
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS nome_candidato VARCHAR(120);
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS email_candidato VARCHAR(160);
+  ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS telefone_candidato VARCHAR(30);
   ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_storage_key TEXT;
   ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_nome VARCHAR(255);
   ALTER TABLE candidaturas ADD COLUMN IF NOT EXISTS curriculo_url TEXT;
@@ -1221,7 +1224,7 @@ app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
   const vagas = await pool.query('SELECT * FROM vagas WHERE empresa_id=$1 ORDER BY criado_em DESC', [req.session.user.id]);
   const candidaturas = await pool.query(
     `SELECT c.id,c.status,c.criada_em,c.mensagem,c.curriculo_storage_key,c.curriculo_nome,c.curriculo_url,c.respostas,
-      u.nome candidato_nome,u.email candidato_email,u.telefone,
+      COALESCE(c.nome_candidato,u.nome) candidato_nome,COALESCE(c.email_candidato,u.email) candidato_email,COALESCE(c.telefone_candidato,u.telefone) telefone,
       v.id vaga_id,v.titulo vaga_titulo FROM candidaturas c
       JOIN usuarios u ON u.id=c.candidato_id JOIN vagas v ON v.id=c.vaga_id
       WHERE v.empresa_id=$1 ORDER BY c.criada_em DESC`, [req.session.user.id]
@@ -1315,6 +1318,10 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
     clean(item?.pergunta, 180) !== questions[index] || clean(item?.resposta, 1000).length < 1
   )) return res.status(400).json({ erro: 'Responda a todas as perguntas da empresa.' });
 
+  const nomeCandidato = clean(req.body.nome, 120);
+  const emailCandidato = clean(req.body.email, 160).toLowerCase();
+  const telefoneCandidato = clean(req.body.telefone, 30);
+  if (nomeCandidato.length < 2 || !validEmail(emailCandidato)) return res.status(400).json({ erro: 'Confira seu nome e e-mail antes de continuar.' });
   const resumeUrl = clean(req.body.curriculoUrl, 500);
   if (resumeUrl && !/^https:\/\//i.test(resumeUrl)) return res.status(400).json({ erro: 'O link do currículo precisa começar com HTTPS.' });
 
@@ -1342,9 +1349,10 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
 
   try {
     await pool.query(
-      `INSERT INTO candidaturas (vaga_id,candidato_id,mensagem,curriculo_storage_key,curriculo_nome,curriculo_url,respostas)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      `INSERT INTO candidaturas (vaga_id,candidato_id,mensagem,nome_candidato,email_candidato,telefone_candidato,curriculo_storage_key,curriculo_nome,curriculo_url,respostas)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
       [candidatura.vagaId, req.session.user.id, candidatura.mensagem || null,
+        nomeCandidato, emailCandidato, telefoneCandidato || null,
         resumeKey, resumeName || null, resumeUrl || null, JSON.stringify(answers)]
     );
     res.status(201).json({ sucesso: true, mensagem: 'Candidatura enviada com sucesso.' });
