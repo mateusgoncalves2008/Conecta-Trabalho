@@ -829,6 +829,7 @@ app.get('/api/vagas', asyncRoute(async (req, res) => {
 }));
 
 app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const vagaId = Number(req.params.id);
   if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
   const result = await pool.query(
@@ -1221,6 +1222,7 @@ app.post('/api/vagas', role('empresa'), asyncRoute(async (req, res) => {
 }));
 
 app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const vagas = await pool.query('SELECT * FROM vagas WHERE empresa_id=$1 ORDER BY criado_em DESC', [req.session.user.id]);
   const candidaturas = await pool.query(
     `SELECT c.id,c.status,c.criada_em,c.mensagem,c.curriculo_storage_key,c.curriculo_nome,c.curriculo_url,c.respostas,
@@ -1233,6 +1235,7 @@ app.get('/api/painel/empresa', role('empresa'), asyncRoute(async (req, res) => {
 }));
 
 app.get('/api/painel/candidato', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const result = await pool.query(
     `SELECT c.id,c.status,c.criada_em,c.mensagem,c.curriculo_nome,c.curriculo_url,c.respostas,
       v.id vaga_id,v.titulo,v.cidade,empresa.nome_empresa
@@ -1364,6 +1367,7 @@ app.post('/api/vagas/:id/candidatar', role('candidato'), asyncRoute(async (req, 
 }));
 
 app.get('/api/candidaturas/:id/curriculo', auth, asyncRoute(async (req, res) => {
+  await profileSchemaReady;
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ erro: 'Candidatura inválida.' });
   const result = await pool.query(
