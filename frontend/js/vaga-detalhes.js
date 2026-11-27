@@ -23,6 +23,25 @@
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
   };
   const initials = value => String(value || 'Empresa').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('').toUpperCase();
+  const phoneDigits = value => {
+    let digits = String(value || '').replace(/\D/g, '');
+    if (digits.length > 11 && digits.startsWith('55')) digits = digits.slice(2);
+    return digits.slice(0, 11);
+  };
+  const formatBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    if (!digits) return '';
+    const ddd = digits.slice(0, 2);
+    const number = digits.slice(2);
+    if (digits.length <= 2) return '+55 (' + ddd;
+    if (number.length <= 4) return '+55 (' + ddd + ') ' + number;
+    if (number.length <= 8) return '+55 (' + ddd + ') ' + number.slice(0, 4) + '-' + number.slice(4);
+    return '+55 (' + ddd + ') ' + number.slice(0, 5) + '-' + number.slice(5);
+  };
+  const normalizeBrazilPhone = value => {
+    const digits = phoneDigits(value);
+    return digits.length === 10 || digits.length === 11 ? '+55' + digits : '';
+  };
   const savedKey = 'conecta-vagas-salvas';
   const getLegacySaved = () => {
     try {
@@ -60,7 +79,7 @@
               <h3>Confirme seus dados</h3><p>Confira as informações que serão enviadas à empresa.</p>
               <label>Nome completo<input name="nome" maxlength="120" required value="${escapeHTML(profile.nome || session.usuario.nome || '')}"></label>
               <label>E-mail<input name="email" type="email" maxlength="160" required value="${escapeHTML(profile.email || session.usuario.email || '')}"></label>
-              <label>Telefone<input name="telefone" maxlength="30" value="${escapeHTML(profile.telefone || '')}" placeholder="Informe um telefone para contato"></label>
+              <label>WhatsApp para contato<input name="telefone" type="tel" maxlength="20" autocomplete="tel" required value="${escapeHTML(formatBrazilPhone(profile.telefone || ''))}" placeholder="+55 (33) 99999-9999"><small>Informe o DDD e o número. O código +55 será incluído automaticamente. A empresa poderá iniciar uma conversa pelo WhatsApp.</small></label>
               <div class="application-resume">
                 <div class="application-resume-heading">
                   <span class="application-resume-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg></span>
@@ -105,6 +124,8 @@
       const form = modal.querySelector('form');
       const feedback = modal.querySelector('.application-feedback');
       const resumeInput = form.elements.curriculo;
+      const phoneInput = form.elements.telefone;
+      phoneInput.addEventListener('input', () => { phoneInput.value = formatBrazilPhone(phoneInput.value); });
       const selectedFile = modal.querySelector('[data-resume-selected]');
       const selectedFilename = modal.querySelector('[data-resume-filename]');
       const resumeError = modal.querySelector('[data-resume-error]');
@@ -208,6 +229,12 @@
         const fields = [...active.querySelectorAll('input,textarea')].filter(field => field.type !== 'checkbox' && field.type !== 'file');
         const invalid = fields.find(field => !field.checkValidity());
         if (invalid) { invalid.reportValidity(); return; }
+        if (!normalizeBrazilPhone(phoneInput.value)) {
+          phoneInput.setCustomValidity('Informe DDD e um número brasileiro válido com 10 ou 11 dígitos.');
+          phoneInput.reportValidity();
+          phoneInput.setCustomValidity('');
+          return;
+        }
         const file = form.elements.curriculo.files[0];
         const resumeValidationError = await validateResumeFile(file);
         if (resumeValidationError) {
@@ -239,7 +266,7 @@
             body: JSON.stringify({
               nome: String(values.get('nome') || '').trim(),
               email: String(values.get('email') || '').trim(),
-              telefone: String(values.get('telefone') || '').trim(),
+              telefone: normalizeBrazilPhone(values.get('telefone')),
               curriculoUrl: !file && form.elements.usarCurriculoPerfil?.checked ? profile.curriculo_url : '',
               curriculo,
               respostas,
