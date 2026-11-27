@@ -30,20 +30,150 @@
       return Array.isArray(value) ? [...new Set(value.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
     } catch { return []; }
   };
-  async function apply(id, button) {
+  const readFileAsDataUrl = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Não foi possível ler o currículo selecionado.'));
+    reader.readAsDataURL(file);
+  });
+
+  async function apply(id, button, vaga) {
     try {
       const session = await Conecta.api('/api/me');
       if (!session.usuario) { window.location.href = '/pages/login.html'; return; }
       if (session.usuario.tipo !== 'candidato') { Conecta.toast('Somente contas de candidato podem se candidatar.'); return; }
-      button.disabled = true;
-      button.textContent = 'Enviando...';
-      await Conecta.api('/api/vagas/' + id + '/candidatar', { method: 'POST', body: JSON.stringify({ mensagem: '' }) });
-      button.textContent = 'Candidatura enviada';
-      Conecta.toast('Sua candidatura foi enviada com sucesso.');
+      const profileResult = await Conecta.api('/api/perfil');
+      const profile = profileResult.perfil || {};
+      const questions = Array.isArray(vaga.perguntas_candidatura) ? vaga.perguntas_candidatura : [];
+      const modal = document.createElement('div');
+      modal.className = 'application-modal';
+      modal.setAttribute('aria-hidden', 'false');
+      modal.innerHTML = `
+        <section class="application-dialog" role="dialog" aria-modal="true" aria-labelledby="application-title">
+          <header class="application-header">
+            <div><span class="application-eyebrow">CONECTATRABALHO</span><h2 id="application-title">Candidatar-se</h2><p>${escapeHTML(vaga.titulo)} · ${escapeHTML(vaga.nome_empresa || 'Empresa')}</p></div>
+            <button type="button" class="application-close" aria-label="Fechar">&times;</button>
+          </header>
+          <div class="application-progress"><span class="is-active" data-step-indicator="1">1. Seus dados</span>${questions.length ? '<span data-step-indicator="2">2. Perguntas</span>' : ''}<span data-step-indicator="3">${questions.length ? '3. Revisão' : '2. Revisão'}</span></div>
+          <form class="application-form">
+            <section class="application-step is-active" data-step="1">
+              <h3>Confirme seus dados</h3><p>Confira as informações que serão enviadas à empresa.</p>
+              <label>Nome completo<input name="nome" maxlength="120" required value="${escapeHTML(profile.nome || session.usuario.nome || '')}"></label>
+              <label>E-mail<input name="email" type="email" maxlength="160" required value="${escapeHTML(profile.email || session.usuario.email || '')}"></label>
+              <label>Telefone<input name="telefone" maxlength="30" value="${escapeHTML(profile.telefone || '')}" placeholder="Informe um telefone para contato"></label>
+              <div class="application-resume">
+                <strong>Currículo</strong><p>Você pode usar o currículo cadastrado no perfil ou anexar um arquivo PDF de até 5 MB.</p>
+                ${profile.curriculo_url ? '<label class="application-resume-option"><input type="checkbox" name="usarCurriculoPerfil" checked><span>Usar currículo do meu perfil <a href="' + escapeHTML(profile.curriculo_url) + '" target="_blank" rel="noopener noreferrer">Visualizar</a></span></label>' : '<p class="application-muted">Você ainda não cadastrou um link de currículo no perfil.</p>'}
+                <label>Anexar outro currículo (PDF)<input type="file" name="curriculo" accept="application/pdf,.pdf"></label>
+                <small class="application-muted">O arquivo é enviado de forma privada e só pode ser acessado por você e pela empresa desta vaga.</small>
+              </div>
+            </section>
+            ${questions.length ? '<section class="application-step" data-step="2"><h3>Perguntas da empresa</h3><p>Responda às perguntas para concluir sua candidatura.</p>' + questions.map((question,index) => '<label>' + (index+1) + '. ' + escapeHTML(question) + '<textarea name="resposta-' + index + '" maxlength="1000" rows="3" required placeholder="Digite sua resposta"></textarea></label>').join('') + '</section>' : ''}
+            <section class="application-step" data-step="3">
+              <h3>Revise sua candidatura</h3><p>Confira tudo antes de enviar para a empresa.</p>
+              <div class="application-review" data-application-review></div>
+              <p class="application-consent">Ao enviar, você confirma que as informações estão corretas e autoriza o compartilhamento delas com a empresa responsável pela vaga.</p>
+            </section>
+            <p class="application-feedback" role="alert" aria-live="polite"></p>
+            <footer class="application-actions">
+              <button type="button" class="button button-outline" data-application-back hidden>Voltar</button>
+              <button type="button" class="button button-primary" data-application-next>Continuar</button>
+              <button type="submit" class="button button-primary" data-application-submit hidden>Enviar candidatura</button>
+            </footer>
+          </form>
+        </section>`;
+      document.body.appendChild(modal);
+      document.body.classList.add('application-modal-open');
+      const form = modal.querySelector('form');
+      const feedback = modal.querySelector('.application-feedback');
+      const back = modal.querySelector('[data-application-back]');
+      const next = modal.querySelector('[data-application-next]');
+      const submit = modal.querySelector('[data-application-submit]');
+      const steps = [...modal.querySelectorAll('.application-step')];
+      const stepCount = steps.length;
+      let currentStep = 1;
+      const close = () => {
+        modal.remove();
+        document.body.classList.remove('application-modal-open');
+      };
+      const renderStep = () => {
+        steps.forEach(step => step.classList.toggle('is-active', Number(step.dataset.step) === currentStep));
+        modal.querySelectorAll('[data-step-indicator]').forEach(item => item.classList.toggle('is-active', Number(item.dataset.stepIndicator) === currentStep));
+        back.hidden = currentStep === 1;
+        next.hidden = currentStep === stepCount;
+        submit.hidden = currentStep !== stepCount;
+        feedback.textContent = '';
+        if (currentStep === stepCount) {
+          const values = new FormData(form);
+          const file = form.elements.curriculo.files[0];
+          const usingProfileResume = Boolean(form.elements.usarCurriculoPerfil?.checked && profile.curriculo_url && !file);
+          const answersHtml = questions.map((question,index) => '<div><strong>' + escapeHTML(question) + '</strong><p>' + escapeHTML(values.get('resposta-' + index) || '') + '</p></div>').join('');
+          modal.querySelector('[data-application-review]').innerHTML =
+            '<div><strong>Nome</strong><p>' + escapeHTML(values.get('nome')) + '</p></div>' +
+            '<div><strong>E-mail</strong><p>' + escapeHTML(values.get('email')) + '</p></div>' +
+            '<div><strong>Telefone</strong><p>' + escapeHTML(values.get('telefone') || 'Não informado') + '</p></div>' +
+            '<div><strong>Currículo</strong><p>' + escapeHTML(file?.name || (usingProfileResume ? 'Currículo do perfil' : 'Não anexado')) + '</p></div>' + answersHtml;
+        }
+      };
+      modal.querySelector('.application-close').addEventListener('click', close);
+      modal.addEventListener('click', event => { if (event.target === modal) close(); });
+      const escapeHandler = event => { if (event.key === 'Escape' && document.body.classList.contains('application-modal-open')) { close(); document.removeEventListener('keydown', escapeHandler); } };
+      document.addEventListener('keydown', escapeHandler);
+      back.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); renderStep(); });
+      next.addEventListener('click', () => {
+        const active = steps.find(step => Number(step.dataset.step) === currentStep);
+        const fields = [...active.querySelectorAll('input,textarea')].filter(field => field.type !== 'checkbox' && field.type !== 'file');
+        const invalid = fields.find(field => !field.checkValidity());
+        if (invalid) { invalid.reportValidity(); return; }
+        const file = form.elements.curriculo.files[0];
+        if (file && (file.type !== 'application/pdf' || file.size > 5 * 1024 * 1024)) {
+          feedback.textContent = 'Anexe um currículo PDF de até 5 MB.';
+          return;
+        }
+        currentStep = Math.min(stepCount, currentStep + 1);
+        renderStep();
+      });
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        submit.disabled = true;
+        submit.textContent = 'Enviando...';
+        feedback.textContent = '';
+        try {
+          const values = new FormData(form);
+          const file = form.elements.curriculo.files[0];
+          let curriculo = null;
+          if (file) {
+            const dataUrl = await readFileAsDataUrl(file);
+            curriculo = { nome: file.name, conteudo: dataUrl.split(',')[1] || '' };
+          }
+          const respostas = questions.map((pergunta,index) => ({ pergunta, resposta: String(values.get('resposta-' + index) || '').trim() }));
+          await Conecta.api('/api/vagas/' + id + '/candidatar', {
+            method: 'POST',
+            body: JSON.stringify({
+              nome: String(values.get('nome') || '').trim(),
+              email: String(values.get('email') || '').trim(),
+              telefone: String(values.get('telefone') || '').trim(),
+              curriculoUrl: !file && form.elements.usarCurriculoPerfil?.checked ? profile.curriculo_url : '',
+              curriculo,
+              respostas,
+              mensagem: ''
+            })
+          });
+          close();
+          button.textContent = 'Candidatura enviada';
+          button.disabled = true;
+          Conecta.toast('Sua candidatura foi enviada com sucesso. Acompanhe o andamento em Minhas candidaturas.');
+        } catch (error) {
+          feedback.textContent = error.message;
+          submit.disabled = false;
+          submit.textContent = 'Enviar candidatura';
+        }
+      });
+      renderStep();
+      modal.querySelector('input[name="nome"]').focus();
     } catch (error) {
       Conecta.toast(error.message);
-      button.disabled = false;
-      button.textContent = 'Candidatar-se';
     }
   }
   async function load() {
@@ -122,7 +252,7 @@
           </section>
         </aside>
       </div>`;
-      document.getElementById('apply-job').addEventListener('click', event => apply(vaga.id, event.currentTarget));
+      document.getElementById('apply-job').addEventListener('click', event => apply(vaga.id, event.currentTarget, vaga));
       document.getElementById('save-job').addEventListener('click', async event => {
         const button = event.currentTarget;
         if (button.getAttribute('aria-pressed') === 'true') return;
