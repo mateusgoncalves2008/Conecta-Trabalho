@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS vagas (
   modalidade VARCHAR(30) NOT NULL DEFAULT 'Presencial',
   cidade VARCHAR(100) NOT NULL,
   salario VARCHAR(80),
+  perguntas_candidatura JSONB NOT NULL DEFAULT '[]'::jsonb,
   status VARCHAR(20) NOT NULL DEFAULT 'aberta' CHECK (status IN ('aberta','pausada','encerrada')),
   criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -30,6 +31,10 @@ CREATE TABLE IF NOT EXISTS candidaturas (
   vaga_id BIGINT NOT NULL REFERENCES vagas(id) ON DELETE CASCADE,
   candidato_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
   mensagem TEXT,
+  curriculo_storage_key TEXT,
+  curriculo_nome VARCHAR(255),
+  curriculo_url TEXT,
+  respostas JSONB NOT NULL DEFAULT '[]'::jsonb,
   status VARCHAR(30) NOT NULL DEFAULT 'recebida'
     CHECK (status IN ('recebida','em_analise','entrevista','aprovada','rejeitada')),
   criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
