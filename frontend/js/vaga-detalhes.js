@@ -277,7 +277,7 @@
             })
           });
           close();
-          button.textContent = 'Candidatura enviada';
+          button.textContent = 'Você já se candidatou';
           button.disabled = true;
           Conecta.toast('Sua candidatura foi enviada com sucesso. Acompanhe o andamento em Minhas candidaturas.');
         } catch (error) {
@@ -303,7 +303,10 @@
       const company = vaga.nome_empresa || 'Empresa';
       const session = await Conecta.api('/api/me');
       let saved = false;
+      let alreadyApplied = false;
       if (session.usuario?.tipo === 'candidato') {
+        const applicationResult = await Conecta.api('/api/vagas/' + encodeURIComponent(id) + '/minha-candidatura');
+        alreadyApplied = applicationResult.jaCandidatou === true;
         const legacyIds = getLegacySaved();
         if (legacyIds.length) {
           await Conecta.api('/api/vagas-salvas/importar', {
@@ -331,7 +334,7 @@
               <span>Publicada em ${escapeHTML(dateLabel(vaga.criado_em))}</span>
             </div>
             <div class="job-detail-actions">
-              <button class="button button-primary" type="button" id="apply-job">Candidatar-se</button>
+              <button class="button button-primary" type="button" id="apply-job" ${alreadyApplied ? 'disabled' : ''}>${alreadyApplied ? 'Você já se candidatou' : 'Candidatar-se'}</button>
               <button class="button button-save" type="button" id="save-job" aria-pressed="${saved}" ${saved ? 'disabled' : ''}>${saved ? 'Vaga salva' : 'Salvar vaga'}</button>
             </div>
           </section>
