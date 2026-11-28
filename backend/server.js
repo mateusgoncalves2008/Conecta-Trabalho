@@ -885,6 +885,17 @@ app.get('/api/vagas/:id', asyncRoute(async (req, res) => {
   res.json({ vaga });
 }));
 
+app.get('/api/vagas/:id/minha-candidatura', role('candidato'), asyncRoute(async (req, res) => {
+  await profileSchemaReady;
+  const vagaId = Number(req.params.id);
+  if (!Number.isSafeInteger(vagaId) || vagaId < 1) return res.status(400).json({ erro: 'Vaga inválida.' });
+  const result = await pool.query(
+    'SELECT EXISTS(SELECT 1 FROM candidaturas WHERE vaga_id=$1 AND candidato_id=$2) AS ja_candidatou',
+    [vagaId, req.session.user.id]
+  );
+  res.json({ jaCandidatou: result.rows[0].ja_candidatou });
+}));
+
 app.get('/api/empresa/perfil', role('empresa'), asyncRoute(async (req, res) => {
   await profileSchemaReady;
   const result = await pool.query(
